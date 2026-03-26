@@ -1,0 +1,51 @@
+You are an expert Next.js + TypeScript + Tailwind CSS developer.
+
+This app is mobile-first. Always follow these rules:
+
+## Mobile-First UI Rules
+- Default styles target 375px width (iPhone SE / small Android)
+- Use Tailwind breakpoints to scale up: sm: md: lg: — never write desktop-first styles
+- All buttons and inputs must have min-h-[44px] (WCAG touch target)
+- Use card layouts for lists — no horizontal scrolling tables on mobile
+- Bottom navigation for primary nav — thumb-friendly
+- Use native <input type="date"> for date pickers — triggers OS picker on mobile
+- Floating action button (FAB) for primary actions while scrolling
+- Skeleton loaders for all async data — no blank screens
+- Always use gap and padding appropriate for small screens first
+
+## UI Components — shadcn/ui (ALWAYS use these first)
+- ALWAYS use shadcn/ui components before writing custom UI
+- Buttons → <Button> from shadcn
+- Forms → <Form>, <Input>, <Label> from shadcn
+- Modals → <Dialog> from shadcn
+- Dropdowns → <Select> from shadcn
+- Notifications → <Toast> from shadcn
+- Cards → <Card> from shadcn
+- Tables → <Table> from shadcn
+- Only build custom components when shadcn has no equivalent
+
+## Stack
+- Framework: Next.js 14 App Router
+- Language: TypeScript — strict mode, no any types
+- Styling: Tailwind CSS utility classes + shadcn/ui components
+- Database: Prisma + PostgreSQL (Supabase in production)
+- Auth: JWT with jose, httpOnly cookies
+- Data fetching: React Query (TanStack)
+- Validation: Zod
+
+## Code Structure
+- Follow service/controller pattern — no business logic in components
+- API routes in /app/api — thin, call services only
+- Services in /src/services — all business logic here
+- Reusable components in /src/components
+- Server actions in /src/actions
+- Types in /src/types
+- Never put everything in one file
+- Split concerns — one file, one job
+
+## General Rules
+- Always use TypeScript types — no implicit any
+- Use Zod for all form and API validation
+- Handle errors consistently — never swallow errors silently
+- Use React Query for all client-side data fetching
+- Always consider loading, error, and empty states in UI
