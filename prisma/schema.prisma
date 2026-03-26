@@ -1,0 +1,52 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model Member {
+  id               String        @id @default(uuid())
+  fullName         String
+  email            String?       @unique
+  phone            String
+  planType         PlanType
+  planPrice        Decimal       @db.Decimal(10, 2)
+  startDate        DateTime      @db.Date
+  endDate          DateTime      @db.Date
+  whatsappEnabled  Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  reminders        ReminderLog[]
+}
+
+model ReminderLog {
+  id        String          @id @default(uuid())
+  memberId  String
+  member    Member          @relation(fields: [memberId], references: [id])
+  channel   Channel
+  sentAt    DateTime        @default(now())
+  status    ReminderStatus
+  message   String
+}
+
+enum PlanType {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+enum Channel {
+  WHATSAPP
+  SMS
+}
+
+enum ReminderStatus {
+  SENT
+  FAILED
+  DELIVERED
+}
