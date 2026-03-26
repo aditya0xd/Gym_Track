@@ -1,15 +1,18 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import {
   createAccessToken,
   createRefreshToken,
   TokenPayload,
   verifyRefreshToken,
-} from "@/app/lib/jwt";
+} from "../jwt";
 
-const demoEmail = (process.env.DEMO_AUTH_EMAIL ?? "admin@gym.local").toLowerCase();
+const demoEmail = (
+  process.env.DEMO_AUTH_EMAIL ?? "admin@gym.local"
+).toLowerCase();
 const demoPassword = process.env.DEMO_AUTH_PASSWORD ?? "GymPass123!";
 
 const demoUser: TokenPayload = {
@@ -34,16 +37,21 @@ function buildCookieOptions(maxAgeSeconds: number) {
   };
 }
 
-function setTokenCookies(accessToken: string, refreshToken: string) {
-  const cookieStore = cookies();
+async function setTokenCookies(accessToken: string, refreshToken: string) {
+  const cookieStore = await cookies();
   cookieStore.set("gym_access_token", accessToken, buildCookieOptions(15 * 60));
-  cookieStore.set("gym_refresh_token", refreshToken, buildCookieOptions(7 * 24 * 60 * 60));
+  cookieStore.set(
+    "gym_refresh_token",
+    refreshToken,
+    buildCookieOptions(7 * 24 * 60 * 60),
+  );
 }
 
 export async function login(formData: FormData): Promise<AuthResponse> {
   const rawEmail = formData.get("email");
   const rawPassword = formData.get("password");
-  const email = typeof rawEmail === "string" ? rawEmail.toLowerCase().trim() : "";
+  const email =
+    typeof rawEmail === "string" ? rawEmail.toLowerCase().trim() : "";
   const password = typeof rawPassword === "string" ? rawPassword.trim() : "";
 
   if (!email || !password) {
@@ -51,7 +59,10 @@ export async function login(formData: FormData): Promise<AuthResponse> {
   }
 
   if (email !== demoEmail || password !== demoPassword) {
-    return { success: false, message: "Invalid credentials. Try the demo credentials instead." };
+    return {
+      success: false,
+      message: "Invalid credentials. Try the demo credentials instead.",
+    };
   }
 
   const payload: TokenPayload = {
@@ -62,13 +73,16 @@ export async function login(formData: FormData): Promise<AuthResponse> {
   const accessToken = await createAccessToken(payload);
   const refreshToken = await createRefreshToken(payload);
 
-  setTokenCookies(accessToken, refreshToken);
+  await setTokenCookies(accessToken, refreshToken);
 
+  redirect("/dashboard");
+  // NOTE: redirect throws, but we keep the return type consistent.
   return { success: true, message: "Access and refresh tokens minted." };
 }
 
 export async function refreshTokens(): Promise<AuthResponse> {
-  const refreshToken = cookies().get("gym_refresh_token")?.value;
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("gym_refresh_token")?.value;
 
   if (!refreshToken) {
     return { success: false, message: "Refresh token missing." };
@@ -83,7 +97,7 @@ export async function refreshTokens(): Promise<AuthResponse> {
   const newAccessToken = await createAccessToken(payload);
   const newRefreshToken = await createRefreshToken(payload);
 
-  setTokenCookies(newAccessToken, newRefreshToken);
+  await setTokenCookies(newAccessToken, newRefreshToken);
 
   return { success: true, message: "Tokens refreshed." };
 }
@@ -97,7 +111,7 @@ export async function logout(): Promise<AuthResponse> {
     maxAge: 0,
   };
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   cookieStore.set("gym_access_token", "", cookieOptions);
   cookieStore.set("gym_refresh_token", "", cookieOptions);
 
