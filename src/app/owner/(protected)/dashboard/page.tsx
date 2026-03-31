@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { MembersExplorerPanel } from "@/components/gym-owner/MembersExplorerPanel";
 import { PageShell } from "@/components/shared/PageShell";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
@@ -37,14 +36,6 @@ export default async function OwnerDashboardPage() {
   const revenueAtRisk = expiringSoon.reduce((sum, m) => sum + Number(m.planPrice), 0);
   const revenueLost = expiredMembers.reduce((sum, m) => sum + Number(m.planPrice), 0);
   const recentMembers = members.slice(0, 6);
-  const explorerMembers = members.map((m) => ({
-    id: m.id,
-    fullName: m.fullName,
-    phone: m.phone,
-    billingDuration: m.billingDuration,
-    planPrice: m.planPrice.toString(),
-    endDate: m.endDate.toISOString().slice(0, 10),
-  }));
   const todayLabel = today.toLocaleDateString("en-IN", {
     weekday: "long",
     day: "numeric",
@@ -52,10 +43,15 @@ export default async function OwnerDashboardPage() {
   });
 
   const statCards = [
-    { label: "Total", value: totalMembers, accent: "border-border" },
-    { label: "Active", value: activeMembers, accent: "border-border" },
-    { label: "Expiring", value: expiringSoon.length, accent: "border-border" },
-    { label: "Expired", value: expiredMembers.length, accent: "border-border" },
+    { label: "Total", value: totalMembers, accent: "border-border", href: "/owner/members?status=all" },
+    { label: "Active", value: activeMembers, accent: "border-border", href: "/owner/members?status=active" },
+    {
+      label: "Expiring",
+      value: expiringSoon.length,
+      accent: "border-border",
+      href: "/owner/members?status=expiring",
+    },
+    { label: "Expired", value: expiredMembers.length, accent: "border-border", href: "/owner/members?status=expired" },
   ];
 
   return (
@@ -90,12 +86,16 @@ export default async function OwnerDashboardPage() {
 
         <div className="grid grid-cols-2 gap-3">
           {statCards.map((card) => (
-            <div key={card.label} className={`rounded-xl border ${card.accent} bg-card p-3`}>
+            <Link
+              key={card.label}
+              href={card.href}
+              className={`rounded-xl border ${card.accent} bg-card p-3 transition-colors hover:bg-muted/40`}
+            >
               <p className="text-3xl font-bold text-foreground">{card.value}</p>
               <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
                 {card.label}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
 
@@ -137,7 +137,6 @@ export default async function OwnerDashboardPage() {
           </div>
         </div>
 
-        <MembersExplorerPanel members={explorerMembers} />
       </div>
     </PageShell>
   );
