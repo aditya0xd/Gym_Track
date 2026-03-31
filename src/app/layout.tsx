@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { AppToaster } from "@/components/providers/AppToaster";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import "./globals.css";
 
@@ -19,6 +20,12 @@ export const metadata: Metadata = {
   description: "Login to mint JWT access and refresh tokens for the gym dashboard.",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,8 +36,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-slate-950">
-        <SessionProvider>{children}</SessionProvider>
+      <body className="min-h-full bg-background text-foreground antialiased">
+        <SessionProvider>
+          {children}
+          <AppToaster />
+        </SessionProvider>
       </body>
     </html>
   );

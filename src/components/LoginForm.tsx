@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSession, signIn, signOut } from "next-auth/react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,11 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-type AuthState = {
-  success: boolean;
-  message: string;
-} | null;
-
 type LoginFormProps = {
   className?: string;
 };
@@ -32,13 +28,10 @@ export default function LoginForm({ className }: LoginFormProps) {
   const [loginPending, setLoginPending] = useState(false);
   const [signupPending, setSignupPending] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
-  const [loginState, setLoginState] = useState<AuthState>(null);
-  const [signupState, setSignupState] = useState<AuthState>(null);
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoginPending(true);
-    setLoginState(null);
 
     const formData = new FormData(event.currentTarget);
     const email =
@@ -57,7 +50,7 @@ export default function LoginForm({ className }: LoginFormProps) {
     });
 
     if (!result || result.error) {
-      setLoginState({ success: false, message: "Invalid email or password." });
+      toast.error("Invalid email or password.");
       setLoginPending(false);
       return;
     }
@@ -65,17 +58,19 @@ export default function LoginForm({ className }: LoginFormProps) {
     const session = await getSession();
     const role = session?.user?.role;
     if (role === "superadmin") {
+      toast.success("Signed in as superadmin.");
       router.push("/superadmin/gym-owners");
     } else {
+      toast.success("Signed in.");
       router.push("/owner/dashboard");
     }
     router.refresh();
+    setLoginPending(false);
   }
 
   async function handleSignupSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSignupPending(true);
-    setSignupState(null);
 
     const formData = new FormData(event.currentTarget);
     const payload = {
@@ -95,10 +90,7 @@ export default function LoginForm({ className }: LoginFormProps) {
 
     const data = (await response.json()) as { message?: string };
     if (!response.ok) {
-      setSignupState({
-        success: false,
-        message: data.message ?? "Unable to create account.",
-      });
+      toast.error(data.message ?? "Unable to create account.");
       setSignupPending(false);
       return;
     }
@@ -110,17 +102,16 @@ export default function LoginForm({ className }: LoginFormProps) {
     });
 
     if (!result || result.error) {
-      setSignupState({
-        success: true,
-        message: "Account created. Please login with your new credentials.",
-      });
+      toast.success("Account created. Sign in with your new credentials.");
       setMode("login");
       setSignupPending(false);
       return;
     }
 
+    toast.success("Welcome! Your gym owner account is ready.");
     router.push("/owner/dashboard");
     router.refresh();
+    setSignupPending(false);
   }
 
   async function handleLogout() {
@@ -129,7 +120,7 @@ export default function LoginForm({ className }: LoginFormProps) {
   }
 
   return (
-    <Card className={cn("w-full max-w-md", className)}>
+    <Card className={cn("w-full min-w-0 max-w-md border-border", className)}>
       <CardHeader>
         <CardTitle>Sign in</CardTitle>
         <CardDescription>
@@ -185,18 +176,6 @@ export default function LoginForm({ className }: LoginFormProps) {
             <Button type="submit" className="w-full" disabled={loginPending}>
               {loginPending ? "Signing in..." : "Sign in"}
             </Button>
-
-            {loginState?.message ? (
-              <p
-                role="status"
-                className={cn(
-                  "text-sm",
-                  loginState.success ? "text-emerald-600" : "text-rose-600",
-                )}
-              >
-                {loginState.message}
-              </p>
-            ) : null}
           </form>
         ) : (
           <form onSubmit={handleSignupSubmit} className="space-y-4">
@@ -250,22 +229,10 @@ export default function LoginForm({ className }: LoginFormProps) {
             <Button type="submit" className="w-full" disabled={signupPending}>
               {signupPending ? "Creating account..." : "Create gym owner account"}
             </Button>
-
-            {signupState?.message ? (
-              <p
-                role="status"
-                className={cn(
-                  "text-sm",
-                  signupState.success ? "text-emerald-600" : "text-rose-600",
-                )}
-              >
-                {signupState.message}
-              </p>
-            ) : null}
           </form>
         )}
 
-        <div className="flex flex-col gap-2 border-t pt-4">
+        <div className="flex flex-col gap-2 border-t border-border pt-4">
           <Button
             type="button"
             variant="secondary"
@@ -276,8 +243,8 @@ export default function LoginForm({ className }: LoginFormProps) {
             {logoutPending ? "Logging out..." : "Logout"}
           </Button>
 
-          <p className="text-center text-xs text-slate-500">
-            <Link href="/" className="text-slate-400 hover:underline">
+          <p className="text-center text-xs text-muted-foreground">
+            <Link href="/" className="text-foreground underline-offset-4 hover:underline">
               Home
             </Link>
           </p>

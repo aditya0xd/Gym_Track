@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,14 +15,16 @@ export function DurationPricingForm() {
   const [rows, setRows] = useState<PriceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const res = await fetch("/api/owner/pricing");
       if (!res.ok) {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          toast.error("Could not load your prices.");
+          setLoading(false);
+        }
         return;
       }
       const data = (await res.json()) as { prices: PriceRow[] };
@@ -44,7 +47,6 @@ export function DurationPricingForm() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setMessage(null);
 
     const prices = rows.map((r) => ({
       duration: r.duration,
@@ -59,23 +61,23 @@ export function DurationPricingForm() {
 
     const data = (await res.json()) as { message?: string; prices?: PriceRow[] };
     if (!res.ok) {
-      setMessage(data.message ?? "Could not save.");
+      toast.error(data.message ?? "Could not save prices.");
       setSaving(false);
       return;
     }
 
     if (data.prices) setRows(data.prices);
-    setMessage("Saved.");
+    toast.success("Pricing updated.");
     setSaving(false);
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-400">Loading your prices…</p>;
+    return <p className="text-sm text-muted-foreground">Loading your prices…</p>;
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto max-w-md space-y-6">
-      <p className="text-sm text-slate-400">
+    <form onSubmit={onSubmit} className="mx-auto w-full min-w-0 max-w-md space-y-6">
+      <p className="text-sm text-muted-foreground">
         Set list prices in INR for each membership length. These amounts apply when
         you enroll a member for that duration.
       </p>
@@ -88,7 +90,7 @@ export function DurationPricingForm() {
             <div key={opt.value} className="space-y-2">
               <Label htmlFor={`price-${opt.value}`}>{opt.label}</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                   ₹
                 </span>
                 <Input
@@ -97,7 +99,7 @@ export function DurationPricingForm() {
                   placeholder="0.00"
                   value={value}
                   onChange={(ev) => setPrice(opt.value, ev.target.value)}
-                  className="border-white/15 bg-slate-900/60 pl-8 text-slate-100"
+                  className="pl-8"
                   required
                 />
               </div>
@@ -105,17 +107,6 @@ export function DurationPricingForm() {
           );
         })}
       </div>
-
-      {message ? (
-        <p
-          role="status"
-          className={
-            message === "Saved." ? "text-sm text-emerald-400" : "text-sm text-rose-400"
-          }
-        >
-          {message}
-        </p>
-      ) : null}
 
       <Button type="submit" disabled={saving}>
         {saving ? "Saving…" : "Save prices"}

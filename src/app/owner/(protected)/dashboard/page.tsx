@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { MembersDataTable } from "@/components/gym-owner/MembersDataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { PageShell } from "@/components/shared/PageShell";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
 import { listMembersForOwner } from "@/server/gym-owner/member.service";
@@ -32,7 +33,7 @@ export default async function OwnerDashboardPage() {
   }));
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-6">
+    <PageShell>
       <PageHeader
         title="Members"
         description={`Signed in as ${session.user.email ?? ""}`}
@@ -43,6 +44,6 @@ export default async function OwnerDashboardPage() {
         }
       />
       <MembersDataTable members={rows} />
-    </div>
+    </PageShell>
   );
 }
