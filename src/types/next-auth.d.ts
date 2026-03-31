@@ -12,11 +12,13 @@ declare module "next-auth" {
 
   interface User {
     role?: AppRole;
+    rememberMe?: boolean;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     role?: AppRole;
+    rememberMe?: boolean;
   }
 }

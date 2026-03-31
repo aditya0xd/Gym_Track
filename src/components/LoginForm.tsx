@@ -42,10 +42,12 @@ export default function LoginForm({ className }: LoginFormProps) {
       typeof formData.get("password") === "string"
         ? String(formData.get("password"))
         : "";
+    const rememberMe = formData.get("rememberMe") === "on";
 
     const result = await signIn("credentials", {
       email,
       password,
+      rememberMe: rememberMe ? "true" : "false",
       redirect: false,
     });
 
@@ -172,6 +174,16 @@ export default function LoginForm({ className }: LoginFormProps) {
                 placeholder="********"
               />
             </div>
+
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                id="rememberMe"
+                name="rememberMe"
+                type="checkbox"
+                className="size-4 rounded border-input accent-black"
+              />
+              Remember me
+            </label>
 
             <Button type="submit" className="w-full" disabled={loginPending}>
               {loginPending ? "Signing in..." : "Sign in"}
