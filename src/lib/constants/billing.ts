@@ -19,3 +19,9 @@ export const OWNER_SUBSCRIPTION_PLAN_OPTIONS: {
   { value: "STARTER", label: "Starter" },
   { value: "PRO", label: "Pro" },
 ];
+
+export const OWNER_PLAN_FALLBACK_PRICE_INR: Record<OwnerSubscriptionPlan, string> = {
+  TRIAL: "0.00",
+  STARTER: "1499.00",
+  PRO: "2999.00",
+};

@@ -66,3 +66,13 @@ export type SuperAdminUser = Prisma.SuperAdminUserModel
  * INR list prices per duration — set by each gym owner
  */
 export type GymOwnerDurationPrice = Prisma.GymOwnerDurationPriceModel
+/**
+ * Model PlatformPlanPrice
+ * 
+ */
+export type PlatformPlanPrice = Prisma.PlatformPlanPriceModel
+/**
+ * Model OwnerBillingInvoice
+ * 
+ */
+export type OwnerBillingInvoice = Prisma.OwnerBillingInvoiceModel

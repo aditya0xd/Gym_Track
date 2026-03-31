@@ -52,6 +52,7 @@ model AdminUser {
   updatedAt        DateTime                @updatedAt
   members          Member[]
   durationPrices   GymOwnerDurationPrice[]
+  billingInvoices  OwnerBillingInvoice[]
 }
 
 /// Platform operator
@@ -74,6 +75,28 @@ model GymOwnerDurationPrice {
 
   @@unique([adminUserId, duration])
   @@index([adminUserId])
+}
+
+model PlatformPlanPrice {
+  id        String                @id @default(uuid())
+  plan      OwnerSubscriptionPlan @unique
+  priceInr  Decimal               @db.Decimal(10, 2)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+}
+
+model OwnerBillingInvoice {
+  id          String                @id @default(uuid())
+  adminUserId String
+  plan        OwnerSubscriptionPlan
+  amountInr   Decimal               @db.Decimal(10, 2)
+  status      BillingStatus         @default(PENDING)
+  dueDate     DateTime              @db.Date
+  paidAt      DateTime?
+  createdAt   DateTime              @default(now())
+  adminUser   AdminUser             @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId, createdAt])
 }
 
 enum OwnerSubscriptionPlan {
@@ -103,4 +126,10 @@ enum ReminderStatus {
 enum PaymentStatus {
   DONE
   NOT_DONE
+}
+
+enum BillingStatus {
+  PENDING
+  PAID
+  FAILED
 }

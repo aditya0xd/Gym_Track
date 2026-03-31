@@ -388,7 +388,9 @@ export const ModelName = {
   ReminderLog: 'ReminderLog',
   AdminUser: 'AdminUser',
   SuperAdminUser: 'SuperAdminUser',
-  GymOwnerDurationPrice: 'GymOwnerDurationPrice'
+  GymOwnerDurationPrice: 'GymOwnerDurationPrice',
+  PlatformPlanPrice: 'PlatformPlanPrice',
+  OwnerBillingInvoice: 'OwnerBillingInvoice'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -404,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "member" | "reminderLog" | "adminUser" | "superAdminUser" | "gymOwnerDurationPrice"
+    modelProps: "member" | "reminderLog" | "adminUser" | "superAdminUser" | "gymOwnerDurationPrice" | "platformPlanPrice" | "ownerBillingInvoice"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -778,6 +780,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PlatformPlanPrice: {
+      payload: Prisma.$PlatformPlanPricePayload<ExtArgs>
+      fields: Prisma.PlatformPlanPriceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlatformPlanPriceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlatformPlanPriceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>
+        }
+        findFirst: {
+          args: Prisma.PlatformPlanPriceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlatformPlanPriceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>
+        }
+        findMany: {
+          args: Prisma.PlatformPlanPriceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>[]
+        }
+        create: {
+          args: Prisma.PlatformPlanPriceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>
+        }
+        createMany: {
+          args: Prisma.PlatformPlanPriceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlatformPlanPriceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>[]
+        }
+        delete: {
+          args: Prisma.PlatformPlanPriceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>
+        }
+        update: {
+          args: Prisma.PlatformPlanPriceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>
+        }
+        deleteMany: {
+          args: Prisma.PlatformPlanPriceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlatformPlanPriceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlatformPlanPriceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>[]
+        }
+        upsert: {
+          args: Prisma.PlatformPlanPriceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanPricePayload>
+        }
+        aggregate: {
+          args: Prisma.PlatformPlanPriceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlatformPlanPrice>
+        }
+        groupBy: {
+          args: Prisma.PlatformPlanPriceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformPlanPriceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlatformPlanPriceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformPlanPriceCountAggregateOutputType> | number
+        }
+      }
+    }
+    OwnerBillingInvoice: {
+      payload: Prisma.$OwnerBillingInvoicePayload<ExtArgs>
+      fields: Prisma.OwnerBillingInvoiceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OwnerBillingInvoiceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OwnerBillingInvoiceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>
+        }
+        findFirst: {
+          args: Prisma.OwnerBillingInvoiceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OwnerBillingInvoiceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>
+        }
+        findMany: {
+          args: Prisma.OwnerBillingInvoiceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>[]
+        }
+        create: {
+          args: Prisma.OwnerBillingInvoiceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>
+        }
+        createMany: {
+          args: Prisma.OwnerBillingInvoiceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OwnerBillingInvoiceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>[]
+        }
+        delete: {
+          args: Prisma.OwnerBillingInvoiceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>
+        }
+        update: {
+          args: Prisma.OwnerBillingInvoiceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>
+        }
+        deleteMany: {
+          args: Prisma.OwnerBillingInvoiceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OwnerBillingInvoiceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OwnerBillingInvoiceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>[]
+        }
+        upsert: {
+          args: Prisma.OwnerBillingInvoiceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OwnerBillingInvoicePayload>
+        }
+        aggregate: {
+          args: Prisma.OwnerBillingInvoiceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOwnerBillingInvoice>
+        }
+        groupBy: {
+          args: Prisma.OwnerBillingInvoiceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OwnerBillingInvoiceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OwnerBillingInvoiceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OwnerBillingInvoiceCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -884,6 +1034,31 @@ export const GymOwnerDurationPriceScalarFieldEnum = {
 } as const
 
 export type GymOwnerDurationPriceScalarFieldEnum = (typeof GymOwnerDurationPriceScalarFieldEnum)[keyof typeof GymOwnerDurationPriceScalarFieldEnum]
+
+
+export const PlatformPlanPriceScalarFieldEnum = {
+  id: 'id',
+  plan: 'plan',
+  priceInr: 'priceInr',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlatformPlanPriceScalarFieldEnum = (typeof PlatformPlanPriceScalarFieldEnum)[keyof typeof PlatformPlanPriceScalarFieldEnum]
+
+
+export const OwnerBillingInvoiceScalarFieldEnum = {
+  id: 'id',
+  adminUserId: 'adminUserId',
+  plan: 'plan',
+  amountInr: 'amountInr',
+  status: 'status',
+  dueDate: 'dueDate',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt'
+} as const
+
+export type OwnerBillingInvoiceScalarFieldEnum = (typeof OwnerBillingInvoiceScalarFieldEnum)[keyof typeof OwnerBillingInvoiceScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1036,6 +1211,20 @@ export type ListEnumOwnerSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefI
 
 
 /**
+ * Reference to a field of type 'BillingStatus'
+ */
+export type EnumBillingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BillingStatus[]'
+ */
+export type ListEnumBillingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1148,6 +1337,8 @@ export type GlobalOmitConfig = {
   adminUser?: Prisma.AdminUserOmit
   superAdminUser?: Prisma.SuperAdminUserOmit
   gymOwnerDurationPrice?: Prisma.GymOwnerDurationPriceOmit
+  platformPlanPrice?: Prisma.PlatformPlanPriceOmit
+  ownerBillingInvoice?: Prisma.OwnerBillingInvoiceOmit
 }
 
 /* Types for Logging */
