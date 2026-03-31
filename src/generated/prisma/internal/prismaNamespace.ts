@@ -824,6 +824,9 @@ export const MemberScalarFieldEnum = {
   phone: 'phone',
   billingDuration: 'billingDuration',
   planPrice: 'planPrice',
+  paymentStatus: 'paymentStatus',
+  memberPhoto: 'memberPhoto',
+  upiScreenshot: 'upiScreenshot',
   startDate: 'startDate',
   endDate: 'endDate',
   whatsappEnabled: 'whatsappEnabled',
@@ -952,6 +955,20 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Decimal[]'
  */
 export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentStatus'
+ */
+export type EnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentStatus[]'
+ */
+export type ListEnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentStatus[]'>
     
 
 

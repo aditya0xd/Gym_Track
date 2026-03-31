@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 import type { MemberBillingDuration } from "@/generated/prisma/client";
@@ -38,7 +39,12 @@ export function MembersDataTable({ members }: { members: MemberRow[] }) {
             {members.map((m) => (
               <tr key={m.id} className="bg-card">
                 <td className="px-4 py-3">
-                  <div className="font-medium text-foreground">{m.fullName}</div>
+                  <Link
+                    href={`/owner/members/${m.id}`}
+                    className="font-medium text-foreground underline-offset-4 hover:underline"
+                  >
+                    {m.fullName}
+                  </Link>
                   {m.email ? (
                     <div className="text-xs text-muted-foreground">{m.email}</div>
                   ) : (
