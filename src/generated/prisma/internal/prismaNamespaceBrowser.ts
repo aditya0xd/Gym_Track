@@ -162,6 +162,10 @@ export const OwnerBillingInvoiceScalarFieldEnum = {
   plan: 'plan',
   amountInr: 'amountInr',
   status: 'status',
+  provider: 'provider',
+  razorpayOrderId: 'razorpayOrderId',
+  razorpayPaymentId: 'razorpayPaymentId',
+  razorpaySignature: 'razorpaySignature',
   dueDate: 'dueDate',
   paidAt: 'paidAt',
   createdAt: 'createdAt'

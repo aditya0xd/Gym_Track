@@ -40,6 +40,10 @@ export type OwnerBillingInvoiceMinAggregateOutputType = {
   plan: $Enums.OwnerSubscriptionPlan | null
   amountInr: runtime.Decimal | null
   status: $Enums.BillingStatus | null
+  provider: $Enums.PaymentProvider | null
+  razorpayOrderId: string | null
+  razorpayPaymentId: string | null
+  razorpaySignature: string | null
   dueDate: Date | null
   paidAt: Date | null
   createdAt: Date | null
@@ -51,6 +55,10 @@ export type OwnerBillingInvoiceMaxAggregateOutputType = {
   plan: $Enums.OwnerSubscriptionPlan | null
   amountInr: runtime.Decimal | null
   status: $Enums.BillingStatus | null
+  provider: $Enums.PaymentProvider | null
+  razorpayOrderId: string | null
+  razorpayPaymentId: string | null
+  razorpaySignature: string | null
   dueDate: Date | null
   paidAt: Date | null
   createdAt: Date | null
@@ -62,6 +70,10 @@ export type OwnerBillingInvoiceCountAggregateOutputType = {
   plan: number
   amountInr: number
   status: number
+  provider: number
+  razorpayOrderId: number
+  razorpayPaymentId: number
+  razorpaySignature: number
   dueDate: number
   paidAt: number
   createdAt: number
@@ -83,6 +95,10 @@ export type OwnerBillingInvoiceMinAggregateInputType = {
   plan?: true
   amountInr?: true
   status?: true
+  provider?: true
+  razorpayOrderId?: true
+  razorpayPaymentId?: true
+  razorpaySignature?: true
   dueDate?: true
   paidAt?: true
   createdAt?: true
@@ -94,6 +110,10 @@ export type OwnerBillingInvoiceMaxAggregateInputType = {
   plan?: true
   amountInr?: true
   status?: true
+  provider?: true
+  razorpayOrderId?: true
+  razorpayPaymentId?: true
+  razorpaySignature?: true
   dueDate?: true
   paidAt?: true
   createdAt?: true
@@ -105,6 +125,10 @@ export type OwnerBillingInvoiceCountAggregateInputType = {
   plan?: true
   amountInr?: true
   status?: true
+  provider?: true
+  razorpayOrderId?: true
+  razorpayPaymentId?: true
+  razorpaySignature?: true
   dueDate?: true
   paidAt?: true
   createdAt?: true
@@ -203,6 +227,10 @@ export type OwnerBillingInvoiceGroupByOutputType = {
   plan: $Enums.OwnerSubscriptionPlan
   amountInr: runtime.Decimal
   status: $Enums.BillingStatus
+  provider: $Enums.PaymentProvider
+  razorpayOrderId: string | null
+  razorpayPaymentId: string | null
+  razorpaySignature: string | null
   dueDate: Date
   paidAt: Date | null
   createdAt: Date
@@ -237,6 +265,10 @@ export type OwnerBillingInvoiceWhereInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFilter<"OwnerBillingInvoice"> | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFilter<"OwnerBillingInvoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFilter<"OwnerBillingInvoice"> | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFilter<"OwnerBillingInvoice"> | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
+  razorpayPaymentId?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
+  razorpaySignature?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
   dueDate?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   paidAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
@@ -249,6 +281,10 @@ export type OwnerBillingInvoiceOrderByWithRelationInput = {
   plan?: Prisma.SortOrder
   amountInr?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  razorpayOrderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  razorpayPaymentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  razorpaySignature?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -257,6 +293,7 @@ export type OwnerBillingInvoiceOrderByWithRelationInput = {
 
 export type OwnerBillingInvoiceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  razorpayOrderId?: string
   AND?: Prisma.OwnerBillingInvoiceWhereInput | Prisma.OwnerBillingInvoiceWhereInput[]
   OR?: Prisma.OwnerBillingInvoiceWhereInput[]
   NOT?: Prisma.OwnerBillingInvoiceWhereInput | Prisma.OwnerBillingInvoiceWhereInput[]
@@ -264,11 +301,14 @@ export type OwnerBillingInvoiceWhereUniqueInput = Prisma.AtLeast<{
   plan?: Prisma.EnumOwnerSubscriptionPlanFilter<"OwnerBillingInvoice"> | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFilter<"OwnerBillingInvoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFilter<"OwnerBillingInvoice"> | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFilter<"OwnerBillingInvoice"> | $Enums.PaymentProvider
+  razorpayPaymentId?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
+  razorpaySignature?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
   dueDate?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   paidAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
-}, "id">
+}, "id" | "razorpayOrderId">
 
 export type OwnerBillingInvoiceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -276,6 +316,10 @@ export type OwnerBillingInvoiceOrderByWithAggregationInput = {
   plan?: Prisma.SortOrder
   amountInr?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  razorpayOrderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  razorpayPaymentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  razorpaySignature?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -295,6 +339,10 @@ export type OwnerBillingInvoiceScalarWhereWithAggregatesInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanWithAggregatesFilter<"OwnerBillingInvoice"> | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalWithAggregatesFilter<"OwnerBillingInvoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusWithAggregatesFilter<"OwnerBillingInvoice"> | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderWithAggregatesFilter<"OwnerBillingInvoice"> | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.StringNullableWithAggregatesFilter<"OwnerBillingInvoice"> | string | null
+  razorpayPaymentId?: Prisma.StringNullableWithAggregatesFilter<"OwnerBillingInvoice"> | string | null
+  razorpaySignature?: Prisma.StringNullableWithAggregatesFilter<"OwnerBillingInvoice"> | string | null
   dueDate?: Prisma.DateTimeWithAggregatesFilter<"OwnerBillingInvoice"> | Date | string
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OwnerBillingInvoice"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OwnerBillingInvoice"> | Date | string
@@ -305,6 +353,10 @@ export type OwnerBillingInvoiceCreateInput = {
   plan: $Enums.OwnerSubscriptionPlan
   amountInr: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.BillingStatus
+  provider?: $Enums.PaymentProvider
+  razorpayOrderId?: string | null
+  razorpayPaymentId?: string | null
+  razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -317,6 +369,10 @@ export type OwnerBillingInvoiceUncheckedCreateInput = {
   plan: $Enums.OwnerSubscriptionPlan
   amountInr: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.BillingStatus
+  provider?: $Enums.PaymentProvider
+  razorpayOrderId?: string | null
+  razorpayPaymentId?: string | null
+  razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -327,6 +383,10 @@ export type OwnerBillingInvoiceUpdateInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFieldUpdateOperationsInput | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -339,6 +399,10 @@ export type OwnerBillingInvoiceUncheckedUpdateInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFieldUpdateOperationsInput | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -350,6 +414,10 @@ export type OwnerBillingInvoiceCreateManyInput = {
   plan: $Enums.OwnerSubscriptionPlan
   amountInr: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.BillingStatus
+  provider?: $Enums.PaymentProvider
+  razorpayOrderId?: string | null
+  razorpayPaymentId?: string | null
+  razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -360,6 +428,10 @@ export type OwnerBillingInvoiceUpdateManyMutationInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFieldUpdateOperationsInput | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -371,6 +443,10 @@ export type OwnerBillingInvoiceUncheckedUpdateManyInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFieldUpdateOperationsInput | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -392,6 +468,10 @@ export type OwnerBillingInvoiceCountOrderByAggregateInput = {
   plan?: Prisma.SortOrder
   amountInr?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  razorpayOrderId?: Prisma.SortOrder
+  razorpayPaymentId?: Prisma.SortOrder
+  razorpaySignature?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -407,6 +487,10 @@ export type OwnerBillingInvoiceMaxOrderByAggregateInput = {
   plan?: Prisma.SortOrder
   amountInr?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  razorpayOrderId?: Prisma.SortOrder
+  razorpayPaymentId?: Prisma.SortOrder
+  razorpaySignature?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -418,6 +502,10 @@ export type OwnerBillingInvoiceMinOrderByAggregateInput = {
   plan?: Prisma.SortOrder
   amountInr?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  provider?: Prisma.SortOrder
+  razorpayOrderId?: Prisma.SortOrder
+  razorpayPaymentId?: Prisma.SortOrder
+  razorpaySignature?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -473,11 +561,19 @@ export type EnumBillingStatusFieldUpdateOperationsInput = {
   set?: $Enums.BillingStatus
 }
 
+export type EnumPaymentProviderFieldUpdateOperationsInput = {
+  set?: $Enums.PaymentProvider
+}
+
 export type OwnerBillingInvoiceCreateWithoutAdminUserInput = {
   id?: string
   plan: $Enums.OwnerSubscriptionPlan
   amountInr: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.BillingStatus
+  provider?: $Enums.PaymentProvider
+  razorpayOrderId?: string | null
+  razorpayPaymentId?: string | null
+  razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -488,6 +584,10 @@ export type OwnerBillingInvoiceUncheckedCreateWithoutAdminUserInput = {
   plan: $Enums.OwnerSubscriptionPlan
   amountInr: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.BillingStatus
+  provider?: $Enums.PaymentProvider
+  razorpayOrderId?: string | null
+  razorpayPaymentId?: string | null
+  razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -528,6 +628,10 @@ export type OwnerBillingInvoiceScalarWhereInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFilter<"OwnerBillingInvoice"> | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFilter<"OwnerBillingInvoice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFilter<"OwnerBillingInvoice"> | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFilter<"OwnerBillingInvoice"> | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
+  razorpayPaymentId?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
+  razorpaySignature?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
   dueDate?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   paidAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
@@ -538,6 +642,10 @@ export type OwnerBillingInvoiceCreateManyAdminUserInput = {
   plan: $Enums.OwnerSubscriptionPlan
   amountInr: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.BillingStatus
+  provider?: $Enums.PaymentProvider
+  razorpayOrderId?: string | null
+  razorpayPaymentId?: string | null
+  razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
   createdAt?: Date | string
@@ -548,6 +656,10 @@ export type OwnerBillingInvoiceUpdateWithoutAdminUserInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFieldUpdateOperationsInput | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -558,6 +670,10 @@ export type OwnerBillingInvoiceUncheckedUpdateWithoutAdminUserInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFieldUpdateOperationsInput | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -568,6 +684,10 @@ export type OwnerBillingInvoiceUncheckedUpdateManyWithoutAdminUserInput = {
   plan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   amountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
+  provider?: Prisma.EnumPaymentProviderFieldUpdateOperationsInput | $Enums.PaymentProvider
+  razorpayOrderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -581,6 +701,10 @@ export type OwnerBillingInvoiceSelect<ExtArgs extends runtime.Types.Extensions.I
   plan?: boolean
   amountInr?: boolean
   status?: boolean
+  provider?: boolean
+  razorpayOrderId?: boolean
+  razorpayPaymentId?: boolean
+  razorpaySignature?: boolean
   dueDate?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -593,6 +717,10 @@ export type OwnerBillingInvoiceSelectCreateManyAndReturn<ExtArgs extends runtime
   plan?: boolean
   amountInr?: boolean
   status?: boolean
+  provider?: boolean
+  razorpayOrderId?: boolean
+  razorpayPaymentId?: boolean
+  razorpaySignature?: boolean
   dueDate?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -605,6 +733,10 @@ export type OwnerBillingInvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime
   plan?: boolean
   amountInr?: boolean
   status?: boolean
+  provider?: boolean
+  razorpayOrderId?: boolean
+  razorpayPaymentId?: boolean
+  razorpaySignature?: boolean
   dueDate?: boolean
   paidAt?: boolean
   createdAt?: boolean
@@ -617,12 +749,16 @@ export type OwnerBillingInvoiceSelectScalar = {
   plan?: boolean
   amountInr?: boolean
   status?: boolean
+  provider?: boolean
+  razorpayOrderId?: boolean
+  razorpayPaymentId?: boolean
+  razorpaySignature?: boolean
   dueDate?: boolean
   paidAt?: boolean
   createdAt?: boolean
 }
 
-export type OwnerBillingInvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminUserId" | "plan" | "amountInr" | "status" | "dueDate" | "paidAt" | "createdAt", ExtArgs["result"]["ownerBillingInvoice"]>
+export type OwnerBillingInvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminUserId" | "plan" | "amountInr" | "status" | "provider" | "razorpayOrderId" | "razorpayPaymentId" | "razorpaySignature" | "dueDate" | "paidAt" | "createdAt", ExtArgs["result"]["ownerBillingInvoice"]>
 export type OwnerBillingInvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }
@@ -644,6 +780,10 @@ export type $OwnerBillingInvoicePayload<ExtArgs extends runtime.Types.Extensions
     plan: $Enums.OwnerSubscriptionPlan
     amountInr: runtime.Decimal
     status: $Enums.BillingStatus
+    provider: $Enums.PaymentProvider
+    razorpayOrderId: string | null
+    razorpayPaymentId: string | null
+    razorpaySignature: string | null
     dueDate: Date
     paidAt: Date | null
     createdAt: Date
@@ -1076,6 +1216,10 @@ export interface OwnerBillingInvoiceFieldRefs {
   readonly plan: Prisma.FieldRef<"OwnerBillingInvoice", 'OwnerSubscriptionPlan'>
   readonly amountInr: Prisma.FieldRef<"OwnerBillingInvoice", 'Decimal'>
   readonly status: Prisma.FieldRef<"OwnerBillingInvoice", 'BillingStatus'>
+  readonly provider: Prisma.FieldRef<"OwnerBillingInvoice", 'PaymentProvider'>
+  readonly razorpayOrderId: Prisma.FieldRef<"OwnerBillingInvoice", 'String'>
+  readonly razorpayPaymentId: Prisma.FieldRef<"OwnerBillingInvoice", 'String'>
+  readonly razorpaySignature: Prisma.FieldRef<"OwnerBillingInvoice", 'String'>
   readonly dueDate: Prisma.FieldRef<"OwnerBillingInvoice", 'DateTime'>
   readonly paidAt: Prisma.FieldRef<"OwnerBillingInvoice", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"OwnerBillingInvoice", 'DateTime'>

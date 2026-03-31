@@ -91,6 +91,10 @@ model OwnerBillingInvoice {
   plan        OwnerSubscriptionPlan
   amountInr   Decimal               @db.Decimal(10, 2)
   status      BillingStatus         @default(PENDING)
+  provider    PaymentProvider       @default(MANUAL)
+  razorpayOrderId   String?         @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
   dueDate     DateTime              @db.Date
   paidAt      DateTime?
   createdAt   DateTime              @default(now())
@@ -132,4 +136,9 @@ enum BillingStatus {
   PENDING
   PAID
   FAILED
+}
+
+enum PaymentProvider {
+  MANUAL
+  RAZORPAY
 }

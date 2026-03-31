@@ -8,6 +8,14 @@ import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 import { Button } from "@/components/ui/button";
 
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+    };
+  }
+}
+
 type ManagePlanData = {
   currentPlan: OwnerSubscriptionPlan;
   trialEndsAt: string | null;
@@ -27,8 +35,21 @@ export function ManagePlanPanel() {
   const [data, setData] = useState<ManagePlanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<OwnerSubscriptionPlan>("TRIAL");
+  const [invoiceFilter, setInvoiceFilter] = useState<"ALL" | BillingStatus>("ALL");
   const [savingPlan, setSavingPlan] = useState(false);
   const [payingId, setPayingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,6 +75,12 @@ export function ManagePlanPanel() {
     return data.planPrices[selectedPlan];
   }, [data, selectedPlan]);
 
+  const filteredInvoices = useMemo(() => {
+    if (!data) return [];
+    if (invoiceFilter === "ALL") return data.invoices;
+    return data.invoices.filter((inv) => inv.status === invoiceFilter);
+  }, [data, invoiceFilter]);
+
   async function handleChangePlan() {
     if (!data) return;
     setSavingPlan(true);
@@ -75,16 +102,72 @@ export function ManagePlanPanel() {
 
   async function handlePayNow(invoiceId: string) {
     setPayingId(invoiceId);
-    const res = await fetch(`/api/owner/billing/${invoiceId}/pay`, { method: "POST" });
-    const json = (await res.json()) as { message?: string };
-    if (!res.ok) {
-      toast.error(json.message ?? "Payment failed.");
+    const orderRes = await fetch(`/api/owner/billing/${invoiceId}/razorpay/order`, {
+      method: "POST",
+    });
+    const orderData = (await orderRes.json()) as {
+      message?: string;
+      keyId?: string;
+      orderId?: string;
+      amount?: number;
+      currency?: string;
+      invoiceId?: string;
+    };
+    if (!orderRes.ok || !orderData.keyId || !orderData.orderId || !orderData.invoiceId) {
+      toast.error(orderData.message ?? "Could not start payment.");
       setPayingId(null);
       return;
     }
-    toast.success("Payment marked as successful.");
-    setPayingId(null);
-    await load();
+
+    if (!window.Razorpay) {
+      toast.error("Razorpay checkout is not available.");
+      setPayingId(null);
+      return;
+    }
+
+    const instance = new window.Razorpay({
+      key: orderData.keyId,
+      amount: orderData.amount,
+      currency: orderData.currency ?? "INR",
+      name: "Gym Admin Portal",
+      description: "Subscription invoice payment",
+      order_id: orderData.orderId,
+      handler: async (response: {
+        razorpay_order_id?: string;
+        razorpay_payment_id?: string;
+        razorpay_signature?: string;
+      }) => {
+        const verifyRes = await fetch(
+          `/api/owner/billing/${orderData.invoiceId}/razorpay/verify`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            }),
+          },
+        );
+        const verifyData = (await verifyRes.json()) as { message?: string };
+        if (!verifyRes.ok) {
+          toast.error(verifyData.message ?? "Payment verification failed.");
+          setPayingId(null);
+          return;
+        }
+        toast.success("Payment successful.");
+        setPayingId(null);
+        await load();
+      },
+      modal: {
+        ondismiss: () => {
+          setPayingId(null);
+        },
+      },
+      theme: { color: "#111111" },
+    });
+
+    instance.open();
   }
 
   if (loading || !data) {
@@ -140,8 +223,26 @@ export function ManagePlanPanel() {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
+        <div className="border-b border-border bg-muted/30 px-3 py-2.5 sm:px-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="invoiceFilter" className="text-xs text-muted-foreground">
+              Filter invoices
+            </label>
+            <select
+              id="invoiceFilter"
+              value={invoiceFilter}
+              onChange={(e) => setInvoiceFilter(e.target.value as "ALL" | BillingStatus)}
+              className="min-h-9 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground"
+            >
+              <option value="ALL">All</option>
+              <option value="PENDING">Pending</option>
+              <option value="PAID">Paid</option>
+              <option value="FAILED">Failed</option>
+            </select>
+          </div>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[760px] text-sm">
             <thead className="border-b border-border bg-muted/50 text-left text-muted-foreground">
               <tr>
                 <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">Date</th>
@@ -153,7 +254,7 @@ export function ManagePlanPanel() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {data.invoices.map((inv) => (
+              {filteredInvoices.map((inv) => (
                 <tr key={inv.id} className="bg-card">
                   <td className="px-3 py-2.5 sm:px-4 sm:py-3">
                     {inv.createdAt.slice(0, 10)}
@@ -165,30 +266,33 @@ export function ManagePlanPanel() {
                   <td className="px-3 py-2.5 sm:px-4 sm:py-3">{inv.status}</td>
                   <td className="px-3 py-2.5 sm:px-4 sm:py-3">{inv.dueDate}</td>
                   <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-right">
-                    {inv.status === "PENDING" ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={payingId === inv.id}
-                        onClick={() => handlePayNow(inv.id)}
-                      >
-                        {payingId === inv.id ? "Paying…" : "Pay now"}
+                    <div className="flex justify-end gap-2">
+                      {inv.status === "PENDING" ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={payingId === inv.id}
+                          onClick={() => handlePayNow(inv.id)}
+                        >
+                          {payingId === inv.id ? "Paying…" : "Pay now"}
+                        </Button>
+                      ) : null}
+                      <Button type="button" size="sm" variant="outline" asChild>
+                        <a href={`/api/owner/billing/${inv.id}/receipt`} download>
+                          Download receipt
+                        </a>
                       </Button>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        {inv.status === "PAID" ? "Paid" : "No action"}
-                      </span>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
-              {data.invoices.length === 0 && (
+              {filteredInvoices.length === 0 && (
                 <tr>
                   <td
                     className="px-3 py-8 text-center text-muted-foreground sm:px-4"
                     colSpan={6}
                   >
-                    No billing invoices yet.
+                    No invoices for selected filter.
                   </td>
                 </tr>
               )}

@@ -1053,6 +1053,10 @@ export const OwnerBillingInvoiceScalarFieldEnum = {
   plan: 'plan',
   amountInr: 'amountInr',
   status: 'status',
+  provider: 'provider',
+  razorpayOrderId: 'razorpayOrderId',
+  razorpayPaymentId: 'razorpayPaymentId',
+  razorpaySignature: 'razorpaySignature',
   dueDate: 'dueDate',
   paidAt: 'paidAt',
   createdAt: 'createdAt'
@@ -1221,6 +1225,20 @@ export type EnumBillingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'BillingStatus[]'
  */
 export type ListEnumBillingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentProvider'
+ */
+export type EnumPaymentProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentProvider'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentProvider[]'
+ */
+export type ListEnumPaymentProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentProvider[]'>
     
 
 

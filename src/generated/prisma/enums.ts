@@ -60,3 +60,11 @@ export const BillingStatus = {
 } as const
 
 export type BillingStatus = (typeof BillingStatus)[keyof typeof BillingStatus]
+
+
+export const PaymentProvider = {
+  MANUAL: 'MANUAL',
+  RAZORPAY: 'RAZORPAY'
+} as const
+
+export type PaymentProvider = (typeof PaymentProvider)[keyof typeof PaymentProvider]
