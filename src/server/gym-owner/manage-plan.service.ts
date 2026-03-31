@@ -88,3 +88,82 @@ export async function payInvoice(adminUserId: string, invoiceId: string) {
     },
   });
 }
+
+export async function createRazorpayOrderForOwnerInvoice(adminUserId: string, invoiceId: string) {
+  const invoice = await prisma.ownerBillingInvoice.findFirst({
+    where: { id: invoiceId, adminUserId },
+    select: { id: true, amountInr: true, status: true, adminUserId: true, plan: true },
+  });
+  if (!invoice) throw new HttpError(404, "Invoice not found.");
+  if (invoice.status !== "PENDING") {
+    throw new HttpError(400, "Only pending invoices can be paid.");
+  }
+  return invoice;
+}
+
+export async function attachRazorpayOrderToInvoice(
+  adminUserId: string,
+  invoiceId: string,
+  razorpayOrderId: string,
+) {
+  return prisma.ownerBillingInvoice.updateMany({
+    where: { id: invoiceId, adminUserId, status: "PENDING" },
+    data: { razorpayOrderId, provider: "RAZORPAY" },
+  });
+}
+
+export async function markInvoicePaidFromRazorpay(input: {
+  adminUserId: string;
+  invoiceId: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}) {
+  const invoice = await prisma.ownerBillingInvoice.findFirst({
+    where: {
+      id: input.invoiceId,
+      adminUserId: input.adminUserId,
+      razorpayOrderId: input.razorpayOrderId,
+    },
+    select: { id: true, status: true },
+  });
+  if (!invoice) throw new HttpError(404, "Invoice not found for Razorpay order.");
+  if (invoice.status === "PAID") return invoice;
+  if (invoice.status !== "PENDING") throw new HttpError(400, "Invoice is not payable.");
+
+  return prisma.ownerBillingInvoice.update({
+    where: { id: input.invoiceId },
+    data: {
+      status: "PAID",
+      paidAt: new Date(),
+      provider: "RAZORPAY",
+      razorpayPaymentId: input.razorpayPaymentId,
+      razorpaySignature: input.razorpaySignature,
+    },
+    select: { id: true, status: true },
+  });
+}
+
+export async function getInvoiceReceiptForOwner(adminUserId: string, invoiceId: string) {
+  const invoice = await prisma.ownerBillingInvoice.findFirst({
+    where: { id: invoiceId, adminUserId },
+    select: {
+      id: true,
+      plan: true,
+      amountInr: true,
+      status: true,
+      dueDate: true,
+      paidAt: true,
+      createdAt: true,
+      adminUser: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  if (!invoice) throw new HttpError(404, "Invoice not found.");
+  return invoice;
+}

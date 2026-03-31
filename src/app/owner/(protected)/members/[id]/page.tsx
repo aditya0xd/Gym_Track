@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { PageShell } from "@/components/shared/PageShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MemberNotificationActions } from "@/components/gym-owner/MemberNotificationActions";
 import { authOptions } from "@/lib/auth";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
@@ -41,9 +42,12 @@ export default async function OwnerMemberDetailPage({
         title={member.fullName}
         description={`Member ID: ${member.id}`}
         actions={
-          <Button variant="outline" asChild>
-            <Link href="/owner/dashboard">Back to members</Link>
-          </Button>
+          <>
+            <MemberNotificationActions memberId={member.id} />
+            <Button variant="outline" asChild>
+              <Link href="/owner/dashboard">Back to members</Link>
+            </Button>
+          </>
         }
       />
 
