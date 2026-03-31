@@ -43,3 +43,11 @@ export const ReminderStatus = {
 } as const
 
 export type ReminderStatus = (typeof ReminderStatus)[keyof typeof ReminderStatus]
+
+
+export const PaymentStatus = {
+  DONE: 'DONE',
+  NOT_DONE: 'NOT_DONE'
+} as const
+
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]

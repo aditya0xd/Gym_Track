@@ -1,4 +1,7 @@
-import type { MemberBillingDuration } from "@/generated/prisma/client";
+import type {
+  MemberBillingDuration,
+  PaymentStatus,
+} from "@/generated/prisma/client";
 import { membershipEndDateInclusive } from "@/lib/billing/membership-dates";
 import { HttpError } from "@/lib/http/errors";
 import { prisma } from "@/lib/prisma";
@@ -14,9 +17,34 @@ export async function listMembersForOwner(adminUserId: string) {
       phone: true,
       billingDuration: true,
       planPrice: true,
+      paymentStatus: true,
+      memberPhoto: true,
+      upiScreenshot: true,
       startDate: true,
       endDate: true,
       whatsappEnabled: true,
+    },
+  });
+}
+
+export async function getMemberForOwner(adminUserId: string, memberId: string) {
+  return prisma.member.findFirst({
+    where: { id: memberId, adminUserId },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phone: true,
+      billingDuration: true,
+      planPrice: true,
+      paymentStatus: true,
+      memberPhoto: true,
+      upiScreenshot: true,
+      startDate: true,
+      endDate: true,
+      whatsappEnabled: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
 }
@@ -28,6 +56,9 @@ export type CreateMemberInput = {
   billingDuration: MemberBillingDuration;
   startDate: Date;
   whatsappEnabled: boolean;
+  paymentStatus: PaymentStatus;
+  memberPhoto: string | null;
+  upiScreenshot: string | null;
 };
 
 export async function createMemberForOwner(
@@ -67,6 +98,9 @@ export async function createMemberForOwner(
       phone: input.phone.trim(),
       billingDuration: input.billingDuration,
       planPrice: priceRow.priceInr,
+      paymentStatus: input.paymentStatus,
+      memberPhoto: input.memberPhoto,
+      upiScreenshot: input.upiScreenshot,
       startDate: start,
       endDate: endDate,
       whatsappEnabled: input.whatsappEnabled,

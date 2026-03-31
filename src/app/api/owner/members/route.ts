@@ -8,10 +8,17 @@ import {
   createMemberForOwner,
   listMembersForOwner,
 } from "@/server/gym-owner/member.service";
-import type { MemberBillingDuration } from "@/generated/prisma/client";
+import type {
+  MemberBillingDuration,
+  PaymentStatus,
+} from "@/generated/prisma/client";
 
 function isDuration(v: unknown): v is MemberBillingDuration {
   return MEMBER_BILLING_DURATION_OPTIONS.some((o) => o.value === v);
+}
+
+function isPaymentStatus(v: unknown): v is PaymentStatus {
+  return v === "DONE" || v === "NOT_DONE";
 }
 
 export async function GET() {
@@ -46,11 +53,30 @@ export async function POST(request: Request) {
   const billingDuration = body.billingDuration;
   const whatsappEnabled =
     typeof body.whatsappEnabled === "boolean" ? body.whatsappEnabled : true;
+  const paymentStatusRaw = body.paymentStatus;
+  const paymentStatus: PaymentStatus = isPaymentStatus(paymentStatusRaw)
+    ? paymentStatusRaw
+    : "NOT_DONE";
+  const memberPhoto =
+    typeof body.memberPhoto === "string" && body.memberPhoto.trim()
+      ? body.memberPhoto
+      : null;
+  const upiScreenshot =
+    typeof body.upiScreenshot === "string" && body.upiScreenshot.trim()
+      ? body.upiScreenshot
+      : null;
   const startDateRaw = typeof body.startDate === "string" ? body.startDate : "";
 
   if (!fullName || !phone || !isDuration(billingDuration) || !startDateRaw) {
     return NextResponse.json(
       { message: "fullName, phone, billingDuration, and startDate are required." },
+      { status: 400 },
+    );
+  }
+
+  if (paymentStatus === "DONE" && !upiScreenshot) {
+    return NextResponse.json(
+      { message: "UPI screenshot is required when payment is marked done." },
       { status: 400 },
     );
   }
@@ -79,6 +105,9 @@ export async function POST(request: Request) {
       billingDuration,
       startDate,
       whatsappEnabled,
+      paymentStatus,
+      memberPhoto,
+      upiScreenshot,
     });
 
     return NextResponse.json(
@@ -89,6 +118,9 @@ export async function POST(request: Request) {
         phone: member.phone,
         billingDuration: member.billingDuration,
         planPrice: member.planPrice.toString(),
+        paymentStatus: member.paymentStatus,
+        memberPhoto: member.memberPhoto,
+        upiScreenshot: member.upiScreenshot,
         startDate: member.startDate.toISOString().slice(0, 10),
         endDate: member.endDate.toISOString().slice(0, 10),
         whatsappEnabled: member.whatsappEnabled,
