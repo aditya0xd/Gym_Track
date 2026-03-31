@@ -45,6 +45,17 @@ export async function getMemberForOwner(adminUserId: string, memberId: string) {
       whatsappEnabled: true,
       createdAt: true,
       updatedAt: true,
+      reminders: {
+        orderBy: { sentAt: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          channel: true,
+          status: true,
+          sentAt: true,
+          message: true,
+        },
+      },
     },
   });
 }
