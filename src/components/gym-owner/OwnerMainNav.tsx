@@ -13,6 +13,7 @@ const links = [
   { href: "/owner/dashboard", label: "Members" },
   { href: "/owner/members/new", label: "Enroll member" },
   { href: "/owner/pricing", label: "Pricing (INR)" },
+  { href: "/owner/analytics", label: "Analytics" },
 ];
 
 function navLinkClass(active: boolean, mobile = false) {
