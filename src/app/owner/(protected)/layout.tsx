@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
+import { OwnerBottomNav } from "@/components/gym-owner/OwnerBottomNav";
 import { OwnerMainNav } from "@/components/gym-owner/OwnerMainNav";
 import { authOptions } from "@/lib/auth";
 
@@ -18,7 +19,8 @@ export default async function OwnerProtectedLayout({
   return (
     <div className="min-h-full bg-background text-foreground">
       <OwnerMainNav email={session.user.email ?? ""} />
-      {children}
+      <div className="pb-16 md:pb-0">{children}</div>
+      <OwnerBottomNav />
     </div>
   );
 }
