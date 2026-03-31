@@ -45,7 +45,7 @@ export function SuperAdminMainNav({ email }: { email: string }) {
             variant="outline"
             size="sm"
             className="border-violet-500/30 text-violet-100"
-            onClick={() => signOut({ callbackUrl: "/superadmin/login" })}
+            onClick={() => signOut({ callbackUrl: "/login" })}
           >
             Sign out
           </Button>

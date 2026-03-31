@@ -15,7 +15,7 @@ export const metadata = {
 export default async function OwnerDashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || session.user.role !== "gym_owner") {
-    redirect("/owner/login");
+    redirect("/login");
   }
 
   const members = await listMembersForOwner(session.user.id);

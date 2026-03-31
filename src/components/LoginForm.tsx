@@ -3,9 +3,8 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn, signOut } from "next-auth/react";
+import { getSession, signIn, signOut } from "next-auth/react";
 
-import { AUTH_PORTALS } from "@/lib/constants/billing";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -35,7 +34,6 @@ export default function LoginForm({ className }: LoginFormProps) {
   const [logoutPending, setLogoutPending] = useState(false);
   const [loginState, setLoginState] = useState<AuthState>(null);
   const [signupState, setSignupState] = useState<AuthState>(null);
-  const [logoutState, setLogoutState] = useState<AuthState>(null);
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,7 +53,6 @@ export default function LoginForm({ className }: LoginFormProps) {
     const result = await signIn("credentials", {
       email,
       password,
-      portal: AUTH_PORTALS.GYM_OWNER,
       redirect: false,
     });
 
@@ -65,7 +62,13 @@ export default function LoginForm({ className }: LoginFormProps) {
       return;
     }
 
-    router.push("/owner/dashboard");
+    const session = await getSession();
+    const role = session?.user?.role;
+    if (role === "superadmin") {
+      router.push("/superadmin/gym-owners");
+    } else {
+      router.push("/owner/dashboard");
+    }
     router.refresh();
   }
 
@@ -103,7 +106,6 @@ export default function LoginForm({ className }: LoginFormProps) {
     const result = await signIn("credentials", {
       email: payload.email,
       password: payload.password,
-      portal: AUTH_PORTALS.GYM_OWNER,
       redirect: false,
     });
 
@@ -123,16 +125,17 @@ export default function LoginForm({ className }: LoginFormProps) {
 
   async function handleLogout() {
     setLogoutPending(true);
-    await signOut({ redirect: false });
-    setLogoutPending(false);
-    setLogoutState({ success: true, message: "Logged out successfully." });
+    await signOut({ callbackUrl: "/login" });
   }
 
   return (
     <Card className={cn("w-full max-w-md", className)}>
       <CardHeader>
-        <CardTitle>Gym admin access</CardTitle>
-        <CardDescription>Sign in or create a new admin account.</CardDescription>
+        <CardTitle>Sign in</CardTitle>
+        <CardDescription>
+          Gym owners and platform superadmin use the same login. New gyms can
+          register below.
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -163,7 +166,7 @@ export default function LoginForm({ className }: LoginFormProps) {
                 type="email"
                 required
                 autoComplete="email"
-                placeholder="owner@gym.com"
+                placeholder="you@example.com"
               />
             </div>
 
@@ -204,7 +207,7 @@ export default function LoginForm({ className }: LoginFormProps) {
                 name="name"
                 type="text"
                 required
-                placeholder="Gym Owner"
+                placeholder="Gym owner name"
               />
             </div>
 
@@ -245,7 +248,7 @@ export default function LoginForm({ className }: LoginFormProps) {
             </div>
 
             <Button type="submit" className="w-full" disabled={signupPending}>
-              {signupPending ? "Creating account..." : "Create account"}
+              {signupPending ? "Creating account..." : "Create gym owner account"}
             </Button>
 
             {signupState?.message ? (
@@ -273,16 +276,9 @@ export default function LoginForm({ className }: LoginFormProps) {
             {logoutPending ? "Logging out..." : "Logout"}
           </Button>
 
-          {logoutState?.message ? (
-            <p role="status" className="text-xs text-muted-foreground">
-              {logoutState.message}
-            </p>
-          ) : null}
-
           <p className="text-center text-xs text-slate-500">
-            Platform admin?{" "}
-            <Link href="/superadmin/login" className="text-violet-400 hover:underline">
-              Superadmin login
+            <Link href="/" className="text-slate-400 hover:underline">
+              Home
             </Link>
           </p>
         </div>

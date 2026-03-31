@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 
+import { seedDefaultDurationPricesForOwner } from "@/lib/auth/default-owner-pricing";
 import { prisma } from "@/lib/prisma";
 
 type SignupPayload = {
@@ -46,13 +47,20 @@ export async function POST(request: Request) {
   }
 
   const passwordHash = await hash(password, 12);
-  await prisma.adminUser.create({
+  const trialEndsAt = new Date();
+  trialEndsAt.setUTCDate(trialEndsAt.getUTCDate() + 14);
+
+  const user = await prisma.adminUser.create({
     data: {
       name,
       email,
       passwordHash,
+      subscriptionPlan: "TRIAL",
+      trialEndsAt,
     },
   });
+
+  await seedDefaultDurationPricesForOwner(user.id);
 
   return NextResponse.json({ message: "Account created successfully." }, { status: 201 });
 }

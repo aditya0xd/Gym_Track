@@ -49,7 +49,7 @@ export function OwnerMainNav({ email }: { email: string }) {
             variant="outline"
             size="sm"
             className="border-white/20 text-slate-100"
-            onClick={() => signOut({ callbackUrl: "/owner/login" })}
+            onClick={() => signOut({ callbackUrl: "/login" })}
           >
             Sign out
           </Button>

@@ -1,23 +1,23 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { OwnerMainNav } from "@/components/gym-owner/OwnerMainNav";
+import { SuperAdminMainNav } from "@/components/superadmin/SuperAdminMainNav";
 import { authOptions } from "@/lib/auth";
 
-export default async function OwnerProtectedLayout({
+export default async function SuperAdminProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
+  if (!session?.user?.id || session.user.role !== "superadmin") {
     redirect("/login");
   }
 
   return (
     <div className="min-h-full bg-slate-950 text-slate-100">
-      <OwnerMainNav email={session.user.email ?? ""} />
+      <SuperAdminMainNav email={session.user.email ?? ""} />
       {children}
     </div>
   );

@@ -2,7 +2,6 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 
-import { AUTH_PORTALS } from "@/lib/constants/billing";
 import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
@@ -11,7 +10,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   pages: {
-    signIn: "/owner/login",
+    signIn: "/login",
   },
   providers: [
     CredentialsProvider({
@@ -20,7 +19,6 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        portal: { label: "Portal", type: "text" },
       },
       async authorize(credentials) {
         const email =
@@ -29,39 +27,34 @@ export const authOptions: NextAuthOptions = {
             : "";
         const password =
           typeof credentials?.password === "string" ? credentials.password : "";
-        const portalRaw =
-          typeof credentials?.portal === "string" ? credentials.portal.trim() : "";
-        const portal =
-          portalRaw === AUTH_PORTALS.SUPERADMIN
-            ? AUTH_PORTALS.SUPERADMIN
-            : AUTH_PORTALS.GYM_OWNER;
 
         if (!email || !password) {
           return null;
         }
 
-        if (portal === AUTH_PORTALS.SUPERADMIN) {
-          const user = await prisma.superAdminUser.findUnique({ where: { email } });
-          if (!user) return null;
-          const ok = await compare(password, user.passwordHash);
+        const superUser = await prisma.superAdminUser.findUnique({
+          where: { email },
+        });
+        if (superUser) {
+          const ok = await compare(password, superUser.passwordHash);
           if (!ok) return null;
           return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: "superadmin",
+            id: superUser.id,
+            name: superUser.name,
+            email: superUser.email,
+            role: "superadmin" as const,
           };
         }
 
-        const user = await prisma.adminUser.findUnique({ where: { email } });
-        if (!user) return null;
-        const ok = await compare(password, user.passwordHash);
+        const owner = await prisma.adminUser.findUnique({ where: { email } });
+        if (!owner) return null;
+        const ok = await compare(password, owner.passwordHash);
         if (!ok) return null;
         return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: "gym_owner",
+          id: owner.id,
+          name: owner.name,
+          email: owner.email,
+          role: "gym_owner" as const,
         };
       },
     }),

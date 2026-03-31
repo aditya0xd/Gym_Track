@@ -19,10 +19,3 @@ export const OWNER_SUBSCRIPTION_PLAN_OPTIONS: {
   { value: "STARTER", label: "Starter" },
   { value: "PRO", label: "Pro" },
 ];
-
-export const AUTH_PORTALS = {
-  GYM_OWNER: "gym_owner",
-  SUPERADMIN: "superadmin",
-} as const;
-
-export type AuthPortal = (typeof AUTH_PORTALS)[keyof typeof AUTH_PORTALS];
