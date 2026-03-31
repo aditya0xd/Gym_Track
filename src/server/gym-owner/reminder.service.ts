@@ -37,7 +37,6 @@ export async function sendReminderForOwnerMember(
       id: true,
       fullName: true,
       phone: true,
-      whatsappEnabled: true,
       endDate: true,
       paymentStatus: true,
     },
@@ -47,7 +46,6 @@ export async function sendReminderForOwnerMember(
     throw new HttpError(400, "Payment is already marked done for this member.");
   }
 
-  const channel: Channel = member.whatsappEnabled ? "WHATSAPP" : "SMS";
   const toPhone = normalizePhone(member.phone);
   const message =
     typeof input.message === "string" && input.message.trim()
@@ -58,15 +56,27 @@ export async function sendReminderForOwnerMember(
           endDate: member.endDate,
         });
 
+  // Delivery strategy: try WhatsApp first, then fallback to SMS.
+  let channel: Channel = "WHATSAPP";
   let status: ReminderStatus = "SENT";
   try {
     await sendTwilioReminder({
       toPhone,
       message,
-      channel,
+      channel: "WHATSAPP",
     });
   } catch {
-    status = "FAILED";
+    try {
+      await sendTwilioReminder({
+        toPhone,
+        message,
+        channel: "SMS",
+      });
+      channel = "SMS";
+      status = "SENT";
+    } catch {
+      status = "FAILED";
+    }
   }
 
   const log = await prisma.reminderLog.create({
