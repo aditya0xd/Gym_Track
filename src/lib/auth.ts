@@ -19,6 +19,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        rememberMe: { label: "Remember me", type: "text" },
       },
       async authorize(credentials) {
         const email =
@@ -27,6 +28,7 @@ export const authOptions: NextAuthOptions = {
             : "";
         const password =
           typeof credentials?.password === "string" ? credentials.password : "";
+        const rememberMe = credentials?.rememberMe === "true";
 
         if (!email || !password) {
           return null;
@@ -43,6 +45,7 @@ export const authOptions: NextAuthOptions = {
             name: superUser.name,
             email: superUser.email,
             role: "superadmin" as const,
+            rememberMe,
           };
         }
 
@@ -55,6 +58,7 @@ export const authOptions: NextAuthOptions = {
           name: owner.name,
           email: owner.email,
           role: "gym_owner" as const,
+          rememberMe,
         };
       },
     }),
@@ -63,6 +67,10 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role === "superadmin" ? "superadmin" : "gym_owner";
+        token.rememberMe = Boolean(user.rememberMe);
+        const nowInSeconds = Math.floor(Date.now() / 1000);
+        const maxAge = token.rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
+        token.exp = nowInSeconds + maxAge;
       }
       return token;
     },
