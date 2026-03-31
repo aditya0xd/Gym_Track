@@ -208,6 +208,7 @@ export type AdminUserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   members?: Prisma.MemberListRelationFilter
   durationPrices?: Prisma.GymOwnerDurationPriceListRelationFilter
+  billingInvoices?: Prisma.OwnerBillingInvoiceListRelationFilter
 }
 
 export type AdminUserOrderByWithRelationInput = {
@@ -221,6 +222,7 @@ export type AdminUserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   members?: Prisma.MemberOrderByRelationAggregateInput
   durationPrices?: Prisma.GymOwnerDurationPriceOrderByRelationAggregateInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceOrderByRelationAggregateInput
 }
 
 export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
@@ -237,6 +239,7 @@ export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   members?: Prisma.MemberListRelationFilter
   durationPrices?: Prisma.GymOwnerDurationPriceListRelationFilter
+  billingInvoices?: Prisma.OwnerBillingInvoiceListRelationFilter
 }, "id" | "email">
 
 export type AdminUserOrderByWithAggregationInput = {
@@ -278,6 +281,7 @@ export type AdminUserCreateInput = {
   updatedAt?: Date | string
   members?: Prisma.MemberCreateNestedManyWithoutAdminUserInput
   durationPrices?: Prisma.GymOwnerDurationPriceCreateNestedManyWithoutAdminUserInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceCreateNestedManyWithoutAdminUserInput
 }
 
 export type AdminUserUncheckedCreateInput = {
@@ -291,6 +295,7 @@ export type AdminUserUncheckedCreateInput = {
   updatedAt?: Date | string
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutAdminUserInput
   durationPrices?: Prisma.GymOwnerDurationPriceUncheckedCreateNestedManyWithoutAdminUserInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type AdminUserUpdateInput = {
@@ -304,6 +309,7 @@ export type AdminUserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUpdateManyWithoutAdminUserNestedInput
   durationPrices?: Prisma.GymOwnerDurationPriceUpdateManyWithoutAdminUserNestedInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUpdateManyWithoutAdminUserNestedInput
 }
 
 export type AdminUserUncheckedUpdateInput = {
@@ -317,6 +323,7 @@ export type AdminUserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUncheckedUpdateManyWithoutAdminUserNestedInput
   durationPrices?: Prisma.GymOwnerDurationPriceUncheckedUpdateManyWithoutAdminUserNestedInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type AdminUserCreateManyInput = {
@@ -426,6 +433,20 @@ export type AdminUserUpdateOneRequiredWithoutDurationPricesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutDurationPricesInput, Prisma.AdminUserUpdateWithoutDurationPricesInput>, Prisma.AdminUserUncheckedUpdateWithoutDurationPricesInput>
 }
 
+export type AdminUserCreateNestedOneWithoutBillingInvoicesInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutBillingInvoicesInput, Prisma.AdminUserUncheckedCreateWithoutBillingInvoicesInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutBillingInvoicesInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+}
+
+export type AdminUserUpdateOneRequiredWithoutBillingInvoicesNestedInput = {
+  create?: Prisma.XOR<Prisma.AdminUserCreateWithoutBillingInvoicesInput, Prisma.AdminUserUncheckedCreateWithoutBillingInvoicesInput>
+  connectOrCreate?: Prisma.AdminUserCreateOrConnectWithoutBillingInvoicesInput
+  upsert?: Prisma.AdminUserUpsertWithoutBillingInvoicesInput
+  connect?: Prisma.AdminUserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AdminUserUpdateToOneWithWhereWithoutBillingInvoicesInput, Prisma.AdminUserUpdateWithoutBillingInvoicesInput>, Prisma.AdminUserUncheckedUpdateWithoutBillingInvoicesInput>
+}
+
 export type AdminUserCreateWithoutMembersInput = {
   id?: string
   name: string
@@ -436,6 +457,7 @@ export type AdminUserCreateWithoutMembersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   durationPrices?: Prisma.GymOwnerDurationPriceCreateNestedManyWithoutAdminUserInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceCreateNestedManyWithoutAdminUserInput
 }
 
 export type AdminUserUncheckedCreateWithoutMembersInput = {
@@ -448,6 +470,7 @@ export type AdminUserUncheckedCreateWithoutMembersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   durationPrices?: Prisma.GymOwnerDurationPriceUncheckedCreateNestedManyWithoutAdminUserInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type AdminUserCreateOrConnectWithoutMembersInput = {
@@ -476,6 +499,7 @@ export type AdminUserUpdateWithoutMembersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   durationPrices?: Prisma.GymOwnerDurationPriceUpdateManyWithoutAdminUserNestedInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUpdateManyWithoutAdminUserNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutMembersInput = {
@@ -488,6 +512,7 @@ export type AdminUserUncheckedUpdateWithoutMembersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   durationPrices?: Prisma.GymOwnerDurationPriceUncheckedUpdateManyWithoutAdminUserNestedInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 export type AdminUserCreateWithoutDurationPricesInput = {
@@ -500,6 +525,7 @@ export type AdminUserCreateWithoutDurationPricesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.MemberCreateNestedManyWithoutAdminUserInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceCreateNestedManyWithoutAdminUserInput
 }
 
 export type AdminUserUncheckedCreateWithoutDurationPricesInput = {
@@ -512,6 +538,7 @@ export type AdminUserUncheckedCreateWithoutDurationPricesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutAdminUserInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUncheckedCreateNestedManyWithoutAdminUserInput
 }
 
 export type AdminUserCreateOrConnectWithoutDurationPricesInput = {
@@ -540,6 +567,7 @@ export type AdminUserUpdateWithoutDurationPricesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUpdateManyWithoutAdminUserNestedInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUpdateManyWithoutAdminUserNestedInput
 }
 
 export type AdminUserUncheckedUpdateWithoutDurationPricesInput = {
@@ -552,6 +580,75 @@ export type AdminUserUncheckedUpdateWithoutDurationPricesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUncheckedUpdateManyWithoutAdminUserNestedInput
+  billingInvoices?: Prisma.OwnerBillingInvoiceUncheckedUpdateManyWithoutAdminUserNestedInput
+}
+
+export type AdminUserCreateWithoutBillingInvoicesInput = {
+  id?: string
+  name: string
+  email: string
+  passwordHash: string
+  subscriptionPlan?: $Enums.OwnerSubscriptionPlan
+  trialEndsAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.MemberCreateNestedManyWithoutAdminUserInput
+  durationPrices?: Prisma.GymOwnerDurationPriceCreateNestedManyWithoutAdminUserInput
+}
+
+export type AdminUserUncheckedCreateWithoutBillingInvoicesInput = {
+  id?: string
+  name: string
+  email: string
+  passwordHash: string
+  subscriptionPlan?: $Enums.OwnerSubscriptionPlan
+  trialEndsAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.MemberUncheckedCreateNestedManyWithoutAdminUserInput
+  durationPrices?: Prisma.GymOwnerDurationPriceUncheckedCreateNestedManyWithoutAdminUserInput
+}
+
+export type AdminUserCreateOrConnectWithoutBillingInvoicesInput = {
+  where: Prisma.AdminUserWhereUniqueInput
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutBillingInvoicesInput, Prisma.AdminUserUncheckedCreateWithoutBillingInvoicesInput>
+}
+
+export type AdminUserUpsertWithoutBillingInvoicesInput = {
+  update: Prisma.XOR<Prisma.AdminUserUpdateWithoutBillingInvoicesInput, Prisma.AdminUserUncheckedUpdateWithoutBillingInvoicesInput>
+  create: Prisma.XOR<Prisma.AdminUserCreateWithoutBillingInvoicesInput, Prisma.AdminUserUncheckedCreateWithoutBillingInvoicesInput>
+  where?: Prisma.AdminUserWhereInput
+}
+
+export type AdminUserUpdateToOneWithWhereWithoutBillingInvoicesInput = {
+  where?: Prisma.AdminUserWhereInput
+  data: Prisma.XOR<Prisma.AdminUserUpdateWithoutBillingInvoicesInput, Prisma.AdminUserUncheckedUpdateWithoutBillingInvoicesInput>
+}
+
+export type AdminUserUpdateWithoutBillingInvoicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.MemberUpdateManyWithoutAdminUserNestedInput
+  durationPrices?: Prisma.GymOwnerDurationPriceUpdateManyWithoutAdminUserNestedInput
+}
+
+export type AdminUserUncheckedUpdateWithoutBillingInvoicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.MemberUncheckedUpdateManyWithoutAdminUserNestedInput
+  durationPrices?: Prisma.GymOwnerDurationPriceUncheckedUpdateManyWithoutAdminUserNestedInput
 }
 
 
@@ -562,11 +659,13 @@ export type AdminUserUncheckedUpdateWithoutDurationPricesInput = {
 export type AdminUserCountOutputType = {
   members: number
   durationPrices: number
+  billingInvoices: number
 }
 
 export type AdminUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | AdminUserCountOutputTypeCountMembersArgs
   durationPrices?: boolean | AdminUserCountOutputTypeCountDurationPricesArgs
+  billingInvoices?: boolean | AdminUserCountOutputTypeCountBillingInvoicesArgs
 }
 
 /**
@@ -593,6 +692,13 @@ export type AdminUserCountOutputTypeCountDurationPricesArgs<ExtArgs extends runt
   where?: Prisma.GymOwnerDurationPriceWhereInput
 }
 
+/**
+ * AdminUserCountOutputType without action
+ */
+export type AdminUserCountOutputTypeCountBillingInvoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OwnerBillingInvoiceWhereInput
+}
+
 
 export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -605,6 +711,7 @@ export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   updatedAt?: boolean
   members?: boolean | Prisma.AdminUser$membersArgs<ExtArgs>
   durationPrices?: boolean | Prisma.AdminUser$durationPricesArgs<ExtArgs>
+  billingInvoices?: boolean | Prisma.AdminUser$billingInvoicesArgs<ExtArgs>
   _count?: boolean | Prisma.AdminUserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["adminUser"]>
 
@@ -645,6 +752,7 @@ export type AdminUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type AdminUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.AdminUser$membersArgs<ExtArgs>
   durationPrices?: boolean | Prisma.AdminUser$durationPricesArgs<ExtArgs>
+  billingInvoices?: boolean | Prisma.AdminUser$billingInvoicesArgs<ExtArgs>
   _count?: boolean | Prisma.AdminUserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AdminUserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -655,6 +763,7 @@ export type $AdminUserPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     members: Prisma.$MemberPayload<ExtArgs>[]
     durationPrices: Prisma.$GymOwnerDurationPricePayload<ExtArgs>[]
+    billingInvoices: Prisma.$OwnerBillingInvoicePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1061,6 +1170,7 @@ export interface Prisma__AdminUserClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   members<T extends Prisma.AdminUser$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   durationPrices<T extends Prisma.AdminUser$durationPricesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$durationPricesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GymOwnerDurationPricePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  billingInvoices<T extends Prisma.AdminUser$billingInvoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUser$billingInvoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OwnerBillingInvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1536,6 +1646,30 @@ export type AdminUser$durationPricesArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.GymOwnerDurationPriceScalarFieldEnum | Prisma.GymOwnerDurationPriceScalarFieldEnum[]
+}
+
+/**
+ * AdminUser.billingInvoices
+ */
+export type AdminUser$billingInvoicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OwnerBillingInvoice
+   */
+  select?: Prisma.OwnerBillingInvoiceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OwnerBillingInvoice
+   */
+  omit?: Prisma.OwnerBillingInvoiceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OwnerBillingInvoiceInclude<ExtArgs> | null
+  where?: Prisma.OwnerBillingInvoiceWhereInput
+  orderBy?: Prisma.OwnerBillingInvoiceOrderByWithRelationInput | Prisma.OwnerBillingInvoiceOrderByWithRelationInput[]
+  cursor?: Prisma.OwnerBillingInvoiceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OwnerBillingInvoiceScalarFieldEnum | Prisma.OwnerBillingInvoiceScalarFieldEnum[]
 }
 
 /**

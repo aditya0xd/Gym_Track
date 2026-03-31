@@ -55,7 +55,9 @@ export const ModelName = {
   ReminderLog: 'ReminderLog',
   AdminUser: 'AdminUser',
   SuperAdminUser: 'SuperAdminUser',
-  GymOwnerDurationPrice: 'GymOwnerDurationPrice'
+  GymOwnerDurationPrice: 'GymOwnerDurationPrice',
+  PlatformPlanPrice: 'PlatformPlanPrice',
+  OwnerBillingInvoice: 'OwnerBillingInvoice'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -141,6 +143,31 @@ export const GymOwnerDurationPriceScalarFieldEnum = {
 } as const
 
 export type GymOwnerDurationPriceScalarFieldEnum = (typeof GymOwnerDurationPriceScalarFieldEnum)[keyof typeof GymOwnerDurationPriceScalarFieldEnum]
+
+
+export const PlatformPlanPriceScalarFieldEnum = {
+  id: 'id',
+  plan: 'plan',
+  priceInr: 'priceInr',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlatformPlanPriceScalarFieldEnum = (typeof PlatformPlanPriceScalarFieldEnum)[keyof typeof PlatformPlanPriceScalarFieldEnum]
+
+
+export const OwnerBillingInvoiceScalarFieldEnum = {
+  id: 'id',
+  adminUserId: 'adminUserId',
+  plan: 'plan',
+  amountInr: 'amountInr',
+  status: 'status',
+  dueDate: 'dueDate',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt'
+} as const
+
+export type OwnerBillingInvoiceScalarFieldEnum = (typeof OwnerBillingInvoiceScalarFieldEnum)[keyof typeof OwnerBillingInvoiceScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -14,6 +14,7 @@ const links = [
   { href: "/owner/members/new", label: "Enroll member" },
   { href: "/owner/pricing", label: "Pricing (INR)" },
   { href: "/owner/analytics", label: "Analytics" },
+  { href: "/owner/manage-plan", label: "Manage plan" },
 ];
 
 function navLinkClass(active: boolean, mobile = false) {
