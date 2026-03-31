@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { MembersDataTable } from "@/components/gym-owner/MembersDataTable";
+import { MembersExplorerPanel } from "@/components/gym-owner/MembersExplorerPanel";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { PageShell } from "@/components/shared/PageShell";
 import { Button } from "@/components/ui/button";
@@ -13,37 +13,52 @@ export const metadata = {
   title: "Members | Gym owner",
 };
 
-export default async function OwnerMembersPage() {
+export default async function OwnerMembersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || session.user.role !== "gym_owner") {
     redirect("/login");
   }
 
   const members = await listMembersForOwner(session.user.id);
-  const rows = members.map((m) => ({
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const in7Days = new Date(today);
+  in7Days.setUTCDate(in7Days.getUTCDate() + 7);
+
+  const params = await searchParams;
+  const status = (params.status ?? "all").toLowerCase();
+  const filteredMembers = members.filter((m) => {
+    if (status === "active") return m.endDate >= today;
+    if (status === "expiring") return m.endDate >= today && m.endDate <= in7Days;
+    if (status === "expired") return m.endDate < today;
+    return true;
+  });
+
+  const explorerMembers = filteredMembers.map((m) => ({
     id: m.id,
     fullName: m.fullName,
-    email: m.email,
     phone: m.phone,
     billingDuration: m.billingDuration,
     planPrice: m.planPrice.toString(),
-    startDate: m.startDate.toISOString().slice(0, 10),
     endDate: m.endDate.toISOString().slice(0, 10),
-    whatsappEnabled: m.whatsappEnabled,
   }));
 
   return (
     <PageShell className="pb-20 md:pb-6">
       <PageHeader
         title="Members"
-        description={`Signed in as ${session.user.email ?? ""}`}
+        description={`Filter: ${status} · Signed in as ${session.user.email ?? ""}`}
         actions={
           <Button asChild>
             <Link href="/owner/members/new">Enroll member</Link>
           </Button>
         }
       />
-      <MembersDataTable members={rows} />
+      <MembersExplorerPanel members={explorerMembers} />
     </PageShell>
   );
 }
