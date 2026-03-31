@@ -27,3 +27,18 @@ export type Member = Prisma.MemberModel
  * 
  */
 export type ReminderLog = Prisma.ReminderLogModel
+/**
+ * Model AdminUser
+ * Gym owner (tenant)
+ */
+export type AdminUser = Prisma.AdminUserModel
+/**
+ * Model SuperAdminUser
+ * Platform operator
+ */
+export type SuperAdminUser = Prisma.SuperAdminUserModel
+/**
+ * Model GymOwnerDurationPrice
+ * INR list prices per duration — set by each gym owner
+ */
+export type GymOwnerDurationPrice = Prisma.GymOwnerDurationPriceModel

@@ -9,13 +9,23 @@
 * 🟢 You can import this file directly.
 */
 
-export const PlanType = {
-  MONTHLY: 'MONTHLY',
-  QUARTERLY: 'QUARTERLY',
-  ANNUAL: 'ANNUAL'
+export const OwnerSubscriptionPlan = {
+  TRIAL: 'TRIAL',
+  STARTER: 'STARTER',
+  PRO: 'PRO'
 } as const
 
-export type PlanType = (typeof PlanType)[keyof typeof PlanType]
+export type OwnerSubscriptionPlan = (typeof OwnerSubscriptionPlan)[keyof typeof OwnerSubscriptionPlan]
+
+
+export const MemberBillingDuration = {
+  ONE_MONTH: 'ONE_MONTH',
+  THREE_MONTHS: 'THREE_MONTHS',
+  SIX_MONTHS: 'SIX_MONTHS',
+  TWELVE_MONTHS: 'TWELVE_MONTHS'
+} as const
+
+export type MemberBillingDuration = (typeof MemberBillingDuration)[keyof typeof MemberBillingDuration]
 
 
 export const Channel = {
