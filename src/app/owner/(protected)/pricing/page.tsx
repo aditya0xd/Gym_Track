@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { DurationPricingForm } from "@/components/gym-owner/DurationPricingForm";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { PageShell } from "@/components/shared/PageShell";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {
@@ -16,12 +17,12 @@ export default async function OwnerPricingPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-6">
+    <PageShell>
       <PageHeader
         title="Membership prices (INR)"
         description="Per duration list prices used when enrolling members."
       />
       <DurationPricingForm />
-    </div>
+    </PageShell>
   );
 }

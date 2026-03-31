@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { GymOwnersAdminPanel } from "@/components/superadmin/GymOwnersAdminPanel";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { PageShell } from "@/components/shared/PageShell";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {
@@ -16,12 +17,12 @@ export default async function SuperAdminGymOwnersPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-6">
+    <PageShell>
       <PageHeader
         title="Gym owners"
         description="Subscription: trial, starter, or pro. Adjust trial end for extensions."
       />
       <GymOwnersAdminPanel />
-    </div>
+    </PageShell>
   );
 }

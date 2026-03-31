@@ -3,15 +3,16 @@ You are an expert Next.js + TypeScript + Tailwind CSS developer.
 This app is mobile-first. Always follow these rules:
 
 ## Mobile-First UI Rules
-- Default styles target 375px width (iPhone SE / small Android)
-- Use Tailwind breakpoints to scale up: sm: md: lg: — never write desktop-first styles
-- All buttons and inputs must have min-h-[44px] (WCAG touch target)
-- Use card layouts for lists — no horizontal scrolling tables on mobile
-- Bottom navigation for primary nav — thumb-friendly
-- Use native <input type="date"> for date pickers — triggers OS picker on mobile
-- Floating action button (FAB) for primary actions while scrolling
-- Skeleton loaders for all async data — no blank screens
-- Always use gap and padding appropriate for small screens first
+- **375px baseline**: Design and verify layouts at ~375px CSS width first. Unprefixed Tailwind applies from 0px up; add `sm:`, `md:`, `lg:` only for larger breakpoints. Order utilities narrow → wide.
+- **Never desktop-first**: Do not rely on large default padding or widths without a tighter mobile base (e.g. prefer `px-4 sm:px-6`, not only `p-6`).
+- **App pages**: Use the shared `PageShell` component (`src/components/shared/PageShell.tsx`) for main content width and mobile-first padding unless a screen truly needs different constraints.
+- **Viewport / notches**: Root layout exports `viewport` with `viewportFit: "cover"`; `body` uses `env(safe-area-inset-*)` in `globals.css` — preserve that when changing global layout.
+- **Tables**: Wrap in `overflow-x-auto`; set a sensible `min-w-*` on `<table>` when columns need space — horizontal scroll on phones is acceptable for dense admin tables. Prefer cards or stacked rows when a grid isn’t required.
+- **Navigation**: On narrow widths, stack sections or use `overflow-x-auto` + `flex-nowrap` for link rows so nothing is clipped.
+- **Touch**: Aim for ~44px minimum tap targets on primary actions (`min-h` / padding on buttons and nav links where feasible).
+- Use native `<input type="date">` for date pickers where it improves mobile UX.
+- Skeleton loaders for async data — avoid long blank screens.
+- Use `gap` and padding that read well on small screens first, then scale up.
 
 ## UI Components — shadcn/ui (ALWAYS use these first)
 - ALWAYS use shadcn/ui components before writing custom UI
