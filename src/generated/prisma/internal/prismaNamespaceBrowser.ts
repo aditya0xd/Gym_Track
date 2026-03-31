@@ -52,7 +52,10 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Member: 'Member',
-  ReminderLog: 'ReminderLog'
+  ReminderLog: 'ReminderLog',
+  AdminUser: 'AdminUser',
+  SuperAdminUser: 'SuperAdminUser',
+  GymOwnerDurationPrice: 'GymOwnerDurationPrice'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -76,11 +79,12 @@ export const MemberScalarFieldEnum = {
   fullName: 'fullName',
   email: 'email',
   phone: 'phone',
-  planType: 'planType',
+  billingDuration: 'billingDuration',
   planPrice: 'planPrice',
   startDate: 'startDate',
   endDate: 'endDate',
   whatsappEnabled: 'whatsappEnabled',
+  adminUserId: 'adminUserId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -98,6 +102,42 @@ export const ReminderLogScalarFieldEnum = {
 } as const
 
 export type ReminderLogScalarFieldEnum = (typeof ReminderLogScalarFieldEnum)[keyof typeof ReminderLogScalarFieldEnum]
+
+
+export const AdminUserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  subscriptionPlan: 'subscriptionPlan',
+  trialEndsAt: 'trialEndsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminUserScalarFieldEnum = (typeof AdminUserScalarFieldEnum)[keyof typeof AdminUserScalarFieldEnum]
+
+
+export const SuperAdminUserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SuperAdminUserScalarFieldEnum = (typeof SuperAdminUserScalarFieldEnum)[keyof typeof SuperAdminUserScalarFieldEnum]
+
+
+export const GymOwnerDurationPriceScalarFieldEnum = {
+  id: 'id',
+  adminUserId: 'adminUserId',
+  duration: 'duration',
+  priceInr: 'priceInr'
+} as const
+
+export type GymOwnerDurationPriceScalarFieldEnum = (typeof GymOwnerDurationPriceScalarFieldEnum)[keyof typeof GymOwnerDurationPriceScalarFieldEnum]
 
 
 export const SortOrder = {

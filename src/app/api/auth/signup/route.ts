@@ -1,0 +1,58 @@
+import { NextResponse } from "next/server";
+import { hash } from "bcryptjs";
+
+import { prisma } from "@/lib/prisma";
+
+type SignupPayload = {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+};
+
+export async function POST(request: Request) {
+  const body = (await request.json()) as SignupPayload;
+
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  const email = typeof body.email === "string" ? body.email.toLowerCase().trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  const confirmPassword =
+    typeof body.confirmPassword === "string" ? body.confirmPassword : "";
+
+  if (!name || !email || !password || !confirmPassword) {
+    return NextResponse.json(
+      { message: "All fields are required." },
+      { status: 400 },
+    );
+  }
+
+  if (password.length < 8) {
+    return NextResponse.json(
+      { message: "Password must be at least 8 characters long." },
+      { status: 400 },
+    );
+  }
+
+  if (password !== confirmPassword) {
+    return NextResponse.json({ message: "Passwords do not match." }, { status: 400 });
+  }
+
+  const existingUser = await prisma.adminUser.findUnique({ where: { email } });
+  if (existingUser) {
+    return NextResponse.json(
+      { message: "An account with this email already exists." },
+      { status: 409 },
+    );
+  }
+
+  const passwordHash = await hash(password, 12);
+  await prisma.adminUser.create({
+    data: {
+      name,
+      email,
+      passwordHash,
+    },
+  });
+
+  return NextResponse.json({ message: "Account created successfully." }, { status: 201 });
+}

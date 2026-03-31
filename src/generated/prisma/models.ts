@@ -10,4 +10,7 @@
  */
 export type * from './models/Member'
 export type * from './models/ReminderLog'
+export type * from './models/AdminUser'
+export type * from './models/SuperAdminUser'
+export type * from './models/GymOwnerDurationPrice'
 export type * from './commonInputTypes'

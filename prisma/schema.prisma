@@ -8,20 +8,23 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model Member {
-  id               String        @id @default(uuid())
+  id               String               @id @default(uuid())
   fullName         String
-  email            String?       @unique
+  email            String?              @unique
   phone            String
-  planType         PlanType
-  planPrice        Decimal       @db.Decimal(10, 2)
-  startDate        DateTime      @db.Date
-  endDate          DateTime      @db.Date
-  whatsappEnabled  Boolean       @default(true)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  billingDuration  MemberBillingDuration
+  planPrice        Decimal              @db.Decimal(10, 2)
+  startDate        DateTime             @db.Date
+  endDate          DateTime             @db.Date
+  whatsappEnabled  Boolean              @default(true)
+  adminUserId      String
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  adminUser        AdminUser            @relation(fields: [adminUserId], references: [id])
   reminders        ReminderLog[]
+
+  @@index([adminUserId])
 }
 
 model ReminderLog {
@@ -34,10 +37,53 @@ model ReminderLog {
   message   String
 }
 
-enum PlanType {
-  MONTHLY
-  QUARTERLY
-  ANNUAL
+/// Gym owner (tenant)
+model AdminUser {
+  id               String                  @id @default(uuid())
+  name             String
+  email            String                  @unique
+  passwordHash     String
+  subscriptionPlan OwnerSubscriptionPlan   @default(TRIAL)
+  trialEndsAt      DateTime?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  members          Member[]
+  durationPrices   GymOwnerDurationPrice[]
+}
+
+/// Platform operator
+model SuperAdminUser {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/// INR list prices per duration — set by each gym owner
+model GymOwnerDurationPrice {
+  id          String               @id @default(uuid())
+  adminUserId String
+  duration    MemberBillingDuration
+  priceInr    Decimal              @db.Decimal(10, 2)
+  adminUser   AdminUser            @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@unique([adminUserId, duration])
+  @@index([adminUserId])
+}
+
+enum OwnerSubscriptionPlan {
+  TRIAL
+  STARTER
+  PRO
+}
+
+enum MemberBillingDuration {
+  ONE_MONTH
+  THREE_MONTHS
+  SIX_MONTHS
+  TWELVE_MONTHS
 }
 
 enum Channel {

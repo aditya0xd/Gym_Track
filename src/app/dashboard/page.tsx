@@ -1,19 +1,18 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 
-import { verifyAccessToken } from "@/lib/jwt";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("gym_access_token")?.value;
-  const payload = await verifyAccessToken(accessToken);
+  const session = await getServerSession(authOptions);
 
-  if (!payload) {
+  if (!session?.user?.email || !session.user.id) {
     redirect("/login");
   }
 
   const members = await prisma.member.findMany({
+    where: { adminUserId: session.user.id },
     take: 20,
     orderBy: { startDate: "desc" },
     select: {
@@ -34,7 +33,7 @@ export default async function DashboardPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-100">Dashboard</h1>
         <p className="mt-1 text-sm text-slate-300">
-          Signed in as <span className="font-medium">{payload.email}</span>
+          Signed in as <span className="font-medium">{session.user.email}</span>
         </p>
       </div>
 

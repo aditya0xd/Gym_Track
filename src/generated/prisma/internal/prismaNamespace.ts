@@ -385,7 +385,10 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Member: 'Member',
-  ReminderLog: 'ReminderLog'
+  ReminderLog: 'ReminderLog',
+  AdminUser: 'AdminUser',
+  SuperAdminUser: 'SuperAdminUser',
+  GymOwnerDurationPrice: 'GymOwnerDurationPrice'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -401,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "member" | "reminderLog"
+    modelProps: "member" | "reminderLog" | "adminUser" | "superAdminUser" | "gymOwnerDurationPrice"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -553,6 +556,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdminUser: {
+      payload: Prisma.$AdminUserPayload<ExtArgs>
+      fields: Prisma.AdminUserFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminUserFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminUserFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminUserFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminUserFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>
+        }
+        findMany: {
+          args: Prisma.AdminUserFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>[]
+        }
+        create: {
+          args: Prisma.AdminUserCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>
+        }
+        createMany: {
+          args: Prisma.AdminUserCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminUserCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminUserDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>
+        }
+        update: {
+          args: Prisma.AdminUserUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminUserDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminUserUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminUserUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminUserUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminUserPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminUserAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminUser>
+        }
+        groupBy: {
+          args: Prisma.AdminUserGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminUserGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminUserCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminUserCountAggregateOutputType> | number
+        }
+      }
+    }
+    SuperAdminUser: {
+      payload: Prisma.$SuperAdminUserPayload<ExtArgs>
+      fields: Prisma.SuperAdminUserFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SuperAdminUserFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SuperAdminUserFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>
+        }
+        findFirst: {
+          args: Prisma.SuperAdminUserFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SuperAdminUserFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>
+        }
+        findMany: {
+          args: Prisma.SuperAdminUserFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>[]
+        }
+        create: {
+          args: Prisma.SuperAdminUserCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>
+        }
+        createMany: {
+          args: Prisma.SuperAdminUserCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SuperAdminUserCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>[]
+        }
+        delete: {
+          args: Prisma.SuperAdminUserDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>
+        }
+        update: {
+          args: Prisma.SuperAdminUserUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>
+        }
+        deleteMany: {
+          args: Prisma.SuperAdminUserDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SuperAdminUserUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SuperAdminUserUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>[]
+        }
+        upsert: {
+          args: Prisma.SuperAdminUserUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuperAdminUserPayload>
+        }
+        aggregate: {
+          args: Prisma.SuperAdminUserAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSuperAdminUser>
+        }
+        groupBy: {
+          args: Prisma.SuperAdminUserGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SuperAdminUserGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SuperAdminUserCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SuperAdminUserCountAggregateOutputType> | number
+        }
+      }
+    }
+    GymOwnerDurationPrice: {
+      payload: Prisma.$GymOwnerDurationPricePayload<ExtArgs>
+      fields: Prisma.GymOwnerDurationPriceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GymOwnerDurationPriceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GymOwnerDurationPriceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>
+        }
+        findFirst: {
+          args: Prisma.GymOwnerDurationPriceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GymOwnerDurationPriceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>
+        }
+        findMany: {
+          args: Prisma.GymOwnerDurationPriceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>[]
+        }
+        create: {
+          args: Prisma.GymOwnerDurationPriceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>
+        }
+        createMany: {
+          args: Prisma.GymOwnerDurationPriceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GymOwnerDurationPriceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>[]
+        }
+        delete: {
+          args: Prisma.GymOwnerDurationPriceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>
+        }
+        update: {
+          args: Prisma.GymOwnerDurationPriceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>
+        }
+        deleteMany: {
+          args: Prisma.GymOwnerDurationPriceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GymOwnerDurationPriceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GymOwnerDurationPriceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>[]
+        }
+        upsert: {
+          args: Prisma.GymOwnerDurationPriceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GymOwnerDurationPricePayload>
+        }
+        aggregate: {
+          args: Prisma.GymOwnerDurationPriceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGymOwnerDurationPrice>
+        }
+        groupBy: {
+          args: Prisma.GymOwnerDurationPriceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GymOwnerDurationPriceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GymOwnerDurationPriceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GymOwnerDurationPriceCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -597,11 +822,12 @@ export const MemberScalarFieldEnum = {
   fullName: 'fullName',
   email: 'email',
   phone: 'phone',
-  planType: 'planType',
+  billingDuration: 'billingDuration',
   planPrice: 'planPrice',
   startDate: 'startDate',
   endDate: 'endDate',
   whatsappEnabled: 'whatsappEnabled',
+  adminUserId: 'adminUserId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -619,6 +845,42 @@ export const ReminderLogScalarFieldEnum = {
 } as const
 
 export type ReminderLogScalarFieldEnum = (typeof ReminderLogScalarFieldEnum)[keyof typeof ReminderLogScalarFieldEnum]
+
+
+export const AdminUserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  subscriptionPlan: 'subscriptionPlan',
+  trialEndsAt: 'trialEndsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminUserScalarFieldEnum = (typeof AdminUserScalarFieldEnum)[keyof typeof AdminUserScalarFieldEnum]
+
+
+export const SuperAdminUserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SuperAdminUserScalarFieldEnum = (typeof SuperAdminUserScalarFieldEnum)[keyof typeof SuperAdminUserScalarFieldEnum]
+
+
+export const GymOwnerDurationPriceScalarFieldEnum = {
+  id: 'id',
+  adminUserId: 'adminUserId',
+  duration: 'duration',
+  priceInr: 'priceInr'
+} as const
+
+export type GymOwnerDurationPriceScalarFieldEnum = (typeof GymOwnerDurationPriceScalarFieldEnum)[keyof typeof GymOwnerDurationPriceScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -666,16 +928,16 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'PlanType'
+ * Reference to a field of type 'MemberBillingDuration'
  */
-export type EnumPlanTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanType'>
+export type EnumMemberBillingDurationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberBillingDuration'>
     
 
 
 /**
- * Reference to a field of type 'PlanType[]'
+ * Reference to a field of type 'MemberBillingDuration[]'
  */
-export type ListEnumPlanTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanType[]'>
+export type ListEnumMemberBillingDurationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberBillingDuration[]'>
     
 
 
@@ -739,6 +1001,20 @@ export type EnumReminderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'ReminderStatus[]'
  */
 export type ListEnumReminderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReminderStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'OwnerSubscriptionPlan'
+ */
+export type EnumOwnerSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OwnerSubscriptionPlan'>
+    
+
+
+/**
+ * Reference to a field of type 'OwnerSubscriptionPlan[]'
+ */
+export type ListEnumOwnerSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OwnerSubscriptionPlan[]'>
     
 
 
@@ -852,6 +1128,9 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   member?: Prisma.MemberOmit
   reminderLog?: Prisma.ReminderLogOmit
+  adminUser?: Prisma.AdminUserOmit
+  superAdminUser?: Prisma.SuperAdminUserOmit
+  gymOwnerDurationPrice?: Prisma.GymOwnerDurationPriceOmit
 }
 
 /* Types for Logging */
