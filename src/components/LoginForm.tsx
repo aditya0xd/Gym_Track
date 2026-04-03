@@ -77,7 +77,9 @@ export default function LoginForm({ className }: LoginFormProps) {
     const formData = new FormData(event.currentTarget);
     const payload = {
       name: String(formData.get("name") ?? "").trim(),
-      email: String(formData.get("email") ?? "").toLowerCase().trim(),
+      email: String(formData.get("email") ?? "")
+        .toLowerCase()
+        .trim(),
       password: String(formData.get("password") ?? ""),
       confirmPassword: String(formData.get("confirmPassword") ?? ""),
     };
@@ -239,13 +241,15 @@ export default function LoginForm({ className }: LoginFormProps) {
             </div>
 
             <Button type="submit" className="w-full" disabled={signupPending}>
-              {signupPending ? "Creating account..." : "Create gym owner account"}
+              {signupPending
+                ? "Creating account..."
+                : "Create gym owner account"}
             </Button>
           </form>
         )}
 
         <div className="flex flex-col gap-2 border-t border-border pt-4">
-          <Button
+          {/* <Button
             type="button"
             variant="secondary"
             className="w-full"
@@ -253,12 +257,13 @@ export default function LoginForm({ className }: LoginFormProps) {
             onClick={handleLogout}
           >
             {logoutPending ? "Logging out..." : "Logout"}
-          </Button>
+          </Button> */}
 
           <p className="text-center text-xs text-muted-foreground">
-            <Link href="/" className="text-foreground underline-offset-4 hover:underline">
+            demo email: seed-admin@gym.local, pass: GymPass123!
+            {/* <Link href="/" className="text-foreground underline-offset-4 hover:underline">
               Home
-            </Link>
+            </Link> */}
           </p>
         </div>
       </CardContent>
