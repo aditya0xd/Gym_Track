@@ -46,7 +46,10 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    await changeOwnerPlan(session.user.id, body.subscriptionPlan);
+    const result = await changeOwnerPlan(session.user.id, body.subscriptionPlan);
+    if (!result.changed) {
+      return NextResponse.json({ message: "You are already on this plan." });
+    }
     return NextResponse.json({ message: "Plan updated. Billing invoice created." });
   } catch (e) {
     if (e instanceof HttpError) {

@@ -46,6 +46,7 @@ export type OwnerBillingInvoiceMinAggregateOutputType = {
   razorpaySignature: string | null
   dueDate: Date | null
   paidAt: Date | null
+  deletedAt: Date | null
   createdAt: Date | null
 }
 
@@ -61,6 +62,7 @@ export type OwnerBillingInvoiceMaxAggregateOutputType = {
   razorpaySignature: string | null
   dueDate: Date | null
   paidAt: Date | null
+  deletedAt: Date | null
   createdAt: Date | null
 }
 
@@ -76,6 +78,7 @@ export type OwnerBillingInvoiceCountAggregateOutputType = {
   razorpaySignature: number
   dueDate: number
   paidAt: number
+  deletedAt: number
   createdAt: number
   _all: number
 }
@@ -101,6 +104,7 @@ export type OwnerBillingInvoiceMinAggregateInputType = {
   razorpaySignature?: true
   dueDate?: true
   paidAt?: true
+  deletedAt?: true
   createdAt?: true
 }
 
@@ -116,6 +120,7 @@ export type OwnerBillingInvoiceMaxAggregateInputType = {
   razorpaySignature?: true
   dueDate?: true
   paidAt?: true
+  deletedAt?: true
   createdAt?: true
 }
 
@@ -131,6 +136,7 @@ export type OwnerBillingInvoiceCountAggregateInputType = {
   razorpaySignature?: true
   dueDate?: true
   paidAt?: true
+  deletedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -233,6 +239,7 @@ export type OwnerBillingInvoiceGroupByOutputType = {
   razorpaySignature: string | null
   dueDate: Date
   paidAt: Date | null
+  deletedAt: Date | null
   createdAt: Date
   _count: OwnerBillingInvoiceCountAggregateOutputType | null
   _avg: OwnerBillingInvoiceAvgAggregateOutputType | null
@@ -271,6 +278,7 @@ export type OwnerBillingInvoiceWhereInput = {
   razorpaySignature?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
   dueDate?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   paidAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
 }
@@ -287,6 +295,7 @@ export type OwnerBillingInvoiceOrderByWithRelationInput = {
   razorpaySignature?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   adminUser?: Prisma.AdminUserOrderByWithRelationInput
 }
@@ -306,6 +315,7 @@ export type OwnerBillingInvoiceWhereUniqueInput = Prisma.AtLeast<{
   razorpaySignature?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
   dueDate?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   paidAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
 }, "id" | "razorpayOrderId">
@@ -322,6 +332,7 @@ export type OwnerBillingInvoiceOrderByWithAggregationInput = {
   razorpaySignature?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.OwnerBillingInvoiceCountOrderByAggregateInput
   _avg?: Prisma.OwnerBillingInvoiceAvgOrderByAggregateInput
@@ -345,6 +356,7 @@ export type OwnerBillingInvoiceScalarWhereWithAggregatesInput = {
   razorpaySignature?: Prisma.StringNullableWithAggregatesFilter<"OwnerBillingInvoice"> | string | null
   dueDate?: Prisma.DateTimeWithAggregatesFilter<"OwnerBillingInvoice"> | Date | string
   paidAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OwnerBillingInvoice"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OwnerBillingInvoice"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OwnerBillingInvoice"> | Date | string
 }
 
@@ -359,6 +371,7 @@ export type OwnerBillingInvoiceCreateInput = {
   razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   adminUser: Prisma.AdminUserCreateNestedOneWithoutBillingInvoicesInput
 }
@@ -375,6 +388,7 @@ export type OwnerBillingInvoiceUncheckedCreateInput = {
   razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -389,6 +403,7 @@ export type OwnerBillingInvoiceUpdateInput = {
   razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   adminUser?: Prisma.AdminUserUpdateOneRequiredWithoutBillingInvoicesNestedInput
 }
@@ -405,6 +420,7 @@ export type OwnerBillingInvoiceUncheckedUpdateInput = {
   razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -420,6 +436,7 @@ export type OwnerBillingInvoiceCreateManyInput = {
   razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -434,6 +451,7 @@ export type OwnerBillingInvoiceUpdateManyMutationInput = {
   razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -449,6 +467,7 @@ export type OwnerBillingInvoiceUncheckedUpdateManyInput = {
   razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -474,6 +493,7 @@ export type OwnerBillingInvoiceCountOrderByAggregateInput = {
   razorpaySignature?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -493,6 +513,7 @@ export type OwnerBillingInvoiceMaxOrderByAggregateInput = {
   razorpaySignature?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -508,6 +529,7 @@ export type OwnerBillingInvoiceMinOrderByAggregateInput = {
   razorpaySignature?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   paidAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -576,6 +598,7 @@ export type OwnerBillingInvoiceCreateWithoutAdminUserInput = {
   razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -590,6 +613,7 @@ export type OwnerBillingInvoiceUncheckedCreateWithoutAdminUserInput = {
   razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -634,6 +658,7 @@ export type OwnerBillingInvoiceScalarWhereInput = {
   razorpaySignature?: Prisma.StringNullableFilter<"OwnerBillingInvoice"> | string | null
   dueDate?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
   paidAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"OwnerBillingInvoice"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OwnerBillingInvoice"> | Date | string
 }
 
@@ -648,6 +673,7 @@ export type OwnerBillingInvoiceCreateManyAdminUserInput = {
   razorpaySignature?: string | null
   dueDate: Date | string
   paidAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -662,6 +688,7 @@ export type OwnerBillingInvoiceUpdateWithoutAdminUserInput = {
   razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -676,6 +703,7 @@ export type OwnerBillingInvoiceUncheckedUpdateWithoutAdminUserInput = {
   razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -690,6 +718,7 @@ export type OwnerBillingInvoiceUncheckedUpdateManyWithoutAdminUserInput = {
   razorpaySignature?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -707,6 +736,7 @@ export type OwnerBillingInvoiceSelect<ExtArgs extends runtime.Types.Extensions.I
   razorpaySignature?: boolean
   dueDate?: boolean
   paidAt?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ownerBillingInvoice"]>
@@ -723,6 +753,7 @@ export type OwnerBillingInvoiceSelectCreateManyAndReturn<ExtArgs extends runtime
   razorpaySignature?: boolean
   dueDate?: boolean
   paidAt?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ownerBillingInvoice"]>
@@ -739,6 +770,7 @@ export type OwnerBillingInvoiceSelectUpdateManyAndReturn<ExtArgs extends runtime
   razorpaySignature?: boolean
   dueDate?: boolean
   paidAt?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ownerBillingInvoice"]>
@@ -755,10 +787,11 @@ export type OwnerBillingInvoiceSelectScalar = {
   razorpaySignature?: boolean
   dueDate?: boolean
   paidAt?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
 }
 
-export type OwnerBillingInvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminUserId" | "plan" | "amountInr" | "status" | "provider" | "razorpayOrderId" | "razorpayPaymentId" | "razorpaySignature" | "dueDate" | "paidAt" | "createdAt", ExtArgs["result"]["ownerBillingInvoice"]>
+export type OwnerBillingInvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminUserId" | "plan" | "amountInr" | "status" | "provider" | "razorpayOrderId" | "razorpayPaymentId" | "razorpaySignature" | "dueDate" | "paidAt" | "deletedAt" | "createdAt", ExtArgs["result"]["ownerBillingInvoice"]>
 export type OwnerBillingInvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }
@@ -786,6 +819,7 @@ export type $OwnerBillingInvoicePayload<ExtArgs extends runtime.Types.Extensions
     razorpaySignature: string | null
     dueDate: Date
     paidAt: Date | null
+    deletedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["ownerBillingInvoice"]>
   composites: {}
@@ -1222,6 +1256,7 @@ export interface OwnerBillingInvoiceFieldRefs {
   readonly razorpaySignature: Prisma.FieldRef<"OwnerBillingInvoice", 'String'>
   readonly dueDate: Prisma.FieldRef<"OwnerBillingInvoice", 'DateTime'>
   readonly paidAt: Prisma.FieldRef<"OwnerBillingInvoice", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"OwnerBillingInvoice", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"OwnerBillingInvoice", 'DateTime'>
 }
     

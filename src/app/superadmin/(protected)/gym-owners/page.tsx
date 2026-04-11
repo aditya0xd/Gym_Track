@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { GymOwnersAdminPanel } from "@/components/superadmin/GymOwnersAdminPanel";
+import { PlanFeaturesAdminPanel } from "@/components/superadmin/PlanFeaturesAdminPanel";
 import { PlatformPricingAdminPanel } from "@/components/superadmin/PlatformPricingAdminPanel";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { PageShell } from "@/components/shared/PageShell";
@@ -25,6 +26,7 @@ export default async function SuperAdminGymOwnersPage() {
       />
       <div className="space-y-4">
         <PlatformPricingAdminPanel />
+        <PlanFeaturesAdminPanel />
         <GymOwnersAdminPanel />
       </div>
     </PageShell>

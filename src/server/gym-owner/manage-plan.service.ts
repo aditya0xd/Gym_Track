@@ -1,6 +1,7 @@
 import type { OwnerSubscriptionPlan } from "@/generated/prisma/client";
 import { HttpError } from "@/lib/http/errors";
 import { prisma } from "@/lib/prisma";
+import { activeOwnerWhere, ownerInvoiceScope } from "@/lib/tenant/scope";
 import { getPlatformPlanPriceMap } from "@/server/platform-pricing.service";
 
 function addDays(date: Date, days: number) {
@@ -11,14 +12,14 @@ function addDays(date: Date, days: number) {
 
 export async function getOwnerManagePlanData(adminUserId: string) {
   const owner = await prisma.adminUser.findUnique({
-    where: { id: adminUserId },
+    where: activeOwnerWhere(adminUserId),
     select: { id: true, subscriptionPlan: true, trialEndsAt: true },
   });
   if (!owner) throw new HttpError(404, "Gym owner not found.");
 
   const prices = await getPlatformPlanPriceMap();
   const invoices = await prisma.ownerBillingInvoice.findMany({
-    where: { adminUserId },
+    where: ownerInvoiceScope(adminUserId),
     orderBy: { createdAt: "desc" },
     take: 20,
     select: {
@@ -42,10 +43,14 @@ export async function getOwnerManagePlanData(adminUserId: string) {
 
 export async function changeOwnerPlan(adminUserId: string, nextPlan: OwnerSubscriptionPlan) {
   const owner = await prisma.adminUser.findUnique({
-    where: { id: adminUserId },
+    where: activeOwnerWhere(adminUserId),
     select: { id: true, subscriptionPlan: true },
   });
   if (!owner) throw new HttpError(404, "Gym owner not found.");
+
+  if (owner.subscriptionPlan === nextPlan) {
+    return { changed: false as const };
+  }
 
   const prices = await getPlatformPlanPriceMap();
   const amountInr = prices[nextPlan];
@@ -66,11 +71,28 @@ export async function changeOwnerPlan(adminUserId: string, nextPlan: OwnerSubscr
       },
     }),
   ]);
+  return { changed: true as const };
+}
+
+export async function deleteOwnerInvoice(adminUserId: string, invoiceId: string) {
+  const invoice = await prisma.ownerBillingInvoice.findFirst({
+    where: { id: invoiceId, ...ownerInvoiceScope(adminUserId) },
+    select: { id: true, status: true },
+  });
+  if (!invoice) throw new HttpError(404, "Invoice not found.");
+  if (invoice.status !== "PENDING") {
+    throw new HttpError(400, "Only pending invoices can be deleted.");
+  }
+
+  await prisma.ownerBillingInvoice.update({
+    where: { id: invoiceId },
+    data: { deletedAt: new Date() },
+  });
 }
 
 export async function payInvoice(adminUserId: string, invoiceId: string) {
   const invoice = await prisma.ownerBillingInvoice.findFirst({
-    where: { id: invoiceId, adminUserId },
+    where: { id: invoiceId, ...ownerInvoiceScope(adminUserId) },
     select: { id: true, status: true },
   });
   if (!invoice) throw new HttpError(404, "Invoice not found.");
@@ -91,7 +113,7 @@ export async function payInvoice(adminUserId: string, invoiceId: string) {
 
 export async function createRazorpayOrderForOwnerInvoice(adminUserId: string, invoiceId: string) {
   const invoice = await prisma.ownerBillingInvoice.findFirst({
-    where: { id: invoiceId, adminUserId },
+    where: { id: invoiceId, ...ownerInvoiceScope(adminUserId) },
     select: { id: true, amountInr: true, status: true, adminUserId: true, plan: true },
   });
   if (!invoice) throw new HttpError(404, "Invoice not found.");
@@ -107,7 +129,7 @@ export async function attachRazorpayOrderToInvoice(
   razorpayOrderId: string,
 ) {
   return prisma.ownerBillingInvoice.updateMany({
-    where: { id: invoiceId, adminUserId, status: "PENDING" },
+    where: { id: invoiceId, ...ownerInvoiceScope(adminUserId), status: "PENDING" },
     data: { razorpayOrderId, provider: "RAZORPAY" },
   });
 }
@@ -122,7 +144,7 @@ export async function markInvoicePaidFromRazorpay(input: {
   const invoice = await prisma.ownerBillingInvoice.findFirst({
     where: {
       id: input.invoiceId,
-      adminUserId: input.adminUserId,
+      ...ownerInvoiceScope(input.adminUserId),
       razorpayOrderId: input.razorpayOrderId,
     },
     select: { id: true, status: true },
@@ -146,7 +168,7 @@ export async function markInvoicePaidFromRazorpay(input: {
 
 export async function getInvoiceReceiptForOwner(adminUserId: string, invoiceId: string) {
   const invoice = await prisma.ownerBillingInvoice.findFirst({
-    where: { id: invoiceId, adminUserId },
+    where: { id: invoiceId, ...ownerInvoiceScope(adminUserId) },
     select: {
       id: true,
       plan: true,

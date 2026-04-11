@@ -127,10 +127,10 @@ export default function LoginForm({ className }: LoginFormProps) {
     <Card className={cn("w-full min-w-0 max-w-md border-border", className)}>
       <CardHeader>
         <CardTitle>Sign in</CardTitle>
-        <CardDescription>
+        {/* <CardDescription>
           Gym owners and platform superadmin use the same login. New gyms can
           register below.
-        </CardDescription>
+        </CardDescription> */}
       </CardHeader>
 
       <CardContent className="space-y-6">

@@ -5,6 +5,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { HttpError } from "@/lib/http/errors";
 import { prisma } from "@/lib/prisma";
+import { ownerDurationPriceScope } from "@/lib/tenant/scope";
 
 export type DurationPriceRow = {
   duration: MemberBillingDuration;
@@ -15,7 +16,7 @@ export async function listDurationPricesForOwner(
   adminUserId: string,
 ): Promise<DurationPriceRow[]> {
   const rows = await prisma.gymOwnerDurationPrice.findMany({
-    where: { adminUserId },
+    where: ownerDurationPriceScope(adminUserId),
   });
   const byDuration = new Map(
     rows.map((r) => [r.duration, r.priceInr.toString()] as const),
@@ -55,6 +56,7 @@ export async function upsertDurationPricesForOwner(
         },
         update: {
           priceInr: new Prisma.Decimal(p.priceInr),
+          deletedAt: null,
         },
       }),
     ),

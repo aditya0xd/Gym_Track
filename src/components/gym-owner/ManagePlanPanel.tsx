@@ -1,5 +1,7 @@
 "use client";
 
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { CreditCard, Download, MoreVertical, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -7,6 +9,7 @@ import type { BillingStatus, OwnerSubscriptionPlan } from "@/generated/prisma/cl
 import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 declare global {
   interface Window {
@@ -38,6 +41,7 @@ export function ManagePlanPanel() {
   const [invoiceFilter, setInvoiceFilter] = useState<"ALL" | BillingStatus>("ALL");
   const [savingPlan, setSavingPlan] = useState(false);
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -83,6 +87,10 @@ export function ManagePlanPanel() {
 
   async function handleChangePlan() {
     if (!data) return;
+    if (selectedPlan === data.currentPlan) {
+      toast.info("You are already on this plan.");
+      return;
+    }
     setSavingPlan(true);
     const res = await fetch("/api/owner/manage-plan", {
       method: "PATCH",
@@ -97,6 +105,38 @@ export function ManagePlanPanel() {
     }
     toast.success(json.message ?? "Plan updated.");
     setSavingPlan(false);
+    await load();
+  }
+
+  function handleDeleteInvoice(invoiceId: string) {
+    toast.warning("Remove this pending invoice?", {
+      description: "This cannot be undone.",
+      duration: Infinity,
+      action: {
+        label: "Remove",
+        onClick: () => {
+          void executeDeleteInvoice(invoiceId);
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  }
+
+  async function executeDeleteInvoice(invoiceId: string) {
+    setDeletingId(invoiceId);
+    const res = await fetch(`/api/owner/billing/${invoiceId}`, {
+      method: "DELETE",
+    });
+    const json = (await res.json()) as { message?: string };
+    setDeletingId(null);
+    if (!res.ok) {
+      toast.error(json.message ?? "Could not remove invoice.");
+      return;
+    }
+    toast.success(json.message ?? "Invoice removed.");
     await load();
   }
 
@@ -216,7 +256,11 @@ export function ManagePlanPanel() {
               ))}
             </select>
           </div>
-          <Button type="button" disabled={savingPlan} onClick={handleChangePlan}>
+          <Button
+            type="button"
+            disabled={savingPlan || selectedPlan === data.currentPlan}
+            onClick={handleChangePlan}
+          >
             {savingPlan ? "Updating…" : "Update plan"}
           </Button>
         </div>
@@ -266,23 +310,67 @@ export function ManagePlanPanel() {
                   <td className="px-3 py-2.5 sm:px-4 sm:py-3">{inv.status}</td>
                   <td className="px-3 py-2.5 sm:px-4 sm:py-3">{inv.dueDate}</td>
                   <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-right">
-                    <div className="flex justify-end gap-2">
-                      {inv.status === "PENDING" ? (
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger asChild>
                         <Button
                           type="button"
-                          size="sm"
-                          disabled={payingId === inv.id}
-                          onClick={() => handlePayNow(inv.id)}
+                          variant="ghost"
+                          size="icon-sm"
+                          className="text-muted-foreground hover:text-foreground"
+                          aria-label="Invoice actions"
                         >
-                          {payingId === inv.id ? "Paying…" : "Pay now"}
+                          <MoreVertical className="size-4" />
                         </Button>
-                      ) : null}
-                      <Button type="button" size="sm" variant="outline" asChild>
-                        <a href={`/api/owner/billing/${inv.id}/receipt`} download>
-                          Download receipt
-                        </a>
-                      </Button>
-                    </div>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Portal>
+                        <DropdownMenu.Content
+                          align="end"
+                          sideOffset={4}
+                          className={cn(
+                            "z-50 min-w-[10rem] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md",
+                            "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+                          )}
+                        >
+                          {inv.status === "PENDING" ? (
+                            <>
+                              <DropdownMenu.Item
+                                className="flex cursor-pointer items-center justify-center rounded-md p-2 outline-none hover:bg-muted focus:bg-muted data-disabled:pointer-events-none data-disabled:opacity-40"
+                                disabled={payingId === inv.id}
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  void handlePayNow(inv.id);
+                                }}
+                                aria-label="Pay now"
+                              >
+                                <CreditCard className="size-4" />
+                              </DropdownMenu.Item>
+                              <DropdownMenu.Item
+                                className="flex cursor-pointer items-center justify-center rounded-md p-2 outline-none hover:bg-destructive/10 focus:bg-destructive/10 data-disabled:pointer-events-none data-disabled:opacity-40"
+                                disabled={deletingId === inv.id || payingId === inv.id}
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  void handleDeleteInvoice(inv.id);
+                                }}
+                                aria-label="Delete invoice"
+                              >
+                                <Trash2 className="size-4 text-destructive" />
+                              </DropdownMenu.Item>
+                              <DropdownMenu.Separator className="my-1 h-px bg-border" />
+                            </>
+                          ) : null}
+                          <DropdownMenu.Item asChild>
+                            <a
+                              href={`/api/owner/billing/${inv.id}/receipt`}
+                              download
+                              className="flex cursor-pointer items-center justify-center rounded-md p-2 outline-none hover:bg-muted focus:bg-muted"
+                              aria-label="Download receipt"
+                            >
+                              <Download className="size-4" />
+                            </a>
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu.Portal>
+                    </DropdownMenu.Root>
                   </td>
                 </tr>
               ))}

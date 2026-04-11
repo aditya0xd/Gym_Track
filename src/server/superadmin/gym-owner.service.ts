@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function listGymOwnersWithStats() {
   return prisma.adminUser.findMany({
+    where: { deletedAt: null },
     orderBy: { createdAt: "asc" },
     select: {
       id: true,
@@ -12,7 +13,11 @@ export async function listGymOwnersWithStats() {
       subscriptionPlan: true,
       trialEndsAt: true,
       createdAt: true,
-      _count: { select: { members: true } },
+      _count: {
+        select: {
+          members: { where: { deletedAt: null } },
+        },
+      },
     },
   });
 }
@@ -24,7 +29,9 @@ export async function updateGymOwnerSubscription(
     trialEndsAt?: Date | null;
   },
 ) {
-  const existing = await prisma.adminUser.findUnique({ where: { id: gymOwnerId } });
+  const existing = await prisma.adminUser.findFirst({
+    where: { id: gymOwnerId, deletedAt: null },
+  });
   if (!existing) {
     throw new HttpError(404, "Gym owner not found.");
   }

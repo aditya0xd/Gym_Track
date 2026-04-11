@@ -40,6 +40,12 @@ export async function POST(request: Request) {
 
   const existingUser = await prisma.adminUser.findUnique({ where: { email } });
   if (existingUser) {
+    if (existingUser.deletedAt) {
+      return NextResponse.json(
+        { message: "This account was removed. Contact support to restore access." },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       { message: "An account with this email already exists." },
       { status: 409 },

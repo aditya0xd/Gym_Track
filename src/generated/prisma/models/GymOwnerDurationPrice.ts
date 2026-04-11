@@ -39,6 +39,7 @@ export type GymOwnerDurationPriceMinAggregateOutputType = {
   adminUserId: string | null
   duration: $Enums.MemberBillingDuration | null
   priceInr: runtime.Decimal | null
+  deletedAt: Date | null
 }
 
 export type GymOwnerDurationPriceMaxAggregateOutputType = {
@@ -46,6 +47,7 @@ export type GymOwnerDurationPriceMaxAggregateOutputType = {
   adminUserId: string | null
   duration: $Enums.MemberBillingDuration | null
   priceInr: runtime.Decimal | null
+  deletedAt: Date | null
 }
 
 export type GymOwnerDurationPriceCountAggregateOutputType = {
@@ -53,6 +55,7 @@ export type GymOwnerDurationPriceCountAggregateOutputType = {
   adminUserId: number
   duration: number
   priceInr: number
+  deletedAt: number
   _all: number
 }
 
@@ -70,6 +73,7 @@ export type GymOwnerDurationPriceMinAggregateInputType = {
   adminUserId?: true
   duration?: true
   priceInr?: true
+  deletedAt?: true
 }
 
 export type GymOwnerDurationPriceMaxAggregateInputType = {
@@ -77,6 +81,7 @@ export type GymOwnerDurationPriceMaxAggregateInputType = {
   adminUserId?: true
   duration?: true
   priceInr?: true
+  deletedAt?: true
 }
 
 export type GymOwnerDurationPriceCountAggregateInputType = {
@@ -84,6 +89,7 @@ export type GymOwnerDurationPriceCountAggregateInputType = {
   adminUserId?: true
   duration?: true
   priceInr?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -178,6 +184,7 @@ export type GymOwnerDurationPriceGroupByOutputType = {
   adminUserId: string
   duration: $Enums.MemberBillingDuration
   priceInr: runtime.Decimal
+  deletedAt: Date | null
   _count: GymOwnerDurationPriceCountAggregateOutputType | null
   _avg: GymOwnerDurationPriceAvgAggregateOutputType | null
   _sum: GymOwnerDurationPriceSumAggregateOutputType | null
@@ -208,6 +215,7 @@ export type GymOwnerDurationPriceWhereInput = {
   adminUserId?: Prisma.StringFilter<"GymOwnerDurationPrice"> | string
   duration?: Prisma.EnumMemberBillingDurationFilter<"GymOwnerDurationPrice"> | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFilter<"GymOwnerDurationPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"GymOwnerDurationPrice"> | Date | string | null
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
 }
 
@@ -216,6 +224,7 @@ export type GymOwnerDurationPriceOrderByWithRelationInput = {
   adminUserId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   priceInr?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   adminUser?: Prisma.AdminUserOrderByWithRelationInput
 }
 
@@ -228,6 +237,7 @@ export type GymOwnerDurationPriceWhereUniqueInput = Prisma.AtLeast<{
   adminUserId?: Prisma.StringFilter<"GymOwnerDurationPrice"> | string
   duration?: Prisma.EnumMemberBillingDurationFilter<"GymOwnerDurationPrice"> | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFilter<"GymOwnerDurationPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"GymOwnerDurationPrice"> | Date | string | null
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
 }, "id" | "adminUserId_duration">
 
@@ -236,6 +246,7 @@ export type GymOwnerDurationPriceOrderByWithAggregationInput = {
   adminUserId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   priceInr?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.GymOwnerDurationPriceCountOrderByAggregateInput
   _avg?: Prisma.GymOwnerDurationPriceAvgOrderByAggregateInput
   _max?: Prisma.GymOwnerDurationPriceMaxOrderByAggregateInput
@@ -251,12 +262,14 @@ export type GymOwnerDurationPriceScalarWhereWithAggregatesInput = {
   adminUserId?: Prisma.StringWithAggregatesFilter<"GymOwnerDurationPrice"> | string
   duration?: Prisma.EnumMemberBillingDurationWithAggregatesFilter<"GymOwnerDurationPrice"> | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalWithAggregatesFilter<"GymOwnerDurationPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"GymOwnerDurationPrice"> | Date | string | null
 }
 
 export type GymOwnerDurationPriceCreateInput = {
   id?: string
   duration: $Enums.MemberBillingDuration
   priceInr: runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Date | string | null
   adminUser: Prisma.AdminUserCreateNestedOneWithoutDurationPricesInput
 }
 
@@ -265,12 +278,14 @@ export type GymOwnerDurationPriceUncheckedCreateInput = {
   adminUserId: string
   duration: $Enums.MemberBillingDuration
   priceInr: runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Date | string | null
 }
 
 export type GymOwnerDurationPriceUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   adminUser?: Prisma.AdminUserUpdateOneRequiredWithoutDurationPricesNestedInput
 }
 
@@ -279,6 +294,7 @@ export type GymOwnerDurationPriceUncheckedUpdateInput = {
   adminUserId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GymOwnerDurationPriceCreateManyInput = {
@@ -286,12 +302,14 @@ export type GymOwnerDurationPriceCreateManyInput = {
   adminUserId: string
   duration: $Enums.MemberBillingDuration
   priceInr: runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Date | string | null
 }
 
 export type GymOwnerDurationPriceUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GymOwnerDurationPriceUncheckedUpdateManyInput = {
@@ -299,6 +317,7 @@ export type GymOwnerDurationPriceUncheckedUpdateManyInput = {
   adminUserId?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GymOwnerDurationPriceListRelationFilter = {
@@ -321,6 +340,7 @@ export type GymOwnerDurationPriceCountOrderByAggregateInput = {
   adminUserId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   priceInr?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type GymOwnerDurationPriceAvgOrderByAggregateInput = {
@@ -332,6 +352,7 @@ export type GymOwnerDurationPriceMaxOrderByAggregateInput = {
   adminUserId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   priceInr?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type GymOwnerDurationPriceMinOrderByAggregateInput = {
@@ -339,6 +360,7 @@ export type GymOwnerDurationPriceMinOrderByAggregateInput = {
   adminUserId?: Prisma.SortOrder
   duration?: Prisma.SortOrder
   priceInr?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type GymOwnerDurationPriceSumOrderByAggregateInput = {
@@ -391,12 +413,14 @@ export type GymOwnerDurationPriceCreateWithoutAdminUserInput = {
   id?: string
   duration: $Enums.MemberBillingDuration
   priceInr: runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Date | string | null
 }
 
 export type GymOwnerDurationPriceUncheckedCreateWithoutAdminUserInput = {
   id?: string
   duration: $Enums.MemberBillingDuration
   priceInr: runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Date | string | null
 }
 
 export type GymOwnerDurationPriceCreateOrConnectWithoutAdminUserInput = {
@@ -433,30 +457,35 @@ export type GymOwnerDurationPriceScalarWhereInput = {
   adminUserId?: Prisma.StringFilter<"GymOwnerDurationPrice"> | string
   duration?: Prisma.EnumMemberBillingDurationFilter<"GymOwnerDurationPrice"> | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFilter<"GymOwnerDurationPrice"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"GymOwnerDurationPrice"> | Date | string | null
 }
 
 export type GymOwnerDurationPriceCreateManyAdminUserInput = {
   id?: string
   duration: $Enums.MemberBillingDuration
   priceInr: runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Date | string | null
 }
 
 export type GymOwnerDurationPriceUpdateWithoutAdminUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GymOwnerDurationPriceUncheckedUpdateWithoutAdminUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GymOwnerDurationPriceUncheckedUpdateManyWithoutAdminUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   duration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   priceInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -466,6 +495,7 @@ export type GymOwnerDurationPriceSelect<ExtArgs extends runtime.Types.Extensions
   adminUserId?: boolean
   duration?: boolean
   priceInr?: boolean
+  deletedAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gymOwnerDurationPrice"]>
 
@@ -474,6 +504,7 @@ export type GymOwnerDurationPriceSelectCreateManyAndReturn<ExtArgs extends runti
   adminUserId?: boolean
   duration?: boolean
   priceInr?: boolean
+  deletedAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gymOwnerDurationPrice"]>
 
@@ -482,6 +513,7 @@ export type GymOwnerDurationPriceSelectUpdateManyAndReturn<ExtArgs extends runti
   adminUserId?: boolean
   duration?: boolean
   priceInr?: boolean
+  deletedAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gymOwnerDurationPrice"]>
 
@@ -490,9 +522,10 @@ export type GymOwnerDurationPriceSelectScalar = {
   adminUserId?: boolean
   duration?: boolean
   priceInr?: boolean
+  deletedAt?: boolean
 }
 
-export type GymOwnerDurationPriceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminUserId" | "duration" | "priceInr", ExtArgs["result"]["gymOwnerDurationPrice"]>
+export type GymOwnerDurationPriceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adminUserId" | "duration" | "priceInr" | "deletedAt", ExtArgs["result"]["gymOwnerDurationPrice"]>
 export type GymOwnerDurationPriceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
 }
@@ -513,6 +546,7 @@ export type $GymOwnerDurationPricePayload<ExtArgs extends runtime.Types.Extensio
     adminUserId: string
     duration: $Enums.MemberBillingDuration
     priceInr: runtime.Decimal
+    deletedAt: Date | null
   }, ExtArgs["result"]["gymOwnerDurationPrice"]>
   composites: {}
 }
@@ -941,6 +975,7 @@ export interface GymOwnerDurationPriceFieldRefs {
   readonly adminUserId: Prisma.FieldRef<"GymOwnerDurationPrice", 'String'>
   readonly duration: Prisma.FieldRef<"GymOwnerDurationPrice", 'MemberBillingDuration'>
   readonly priceInr: Prisma.FieldRef<"GymOwnerDurationPrice", 'Decimal'>
+  readonly deletedAt: Prisma.FieldRef<"GymOwnerDurationPrice", 'DateTime'>
 }
     
 

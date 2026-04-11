@@ -48,6 +48,11 @@ export type GymOwnerDurationPrice = Prisma.GymOwnerDurationPriceModel
  */
 export type PlatformPlanPrice = Prisma.PlatformPlanPriceModel
 /**
+ * Model PlatformPlanFeature
+ * Superadmin-managed toggles: which product capabilities each owner subscription tier includes.
+ */
+export type PlatformPlanFeature = Prisma.PlatformPlanFeatureModel
+/**
  * Model OwnerBillingInvoice
  * 
  */

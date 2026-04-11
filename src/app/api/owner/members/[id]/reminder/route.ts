@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { guardGymOwnerPlanFeature } from "@/lib/plan-features/guard";
 import { HttpError } from "@/lib/http/errors";
 import {
   sendReminderForOwnerMember,
@@ -15,9 +16,8 @@ function isReminderType(v: unknown): v is ReminderType {
 
 export async function POST(request: Request, context: RouteContext) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const denied = await guardGymOwnerPlanFeature(session, "MANUAL_MEMBER_REMINDERS");
+  if (denied) return denied;
 
   const { id } = await context.params;
   const body = (await request.json()) as Record<string, unknown>;
@@ -28,7 +28,7 @@ export async function POST(request: Request, context: RouteContext) {
     typeof body.message === "string" && body.message.trim() ? body.message.trim() : undefined;
 
   try {
-    const log = await sendReminderForOwnerMember(session.user.id, id, {
+    const log = await sendReminderForOwnerMember(session!.user.id, id, {
       reminderType,
       message: messageRaw,
     });

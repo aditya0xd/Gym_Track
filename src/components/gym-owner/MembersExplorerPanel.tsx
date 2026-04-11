@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { formatInrFromDecimalString } from "@/lib/format/inr";
-import type { MemberBillingDuration } from "@/generated/prisma/client";
+import type { MemberBillingDuration, MembershipStatus } from "@/generated/prisma/client";
 
 type MemberItem = {
   id: string;
@@ -12,10 +12,12 @@ type MemberItem = {
   phone: string;
   billingDuration: MemberBillingDuration;
   planPrice: string;
+  discountInr: string;
   endDate: string;
+  membershipStatus: MembershipStatus;
 };
 
-type StatusFilter = "ALL" | "EXPIRING_SOON" | "EXPIRED";
+type StatusFilter = "ALL" | "EXPIRING_SOON" | "EXPIRED" | "PAUSED";
 type PlanFilter = "ALL" | "MONTHLY" | "QUARTERLY" | "ANNUALLY";
 
 function planBucket(duration: MemberBillingDuration): PlanFilter {
@@ -25,7 +27,8 @@ function planBucket(duration: MemberBillingDuration): PlanFilter {
   return "ALL";
 }
 
-function statusOf(endDateIso: string) {
+function statusOf(endDateIso: string, membershipStatus: MembershipStatus) {
+  if (membershipStatus === "PAUSED") return "PAUSED";
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const in7 = new Date(today);
@@ -54,7 +57,7 @@ export function MembersExplorerPanel({ members }: { members: MemberItem[] }) {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return members.filter((m) => {
-      const status = statusOf(m.endDate);
+      const status = statusOf(m.endDate, m.membershipStatus);
       if (statusFilter !== "ALL" && status !== statusFilter) return false;
 
       const bucket = planBucket(m.billingDuration);
@@ -83,6 +86,7 @@ export function MembersExplorerPanel({ members }: { members: MemberItem[] }) {
           { id: "ALL", label: "All" },
           { id: "EXPIRING_SOON", label: "Expiring soon" },
           { id: "EXPIRED", label: "Expired" },
+          { id: "PAUSED", label: "Paused" },
         ].map((item) => (
           <button
             key={item.id}
@@ -125,13 +129,15 @@ export function MembersExplorerPanel({ members }: { members: MemberItem[] }) {
 
       <div className="mt-2 space-y-2">
         {filtered.map((m) => {
-          const status = statusOf(m.endDate);
+          const status = statusOf(m.endDate, m.membershipStatus);
           const tone =
             status === "EXPIRED"
               ? "border-border bg-background text-foreground"
               : status === "EXPIRING_SOON"
                 ? "border-border bg-background text-foreground"
-                : "border-border bg-background text-foreground";
+                : status === "PAUSED"
+                  ? "border-border bg-muted text-foreground"
+                  : "border-border bg-background text-foreground";
 
           return (
             <Link
@@ -143,16 +149,24 @@ export function MembersExplorerPanel({ members }: { members: MemberItem[] }) {
                 <p className="truncate text-sm font-semibold text-foreground">{m.fullName}</p>
                 <p className="text-xs text-muted-foreground">{m.phone}</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">
-                  {formatInrFromDecimalString(m.planPrice)}/plan
+                  {formatInrFromDecimalString(m.planPrice)}
+                  {Number(m.discountInr) > 0 ? (
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
+                      (−{formatInrFromDecimalString(m.discountInr)} off list)
+                    </span>
+                  ) : null}
+                  <span className="text-xs font-normal text-muted-foreground">/plan</span>
                 </p>
               </div>
               <div className="text-right">
                 <span className={`rounded-md border px-2 py-1 text-xs ${tone}`}>
-                  {status === "EXPIRING_SOON"
-                    ? "Expiring soon"
-                    : status === "EXPIRED"
-                      ? "Expired"
-                      : "Active"}
+                  {status === "PAUSED"
+                    ? "Paused"
+                    : status === "EXPIRING_SOON"
+                      ? "Expiring soon"
+                      : status === "EXPIRED"
+                        ? "Expired"
+                        : "Active"}
                 </span>
                 <p className="mt-2 text-xs text-muted-foreground">{daysText(m.endDate)}</p>
               </div>
