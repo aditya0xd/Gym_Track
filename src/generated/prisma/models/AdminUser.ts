@@ -31,6 +31,7 @@ export type AdminUserMinAggregateOutputType = {
   passwordHash: string | null
   subscriptionPlan: $Enums.OwnerSubscriptionPlan | null
   trialEndsAt: Date | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +43,7 @@ export type AdminUserMaxAggregateOutputType = {
   passwordHash: string | null
   subscriptionPlan: $Enums.OwnerSubscriptionPlan | null
   trialEndsAt: Date | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,6 +55,7 @@ export type AdminUserCountAggregateOutputType = {
   passwordHash: number
   subscriptionPlan: number
   trialEndsAt: number
+  deletedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -66,6 +69,7 @@ export type AdminUserMinAggregateInputType = {
   passwordHash?: true
   subscriptionPlan?: true
   trialEndsAt?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +81,7 @@ export type AdminUserMaxAggregateInputType = {
   passwordHash?: true
   subscriptionPlan?: true
   trialEndsAt?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +93,7 @@ export type AdminUserCountAggregateInputType = {
   passwordHash?: true
   subscriptionPlan?: true
   trialEndsAt?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -172,6 +178,7 @@ export type AdminUserGroupByOutputType = {
   passwordHash: string
   subscriptionPlan: $Enums.OwnerSubscriptionPlan
   trialEndsAt: Date | null
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: AdminUserCountAggregateOutputType | null
@@ -204,6 +211,7 @@ export type AdminUserWhereInput = {
   passwordHash?: Prisma.StringFilter<"AdminUser"> | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFilter<"AdminUser"> | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.DateTimeNullableFilter<"AdminUser"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"AdminUser"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   members?: Prisma.MemberListRelationFilter
@@ -218,6 +226,7 @@ export type AdminUserOrderByWithRelationInput = {
   passwordHash?: Prisma.SortOrder
   subscriptionPlan?: Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   members?: Prisma.MemberOrderByRelationAggregateInput
@@ -235,6 +244,7 @@ export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
   passwordHash?: Prisma.StringFilter<"AdminUser"> | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFilter<"AdminUser"> | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.DateTimeNullableFilter<"AdminUser"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableFilter<"AdminUser"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AdminUser"> | Date | string
   members?: Prisma.MemberListRelationFilter
@@ -249,6 +259,7 @@ export type AdminUserOrderByWithAggregationInput = {
   passwordHash?: Prisma.SortOrder
   subscriptionPlan?: Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AdminUserCountOrderByAggregateInput
@@ -266,6 +277,7 @@ export type AdminUserScalarWhereWithAggregatesInput = {
   passwordHash?: Prisma.StringWithAggregatesFilter<"AdminUser"> | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanWithAggregatesFilter<"AdminUser"> | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AdminUser"> | Date | string | null
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AdminUser"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AdminUser"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AdminUser"> | Date | string
 }
@@ -277,6 +289,7 @@ export type AdminUserCreateInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.MemberCreateNestedManyWithoutAdminUserInput
@@ -291,6 +304,7 @@ export type AdminUserUncheckedCreateInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutAdminUserInput
@@ -305,6 +319,7 @@ export type AdminUserUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUpdateManyWithoutAdminUserNestedInput
@@ -319,6 +334,7 @@ export type AdminUserUncheckedUpdateInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUncheckedUpdateManyWithoutAdminUserNestedInput
@@ -333,6 +349,7 @@ export type AdminUserCreateManyInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -344,6 +361,7 @@ export type AdminUserUpdateManyMutationInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -355,6 +373,7 @@ export type AdminUserUncheckedUpdateManyInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -371,6 +390,7 @@ export type AdminUserCountOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   subscriptionPlan?: Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -382,6 +402,7 @@ export type AdminUserMaxOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   subscriptionPlan?: Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -393,6 +414,7 @@ export type AdminUserMinOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   subscriptionPlan?: Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -413,10 +435,6 @@ export type AdminUserUpdateOneRequiredWithoutMembersNestedInput = {
 
 export type EnumOwnerSubscriptionPlanFieldUpdateOperationsInput = {
   set?: $Enums.OwnerSubscriptionPlan
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
 }
 
 export type AdminUserCreateNestedOneWithoutDurationPricesInput = {
@@ -454,6 +472,7 @@ export type AdminUserCreateWithoutMembersInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   durationPrices?: Prisma.GymOwnerDurationPriceCreateNestedManyWithoutAdminUserInput
@@ -467,6 +486,7 @@ export type AdminUserUncheckedCreateWithoutMembersInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   durationPrices?: Prisma.GymOwnerDurationPriceUncheckedCreateNestedManyWithoutAdminUserInput
@@ -496,6 +516,7 @@ export type AdminUserUpdateWithoutMembersInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   durationPrices?: Prisma.GymOwnerDurationPriceUpdateManyWithoutAdminUserNestedInput
@@ -509,6 +530,7 @@ export type AdminUserUncheckedUpdateWithoutMembersInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   durationPrices?: Prisma.GymOwnerDurationPriceUncheckedUpdateManyWithoutAdminUserNestedInput
@@ -522,6 +544,7 @@ export type AdminUserCreateWithoutDurationPricesInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.MemberCreateNestedManyWithoutAdminUserInput
@@ -535,6 +558,7 @@ export type AdminUserUncheckedCreateWithoutDurationPricesInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutAdminUserInput
@@ -564,6 +588,7 @@ export type AdminUserUpdateWithoutDurationPricesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUpdateManyWithoutAdminUserNestedInput
@@ -577,6 +602,7 @@ export type AdminUserUncheckedUpdateWithoutDurationPricesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUncheckedUpdateManyWithoutAdminUserNestedInput
@@ -590,6 +616,7 @@ export type AdminUserCreateWithoutBillingInvoicesInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.MemberCreateNestedManyWithoutAdminUserInput
@@ -603,6 +630,7 @@ export type AdminUserUncheckedCreateWithoutBillingInvoicesInput = {
   passwordHash: string
   subscriptionPlan?: $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Date | string | null
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.MemberUncheckedCreateNestedManyWithoutAdminUserInput
@@ -632,6 +660,7 @@ export type AdminUserUpdateWithoutBillingInvoicesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUpdateManyWithoutAdminUserNestedInput
@@ -645,6 +674,7 @@ export type AdminUserUncheckedUpdateWithoutBillingInvoicesInput = {
   passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
   subscriptionPlan?: Prisma.EnumOwnerSubscriptionPlanFieldUpdateOperationsInput | $Enums.OwnerSubscriptionPlan
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.MemberUncheckedUpdateManyWithoutAdminUserNestedInput
@@ -707,6 +737,7 @@ export type AdminUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   passwordHash?: boolean
   subscriptionPlan?: boolean
   trialEndsAt?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   members?: boolean | Prisma.AdminUser$membersArgs<ExtArgs>
@@ -722,6 +753,7 @@ export type AdminUserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   passwordHash?: boolean
   subscriptionPlan?: boolean
   trialEndsAt?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["adminUser"]>
@@ -733,6 +765,7 @@ export type AdminUserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   passwordHash?: boolean
   subscriptionPlan?: boolean
   trialEndsAt?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["adminUser"]>
@@ -744,11 +777,12 @@ export type AdminUserSelectScalar = {
   passwordHash?: boolean
   subscriptionPlan?: boolean
   trialEndsAt?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AdminUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "subscriptionPlan" | "trialEndsAt" | "createdAt" | "updatedAt", ExtArgs["result"]["adminUser"]>
+export type AdminUserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "passwordHash" | "subscriptionPlan" | "trialEndsAt" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["adminUser"]>
 export type AdminUserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.AdminUser$membersArgs<ExtArgs>
   durationPrices?: boolean | Prisma.AdminUser$durationPricesArgs<ExtArgs>
@@ -772,6 +806,7 @@ export type $AdminUserPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     passwordHash: string
     subscriptionPlan: $Enums.OwnerSubscriptionPlan
     trialEndsAt: Date | null
+    deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["adminUser"]>
@@ -1206,6 +1241,7 @@ export interface AdminUserFieldRefs {
   readonly passwordHash: Prisma.FieldRef<"AdminUser", 'String'>
   readonly subscriptionPlan: Prisma.FieldRef<"AdminUser", 'OwnerSubscriptionPlan'>
   readonly trialEndsAt: Prisma.FieldRef<"AdminUser", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"AdminUser", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"AdminUser", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AdminUser", 'DateTime'>
 }

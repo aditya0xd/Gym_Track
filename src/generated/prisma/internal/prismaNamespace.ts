@@ -390,6 +390,7 @@ export const ModelName = {
   SuperAdminUser: 'SuperAdminUser',
   GymOwnerDurationPrice: 'GymOwnerDurationPrice',
   PlatformPlanPrice: 'PlatformPlanPrice',
+  PlatformPlanFeature: 'PlatformPlanFeature',
   OwnerBillingInvoice: 'OwnerBillingInvoice'
 } as const
 
@@ -406,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "member" | "reminderLog" | "adminUser" | "superAdminUser" | "gymOwnerDurationPrice" | "platformPlanPrice" | "ownerBillingInvoice"
+    modelProps: "member" | "reminderLog" | "adminUser" | "superAdminUser" | "gymOwnerDurationPrice" | "platformPlanPrice" | "platformPlanFeature" | "ownerBillingInvoice"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -854,6 +855,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PlatformPlanFeature: {
+      payload: Prisma.$PlatformPlanFeaturePayload<ExtArgs>
+      fields: Prisma.PlatformPlanFeatureFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlatformPlanFeatureFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlatformPlanFeatureFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>
+        }
+        findFirst: {
+          args: Prisma.PlatformPlanFeatureFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlatformPlanFeatureFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>
+        }
+        findMany: {
+          args: Prisma.PlatformPlanFeatureFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>[]
+        }
+        create: {
+          args: Prisma.PlatformPlanFeatureCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>
+        }
+        createMany: {
+          args: Prisma.PlatformPlanFeatureCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlatformPlanFeatureCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>[]
+        }
+        delete: {
+          args: Prisma.PlatformPlanFeatureDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>
+        }
+        update: {
+          args: Prisma.PlatformPlanFeatureUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>
+        }
+        deleteMany: {
+          args: Prisma.PlatformPlanFeatureDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlatformPlanFeatureUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlatformPlanFeatureUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>[]
+        }
+        upsert: {
+          args: Prisma.PlatformPlanFeatureUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformPlanFeaturePayload>
+        }
+        aggregate: {
+          args: Prisma.PlatformPlanFeatureAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlatformPlanFeature>
+        }
+        groupBy: {
+          args: Prisma.PlatformPlanFeatureGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformPlanFeatureGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlatformPlanFeatureCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformPlanFeatureCountAggregateOutputType> | number
+        }
+      }
+    }
     OwnerBillingInvoice: {
       payload: Prisma.$OwnerBillingInvoicePayload<ExtArgs>
       fields: Prisma.OwnerBillingInvoiceFieldRefs
@@ -974,13 +1049,17 @@ export const MemberScalarFieldEnum = {
   phone: 'phone',
   billingDuration: 'billingDuration',
   planPrice: 'planPrice',
+  discountInr: 'discountInr',
   paymentStatus: 'paymentStatus',
   memberPhoto: 'memberPhoto',
   upiScreenshot: 'upiScreenshot',
   startDate: 'startDate',
   endDate: 'endDate',
+  membershipStatus: 'membershipStatus',
+  pausedAt: 'pausedAt',
   whatsappEnabled: 'whatsappEnabled',
   adminUserId: 'adminUserId',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -994,7 +1073,9 @@ export const ReminderLogScalarFieldEnum = {
   channel: 'channel',
   sentAt: 'sentAt',
   status: 'status',
-  message: 'message'
+  message: 'message',
+  category: 'category',
+  relatedEndDate: 'relatedEndDate'
 } as const
 
 export type ReminderLogScalarFieldEnum = (typeof ReminderLogScalarFieldEnum)[keyof typeof ReminderLogScalarFieldEnum]
@@ -1007,6 +1088,7 @@ export const AdminUserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   subscriptionPlan: 'subscriptionPlan',
   trialEndsAt: 'trialEndsAt',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1030,7 +1112,8 @@ export const GymOwnerDurationPriceScalarFieldEnum = {
   id: 'id',
   adminUserId: 'adminUserId',
   duration: 'duration',
-  priceInr: 'priceInr'
+  priceInr: 'priceInr',
+  deletedAt: 'deletedAt'
 } as const
 
 export type GymOwnerDurationPriceScalarFieldEnum = (typeof GymOwnerDurationPriceScalarFieldEnum)[keyof typeof GymOwnerDurationPriceScalarFieldEnum]
@@ -1047,6 +1130,18 @@ export const PlatformPlanPriceScalarFieldEnum = {
 export type PlatformPlanPriceScalarFieldEnum = (typeof PlatformPlanPriceScalarFieldEnum)[keyof typeof PlatformPlanPriceScalarFieldEnum]
 
 
+export const PlatformPlanFeatureScalarFieldEnum = {
+  id: 'id',
+  plan: 'plan',
+  featureKey: 'featureKey',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlatformPlanFeatureScalarFieldEnum = (typeof PlatformPlanFeatureScalarFieldEnum)[keyof typeof PlatformPlanFeatureScalarFieldEnum]
+
+
 export const OwnerBillingInvoiceScalarFieldEnum = {
   id: 'id',
   adminUserId: 'adminUserId',
@@ -1059,6 +1154,7 @@ export const OwnerBillingInvoiceScalarFieldEnum = {
   razorpaySignature: 'razorpaySignature',
   dueDate: 'dueDate',
   paidAt: 'paidAt',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -1166,6 +1262,20 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'MembershipStatus'
+ */
+export type EnumMembershipStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MembershipStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MembershipStatus[]'
+ */
+export type ListEnumMembershipStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MembershipStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
@@ -1201,6 +1311,20 @@ export type ListEnumReminderStatusFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
+ * Reference to a field of type 'ReminderCategory'
+ */
+export type EnumReminderCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReminderCategory'>
+    
+
+
+/**
+ * Reference to a field of type 'ReminderCategory[]'
+ */
+export type ListEnumReminderCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReminderCategory[]'>
+    
+
+
+/**
  * Reference to a field of type 'OwnerSubscriptionPlan'
  */
 export type EnumOwnerSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OwnerSubscriptionPlan'>
@@ -1211,6 +1335,20 @@ export type EnumOwnerSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInput
  * Reference to a field of type 'OwnerSubscriptionPlan[]'
  */
 export type ListEnumOwnerSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OwnerSubscriptionPlan[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PlanFeatureKey'
+ */
+export type EnumPlanFeatureKeyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanFeatureKey'>
+    
+
+
+/**
+ * Reference to a field of type 'PlanFeatureKey[]'
+ */
+export type ListEnumPlanFeatureKeyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanFeatureKey[]'>
     
 
 
@@ -1356,6 +1494,7 @@ export type GlobalOmitConfig = {
   superAdminUser?: Prisma.SuperAdminUserOmit
   gymOwnerDurationPrice?: Prisma.GymOwnerDurationPriceOmit
   platformPlanPrice?: Prisma.PlatformPlanPriceOmit
+  platformPlanFeature?: Prisma.PlatformPlanFeatureOmit
   ownerBillingInvoice?: Prisma.OwnerBillingInvoiceOmit
 }
 

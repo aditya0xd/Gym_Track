@@ -22,7 +22,7 @@ export default async function OwnerEnrollMemberPage() {
     <PageShell>
       <PageHeader
         title="Enroll member"
-        description="Uses your saved INR prices for 1 / 3 / 6 / 12 month durations."
+        // description="Uses your saved INR prices for 1 / 3 / 6 / 12 month durations."
         actions={
           <Button variant="outline" asChild>
             <Link href="/owner/dashboard">Back to members</Link>

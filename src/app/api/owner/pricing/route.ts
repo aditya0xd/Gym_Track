@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { guardGymOwnerPlanFeature } from "@/lib/plan-features/guard";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { HttpError } from "@/lib/http/errors";
 import {
@@ -16,19 +17,17 @@ function isDuration(v: unknown): v is MemberBillingDuration {
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const denied = await guardGymOwnerPlanFeature(session, "CUSTOM_MEMBERSHIP_PRICING");
+  if (denied) return denied;
 
-  const prices = await listDurationPricesForOwner(session.user.id);
+  const prices = await listDurationPricesForOwner(session!.user.id);
   return NextResponse.json({ prices });
 }
 
 export async function PUT(request: Request) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const denied = await guardGymOwnerPlanFeature(session, "CUSTOM_MEMBERSHIP_PRICING");
+  if (denied) return denied;
 
   const body = (await request.json()) as { prices?: unknown };
   if (!Array.isArray(body.prices)) {
@@ -68,8 +67,8 @@ export async function PUT(request: Request) {
   }
 
   try {
-    await upsertDurationPricesForOwner(session.user.id, parsed);
-    const prices = await listDurationPricesForOwner(session.user.id);
+    await upsertDurationPricesForOwner(session!.user.id, parsed);
+    const prices = await listDurationPricesForOwner(session!.user.id);
     return NextResponse.json({ prices });
   } catch (e) {
     if (e instanceof HttpError) {

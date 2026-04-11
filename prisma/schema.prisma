@@ -14,30 +14,44 @@ model Member {
   email            String?              @unique
   phone            String
   billingDuration  MemberBillingDuration
+  /// List price for this duration minus `discountInr` (amount actually charged / recorded).
   planPrice        Decimal              @db.Decimal(10, 2)
+  /// INR bargained off the list price for this duration; 0 if none.
+  discountInr      Decimal              @default(0) @db.Decimal(10, 2)
   paymentStatus    PaymentStatus        @default(NOT_DONE)
   memberPhoto      String?              @db.Text
   upiScreenshot    String?              @db.Text
   startDate        DateTime             @db.Date
   endDate          DateTime             @db.Date
+  membershipStatus MembershipStatus   @default(ACTIVE)
+  /// When status is PAUSED, clock started for freeze; on resume, endDate is extended by frozen calendar days.
+  pausedAt         DateTime?
   whatsappEnabled  Boolean              @default(true)
   adminUserId      String
+  deletedAt        DateTime?
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   adminUser        AdminUser            @relation(fields: [adminUserId], references: [id])
   reminders        ReminderLog[]
 
   @@index([adminUserId])
+  @@index([adminUserId, membershipStatus])
+  @@index([adminUserId, deletedAt])
 }
 
 model ReminderLog {
-  id        String          @id @default(uuid())
-  memberId  String
-  member    Member          @relation(fields: [memberId], references: [id])
-  channel   Channel
-  sentAt    DateTime        @default(now())
-  status    ReminderStatus
-  message   String
+  id             String            @id @default(uuid())
+  memberId       String
+  member         Member            @relation(fields: [memberId], references: [id])
+  channel        Channel
+  sentAt         DateTime          @default(now())
+  status         ReminderStatus
+  message        String
+  category       ReminderCategory  @default(MANUAL)
+  /// When set, used to dedupe scheduled reminders for a specific membership end date.
+  relatedEndDate DateTime?         @db.Date
+
+  @@index([memberId, category, relatedEndDate])
 }
 
 /// Gym owner (tenant)
@@ -48,11 +62,14 @@ model AdminUser {
   passwordHash     String
   subscriptionPlan OwnerSubscriptionPlan   @default(TRIAL)
   trialEndsAt      DateTime?
+  deletedAt        DateTime?
   createdAt        DateTime                @default(now())
   updatedAt        DateTime                @updatedAt
   members          Member[]
   durationPrices   GymOwnerDurationPrice[]
   billingInvoices  OwnerBillingInvoice[]
+
+  @@index([deletedAt])
 }
 
 /// Platform operator
@@ -71,6 +88,7 @@ model GymOwnerDurationPrice {
   adminUserId String
   duration    MemberBillingDuration
   priceInr    Decimal              @db.Decimal(10, 2)
+  deletedAt   DateTime?
   adminUser   AdminUser            @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
 
   @@unique([adminUserId, duration])
@@ -85,6 +103,27 @@ model PlatformPlanPrice {
   updatedAt DateTime              @updatedAt
 }
 
+/// Superadmin-managed toggles: which product capabilities each owner subscription tier includes.
+model PlatformPlanFeature {
+  id         String                @id @default(uuid())
+  plan       OwnerSubscriptionPlan
+  featureKey PlanFeatureKey
+  enabled    Boolean               @default(true)
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+
+  @@unique([plan, featureKey])
+  @@index([plan])
+}
+
+enum PlanFeatureKey {
+  ANALYTICS
+  BULK_IMPORT_EXPORT
+  SCHEDULED_EXPIRY_REMINDERS
+  MANUAL_MEMBER_REMINDERS
+  CUSTOM_MEMBERSHIP_PRICING
+}
+
 model OwnerBillingInvoice {
   id          String                @id @default(uuid())
   adminUserId String
@@ -97,10 +136,12 @@ model OwnerBillingInvoice {
   razorpaySignature String?
   dueDate     DateTime              @db.Date
   paidAt      DateTime?
+  deletedAt   DateTime?
   createdAt   DateTime              @default(now())
   adminUser   AdminUser             @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
 
   @@index([adminUserId, createdAt])
+  @@index([adminUserId, deletedAt])
 }
 
 enum OwnerSubscriptionPlan {
@@ -121,10 +162,20 @@ enum Channel {
   SMS
 }
 
+enum ReminderCategory {
+  MANUAL
+  EXPIRY_ONE_DAY_BEFORE
+}
+
 enum ReminderStatus {
   SENT
   FAILED
   DELIVERED
+}
+
+enum MembershipStatus {
+  ACTIVE
+  PAUSED
 }
 
 enum PaymentStatus {

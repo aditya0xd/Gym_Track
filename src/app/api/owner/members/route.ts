@@ -32,8 +32,10 @@ export async function GET() {
     members.map((m) => ({
       ...m,
       planPrice: m.planPrice.toString(),
+      discountInr: m.discountInr.toString(),
       startDate: m.startDate.toISOString().slice(0, 10),
       endDate: m.endDate.toISOString().slice(0, 10),
+      pausedAt: m.pausedAt?.toISOString() ?? null,
     })),
   );
 }
@@ -65,6 +67,12 @@ export async function POST(request: Request) {
     typeof body.upiScreenshot === "string" && body.upiScreenshot.trim()
       ? body.upiScreenshot
       : null;
+  const discountInrRaw =
+    typeof body.discountInr === "number"
+      ? String(body.discountInr)
+      : typeof body.discountInr === "string"
+        ? body.discountInr.trim()
+        : "";
   const startDateRaw = typeof body.startDate === "string" ? body.startDate : "";
 
   if (!fullName || !phone || !isDuration(billingDuration) || !startDateRaw) {
@@ -108,6 +116,7 @@ export async function POST(request: Request) {
       paymentStatus,
       memberPhoto,
       upiScreenshot,
+      discountInr: discountInrRaw === "" ? undefined : discountInrRaw,
     });
 
     return NextResponse.json(
@@ -118,6 +127,7 @@ export async function POST(request: Request) {
         phone: member.phone,
         billingDuration: member.billingDuration,
         planPrice: member.planPrice.toString(),
+        discountInr: member.discountInr.toString(),
         paymentStatus: member.paymentStatus,
         memberPhoto: member.memberPhoto,
         upiScreenshot: member.upiScreenshot,

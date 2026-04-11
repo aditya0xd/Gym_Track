@@ -9,6 +9,17 @@
 * 🟢 You can import this file directly.
 */
 
+export const PlanFeatureKey = {
+  ANALYTICS: 'ANALYTICS',
+  BULK_IMPORT_EXPORT: 'BULK_IMPORT_EXPORT',
+  SCHEDULED_EXPIRY_REMINDERS: 'SCHEDULED_EXPIRY_REMINDERS',
+  MANUAL_MEMBER_REMINDERS: 'MANUAL_MEMBER_REMINDERS',
+  CUSTOM_MEMBERSHIP_PRICING: 'CUSTOM_MEMBERSHIP_PRICING'
+} as const
+
+export type PlanFeatureKey = (typeof PlanFeatureKey)[keyof typeof PlanFeatureKey]
+
+
 export const OwnerSubscriptionPlan = {
   TRIAL: 'TRIAL',
   STARTER: 'STARTER',
@@ -36,6 +47,14 @@ export const Channel = {
 export type Channel = (typeof Channel)[keyof typeof Channel]
 
 
+export const ReminderCategory = {
+  MANUAL: 'MANUAL',
+  EXPIRY_ONE_DAY_BEFORE: 'EXPIRY_ONE_DAY_BEFORE'
+} as const
+
+export type ReminderCategory = (typeof ReminderCategory)[keyof typeof ReminderCategory]
+
+
 export const ReminderStatus = {
   SENT: 'SENT',
   FAILED: 'FAILED',
@@ -43,6 +62,14 @@ export const ReminderStatus = {
 } as const
 
 export type ReminderStatus = (typeof ReminderStatus)[keyof typeof ReminderStatus]
+
+
+export const MembershipStatus = {
+  ACTIVE: 'ACTIVE',
+  PAUSED: 'PAUSED'
+} as const
+
+export type MembershipStatus = (typeof MembershipStatus)[keyof typeof MembershipStatus]
 
 
 export const PaymentStatus = {

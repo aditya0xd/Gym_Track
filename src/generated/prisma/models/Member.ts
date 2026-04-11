@@ -28,10 +28,12 @@ export type AggregateMember = {
 
 export type MemberAvgAggregateOutputType = {
   planPrice: runtime.Decimal | null
+  discountInr: runtime.Decimal | null
 }
 
 export type MemberSumAggregateOutputType = {
   planPrice: runtime.Decimal | null
+  discountInr: runtime.Decimal | null
 }
 
 export type MemberMinAggregateOutputType = {
@@ -41,13 +43,17 @@ export type MemberMinAggregateOutputType = {
   phone: string | null
   billingDuration: $Enums.MemberBillingDuration | null
   planPrice: runtime.Decimal | null
+  discountInr: runtime.Decimal | null
   paymentStatus: $Enums.PaymentStatus | null
   memberPhoto: string | null
   upiScreenshot: string | null
   startDate: Date | null
   endDate: Date | null
+  membershipStatus: $Enums.MembershipStatus | null
+  pausedAt: Date | null
   whatsappEnabled: boolean | null
   adminUserId: string | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,13 +65,17 @@ export type MemberMaxAggregateOutputType = {
   phone: string | null
   billingDuration: $Enums.MemberBillingDuration | null
   planPrice: runtime.Decimal | null
+  discountInr: runtime.Decimal | null
   paymentStatus: $Enums.PaymentStatus | null
   memberPhoto: string | null
   upiScreenshot: string | null
   startDate: Date | null
   endDate: Date | null
+  membershipStatus: $Enums.MembershipStatus | null
+  pausedAt: Date | null
   whatsappEnabled: boolean | null
   adminUserId: string | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -77,13 +87,17 @@ export type MemberCountAggregateOutputType = {
   phone: number
   billingDuration: number
   planPrice: number
+  discountInr: number
   paymentStatus: number
   memberPhoto: number
   upiScreenshot: number
   startDate: number
   endDate: number
+  membershipStatus: number
+  pausedAt: number
   whatsappEnabled: number
   adminUserId: number
+  deletedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -92,10 +106,12 @@ export type MemberCountAggregateOutputType = {
 
 export type MemberAvgAggregateInputType = {
   planPrice?: true
+  discountInr?: true
 }
 
 export type MemberSumAggregateInputType = {
   planPrice?: true
+  discountInr?: true
 }
 
 export type MemberMinAggregateInputType = {
@@ -105,13 +121,17 @@ export type MemberMinAggregateInputType = {
   phone?: true
   billingDuration?: true
   planPrice?: true
+  discountInr?: true
   paymentStatus?: true
   memberPhoto?: true
   upiScreenshot?: true
   startDate?: true
   endDate?: true
+  membershipStatus?: true
+  pausedAt?: true
   whatsappEnabled?: true
   adminUserId?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -123,13 +143,17 @@ export type MemberMaxAggregateInputType = {
   phone?: true
   billingDuration?: true
   planPrice?: true
+  discountInr?: true
   paymentStatus?: true
   memberPhoto?: true
   upiScreenshot?: true
   startDate?: true
   endDate?: true
+  membershipStatus?: true
+  pausedAt?: true
   whatsappEnabled?: true
   adminUserId?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -141,13 +165,17 @@ export type MemberCountAggregateInputType = {
   phone?: true
   billingDuration?: true
   planPrice?: true
+  discountInr?: true
   paymentStatus?: true
   memberPhoto?: true
   upiScreenshot?: true
   startDate?: true
   endDate?: true
+  membershipStatus?: true
+  pausedAt?: true
   whatsappEnabled?: true
   adminUserId?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -246,13 +274,17 @@ export type MemberGroupByOutputType = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal
+  discountInr: runtime.Decimal
   paymentStatus: $Enums.PaymentStatus
   memberPhoto: string | null
   upiScreenshot: string | null
   startDate: Date
   endDate: Date
+  membershipStatus: $Enums.MembershipStatus
+  pausedAt: Date | null
   whatsappEnabled: boolean
   adminUserId: string
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: MemberCountAggregateOutputType | null
@@ -287,13 +319,17 @@ export type MemberWhereInput = {
   phone?: Prisma.StringFilter<"Member"> | string
   billingDuration?: Prisma.EnumMemberBillingDurationFilter<"Member"> | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Member"> | $Enums.PaymentStatus
   memberPhoto?: Prisma.StringNullableFilter<"Member"> | string | null
   upiScreenshot?: Prisma.StringNullableFilter<"Member"> | string | null
   startDate?: Prisma.DateTimeFilter<"Member"> | Date | string
   endDate?: Prisma.DateTimeFilter<"Member"> | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFilter<"Member"> | $Enums.MembershipStatus
+  pausedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   whatsappEnabled?: Prisma.BoolFilter<"Member"> | boolean
   adminUserId?: Prisma.StringFilter<"Member"> | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
@@ -307,13 +343,17 @@ export type MemberOrderByWithRelationInput = {
   phone?: Prisma.SortOrder
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
+  discountInr?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrderInput | Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  membershipStatus?: Prisma.SortOrder
+  pausedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   whatsappEnabled?: Prisma.SortOrder
   adminUserId?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   adminUser?: Prisma.AdminUserOrderByWithRelationInput
@@ -330,13 +370,17 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   phone?: Prisma.StringFilter<"Member"> | string
   billingDuration?: Prisma.EnumMemberBillingDurationFilter<"Member"> | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Member"> | $Enums.PaymentStatus
   memberPhoto?: Prisma.StringNullableFilter<"Member"> | string | null
   upiScreenshot?: Prisma.StringNullableFilter<"Member"> | string | null
   startDate?: Prisma.DateTimeFilter<"Member"> | Date | string
   endDate?: Prisma.DateTimeFilter<"Member"> | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFilter<"Member"> | $Enums.MembershipStatus
+  pausedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   whatsappEnabled?: Prisma.BoolFilter<"Member"> | boolean
   adminUserId?: Prisma.StringFilter<"Member"> | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
@@ -350,13 +394,17 @@ export type MemberOrderByWithAggregationInput = {
   phone?: Prisma.SortOrder
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
+  discountInr?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrderInput | Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  membershipStatus?: Prisma.SortOrder
+  pausedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   whatsappEnabled?: Prisma.SortOrder
   adminUserId?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.MemberCountOrderByAggregateInput
@@ -376,13 +424,17 @@ export type MemberScalarWhereWithAggregatesInput = {
   phone?: Prisma.StringWithAggregatesFilter<"Member"> | string
   billingDuration?: Prisma.EnumMemberBillingDurationWithAggregatesFilter<"Member"> | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalWithAggregatesFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalWithAggregatesFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusWithAggregatesFilter<"Member"> | $Enums.PaymentStatus
   memberPhoto?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   upiScreenshot?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   startDate?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
   endDate?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusWithAggregatesFilter<"Member"> | $Enums.MembershipStatus
+  pausedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
   whatsappEnabled?: Prisma.BoolWithAggregatesFilter<"Member"> | boolean
   adminUserId?: Prisma.StringWithAggregatesFilter<"Member"> | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Member"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
 }
@@ -394,12 +446,16 @@ export type MemberCreateInput = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
   startDate: Date | string
   endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
   whatsappEnabled?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   adminUser: Prisma.AdminUserCreateNestedOneWithoutMembersInput
@@ -413,13 +469,17 @@ export type MemberUncheckedCreateInput = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
   startDate: Date | string
   endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
   whatsappEnabled?: boolean
   adminUserId: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reminders?: Prisma.ReminderLogUncheckedCreateNestedManyWithoutMemberInput
@@ -432,12 +492,16 @@ export type MemberUpdateInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   adminUser?: Prisma.AdminUserUpdateOneRequiredWithoutMembersNestedInput
@@ -451,13 +515,17 @@ export type MemberUncheckedUpdateInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   adminUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reminders?: Prisma.ReminderLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -470,13 +538,17 @@ export type MemberCreateManyInput = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
   startDate: Date | string
   endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
   whatsappEnabled?: boolean
   adminUserId: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -488,12 +560,16 @@ export type MemberUpdateManyMutationInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -505,13 +581,17 @@ export type MemberUncheckedUpdateManyInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   adminUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -523,19 +603,24 @@ export type MemberCountOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
+  discountInr?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  membershipStatus?: Prisma.SortOrder
+  pausedAt?: Prisma.SortOrder
   whatsappEnabled?: Prisma.SortOrder
   adminUserId?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type MemberAvgOrderByAggregateInput = {
   planPrice?: Prisma.SortOrder
+  discountInr?: Prisma.SortOrder
 }
 
 export type MemberMaxOrderByAggregateInput = {
@@ -545,13 +630,17 @@ export type MemberMaxOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
+  discountInr?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  membershipStatus?: Prisma.SortOrder
+  pausedAt?: Prisma.SortOrder
   whatsappEnabled?: Prisma.SortOrder
   adminUserId?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -563,19 +652,24 @@ export type MemberMinOrderByAggregateInput = {
   phone?: Prisma.SortOrder
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
+  discountInr?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
+  membershipStatus?: Prisma.SortOrder
+  pausedAt?: Prisma.SortOrder
   whatsappEnabled?: Prisma.SortOrder
   adminUserId?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type MemberSumOrderByAggregateInput = {
   planPrice?: Prisma.SortOrder
+  discountInr?: Prisma.SortOrder
 }
 
 export type MemberScalarRelationFilter = {
@@ -619,6 +713,14 @@ export type EnumPaymentStatusFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type EnumMembershipStatusFieldUpdateOperationsInput = {
+  set?: $Enums.MembershipStatus
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type BoolFieldUpdateOperationsInput = {
@@ -688,12 +790,16 @@ export type MemberCreateWithoutRemindersInput = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
   startDate: Date | string
   endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
   whatsappEnabled?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   adminUser: Prisma.AdminUserCreateNestedOneWithoutMembersInput
@@ -706,13 +812,17 @@ export type MemberUncheckedCreateWithoutRemindersInput = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
   startDate: Date | string
   endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
   whatsappEnabled?: boolean
   adminUserId: string
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -740,12 +850,16 @@ export type MemberUpdateWithoutRemindersInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   adminUser?: Prisma.AdminUserUpdateOneRequiredWithoutMembersNestedInput
@@ -758,13 +872,17 @@ export type MemberUncheckedUpdateWithoutRemindersInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   adminUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -776,12 +894,16 @@ export type MemberCreateWithoutAdminUserInput = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
   startDate: Date | string
   endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
   whatsappEnabled?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reminders?: Prisma.ReminderLogCreateNestedManyWithoutMemberInput
@@ -794,12 +916,16 @@ export type MemberUncheckedCreateWithoutAdminUserInput = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
   startDate: Date | string
   endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
   whatsappEnabled?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reminders?: Prisma.ReminderLogUncheckedCreateNestedManyWithoutMemberInput
@@ -841,13 +967,17 @@ export type MemberScalarWhereInput = {
   phone?: Prisma.StringFilter<"Member"> | string
   billingDuration?: Prisma.EnumMemberBillingDurationFilter<"Member"> | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Member"> | $Enums.PaymentStatus
   memberPhoto?: Prisma.StringNullableFilter<"Member"> | string | null
   upiScreenshot?: Prisma.StringNullableFilter<"Member"> | string | null
   startDate?: Prisma.DateTimeFilter<"Member"> | Date | string
   endDate?: Prisma.DateTimeFilter<"Member"> | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFilter<"Member"> | $Enums.MembershipStatus
+  pausedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   whatsappEnabled?: Prisma.BoolFilter<"Member"> | boolean
   adminUserId?: Prisma.StringFilter<"Member"> | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Member"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
 }
@@ -859,12 +989,16 @@ export type MemberCreateManyAdminUserInput = {
   phone: string
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
   startDate: Date | string
   endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
   whatsappEnabled?: boolean
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -876,12 +1010,16 @@ export type MemberUpdateWithoutAdminUserInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reminders?: Prisma.ReminderLogUpdateManyWithoutMemberNestedInput
@@ -894,12 +1032,16 @@ export type MemberUncheckedUpdateWithoutAdminUserInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reminders?: Prisma.ReminderLogUncheckedUpdateManyWithoutMemberNestedInput
@@ -912,12 +1054,16 @@ export type MemberUncheckedUpdateManyWithoutAdminUserInput = {
   phone?: Prisma.StringFieldUpdateOperationsInput | string
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -960,13 +1106,17 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   phone?: boolean
   billingDuration?: boolean
   planPrice?: boolean
+  discountInr?: boolean
   paymentStatus?: boolean
   memberPhoto?: boolean
   upiScreenshot?: boolean
   startDate?: boolean
   endDate?: boolean
+  membershipStatus?: boolean
+  pausedAt?: boolean
   whatsappEnabled?: boolean
   adminUserId?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
@@ -981,13 +1131,17 @@ export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   phone?: boolean
   billingDuration?: boolean
   planPrice?: boolean
+  discountInr?: boolean
   paymentStatus?: boolean
   memberPhoto?: boolean
   upiScreenshot?: boolean
   startDate?: boolean
   endDate?: boolean
+  membershipStatus?: boolean
+  pausedAt?: boolean
   whatsappEnabled?: boolean
   adminUserId?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
@@ -1000,13 +1154,17 @@ export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   phone?: boolean
   billingDuration?: boolean
   planPrice?: boolean
+  discountInr?: boolean
   paymentStatus?: boolean
   memberPhoto?: boolean
   upiScreenshot?: boolean
   startDate?: boolean
   endDate?: boolean
+  membershipStatus?: boolean
+  pausedAt?: boolean
   whatsappEnabled?: boolean
   adminUserId?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
@@ -1019,18 +1177,22 @@ export type MemberSelectScalar = {
   phone?: boolean
   billingDuration?: boolean
   planPrice?: boolean
+  discountInr?: boolean
   paymentStatus?: boolean
   memberPhoto?: boolean
   upiScreenshot?: boolean
   startDate?: boolean
   endDate?: boolean
+  membershipStatus?: boolean
+  pausedAt?: boolean
   whatsappEnabled?: boolean
   adminUserId?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "phone" | "billingDuration" | "planPrice" | "paymentStatus" | "memberPhoto" | "upiScreenshot" | "startDate" | "endDate" | "whatsappEnabled" | "adminUserId" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "phone" | "billingDuration" | "planPrice" | "discountInr" | "paymentStatus" | "memberPhoto" | "upiScreenshot" | "startDate" | "endDate" | "membershipStatus" | "pausedAt" | "whatsappEnabled" | "adminUserId" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   reminders?: boolean | Prisma.Member$remindersArgs<ExtArgs>
@@ -1055,14 +1217,27 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     email: string | null
     phone: string
     billingDuration: $Enums.MemberBillingDuration
+    /**
+     * List price for this duration minus `discountInr` (amount actually charged / recorded).
+     */
     planPrice: runtime.Decimal
+    /**
+     * INR bargained off the list price for this duration; 0 if none.
+     */
+    discountInr: runtime.Decimal
     paymentStatus: $Enums.PaymentStatus
     memberPhoto: string | null
     upiScreenshot: string | null
     startDate: Date
     endDate: Date
+    membershipStatus: $Enums.MembershipStatus
+    /**
+     * When status is PAUSED, clock started for freeze; on resume, endDate is extended by frozen calendar days.
+     */
+    pausedAt: Date | null
     whatsappEnabled: boolean
     adminUserId: string
+    deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["member"]>
@@ -1496,13 +1671,17 @@ export interface MemberFieldRefs {
   readonly phone: Prisma.FieldRef<"Member", 'String'>
   readonly billingDuration: Prisma.FieldRef<"Member", 'MemberBillingDuration'>
   readonly planPrice: Prisma.FieldRef<"Member", 'Decimal'>
+  readonly discountInr: Prisma.FieldRef<"Member", 'Decimal'>
   readonly paymentStatus: Prisma.FieldRef<"Member", 'PaymentStatus'>
   readonly memberPhoto: Prisma.FieldRef<"Member", 'String'>
   readonly upiScreenshot: Prisma.FieldRef<"Member", 'String'>
   readonly startDate: Prisma.FieldRef<"Member", 'DateTime'>
   readonly endDate: Prisma.FieldRef<"Member", 'DateTime'>
+  readonly membershipStatus: Prisma.FieldRef<"Member", 'MembershipStatus'>
+  readonly pausedAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly whatsappEnabled: Prisma.FieldRef<"Member", 'Boolean'>
   readonly adminUserId: Prisma.FieldRef<"Member", 'String'>
+  readonly deletedAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Member", 'DateTime'>
 }

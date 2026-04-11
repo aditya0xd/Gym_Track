@@ -30,8 +30,16 @@ export default async function OwnerDashboardPage() {
   in7Days.setUTCDate(in7Days.getUTCDate() + 7);
 
   const totalMembers = members.length;
-  const activeMembers = members.filter((m) => m.endDate >= today).length;
-  const expiringSoon = members.filter((m) => m.endDate >= today && m.endDate <= in7Days);
+  const activeMembers = members.filter(
+    (m) => m.endDate >= today && m.membershipStatus === "ACTIVE",
+  ).length;
+  const pausedMembers = members.filter((m) => m.membershipStatus === "PAUSED").length;
+  const expiringSoon = members.filter(
+    (m) =>
+      m.endDate >= today &&
+      m.endDate <= in7Days &&
+      m.membershipStatus === "ACTIVE",
+  );
   const expiredMembers = members.filter((m) => m.endDate < today);
   const revenueAtRisk = expiringSoon.reduce((sum, m) => sum + Number(m.planPrice), 0);
   const revenueLost = expiredMembers.reduce((sum, m) => sum + Number(m.planPrice), 0);
@@ -51,6 +59,7 @@ export default async function OwnerDashboardPage() {
       accent: "border-border",
       href: "/owner/members?status=expiring",
     },
+    { label: "Paused", value: pausedMembers, accent: "border-border", href: "/owner/members?status=paused" },
     { label: "Expired", value: expiredMembers.length, accent: "border-border", href: "/owner/members?status=expired" },
   ];
 
@@ -84,7 +93,7 @@ export default async function OwnerDashboardPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {statCards.map((card) => (
             <Link
               key={card.label}
@@ -112,7 +121,14 @@ export default async function OwnerDashboardPage() {
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Recent members</p>
           <div className="mt-3 divide-y divide-border">
             {recentMembers.map((m) => {
-              const status = m.endDate < today ? "Expired" : m.endDate <= in7Days ? "Expiring soon" : "Active";
+              const status =
+                m.membershipStatus === "PAUSED"
+                  ? "Paused"
+                  : m.endDate < today
+                    ? "Expired"
+                    : m.endDate <= in7Days
+                      ? "Expiring soon"
+                      : "Active";
               return (
                 <Link
                   key={m.id}
@@ -122,7 +138,14 @@ export default async function OwnerDashboardPage() {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-foreground">{m.fullName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {durationLabel(m.billingDuration)} · {formatInrFromDecimalString(m.planPrice.toString())}
+                      {durationLabel(m.billingDuration)} ·{" "}
+                      {formatInrFromDecimalString(m.planPrice.toString())}
+                      {Number(m.discountInr) > 0 ? (
+                        <span className="text-muted-foreground/90">
+                          {" "}
+                          (−{formatInrFromDecimalString(m.discountInr.toString())} off list)
+                        </span>
+                      ) : null}
                     </p>
                   </div>
                   <span className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground">

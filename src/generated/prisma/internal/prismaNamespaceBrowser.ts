@@ -57,6 +57,7 @@ export const ModelName = {
   SuperAdminUser: 'SuperAdminUser',
   GymOwnerDurationPrice: 'GymOwnerDurationPrice',
   PlatformPlanPrice: 'PlatformPlanPrice',
+  PlatformPlanFeature: 'PlatformPlanFeature',
   OwnerBillingInvoice: 'OwnerBillingInvoice'
 } as const
 
@@ -83,13 +84,17 @@ export const MemberScalarFieldEnum = {
   phone: 'phone',
   billingDuration: 'billingDuration',
   planPrice: 'planPrice',
+  discountInr: 'discountInr',
   paymentStatus: 'paymentStatus',
   memberPhoto: 'memberPhoto',
   upiScreenshot: 'upiScreenshot',
   startDate: 'startDate',
   endDate: 'endDate',
+  membershipStatus: 'membershipStatus',
+  pausedAt: 'pausedAt',
   whatsappEnabled: 'whatsappEnabled',
   adminUserId: 'adminUserId',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -103,7 +108,9 @@ export const ReminderLogScalarFieldEnum = {
   channel: 'channel',
   sentAt: 'sentAt',
   status: 'status',
-  message: 'message'
+  message: 'message',
+  category: 'category',
+  relatedEndDate: 'relatedEndDate'
 } as const
 
 export type ReminderLogScalarFieldEnum = (typeof ReminderLogScalarFieldEnum)[keyof typeof ReminderLogScalarFieldEnum]
@@ -116,6 +123,7 @@ export const AdminUserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   subscriptionPlan: 'subscriptionPlan',
   trialEndsAt: 'trialEndsAt',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -139,7 +147,8 @@ export const GymOwnerDurationPriceScalarFieldEnum = {
   id: 'id',
   adminUserId: 'adminUserId',
   duration: 'duration',
-  priceInr: 'priceInr'
+  priceInr: 'priceInr',
+  deletedAt: 'deletedAt'
 } as const
 
 export type GymOwnerDurationPriceScalarFieldEnum = (typeof GymOwnerDurationPriceScalarFieldEnum)[keyof typeof GymOwnerDurationPriceScalarFieldEnum]
@@ -156,6 +165,18 @@ export const PlatformPlanPriceScalarFieldEnum = {
 export type PlatformPlanPriceScalarFieldEnum = (typeof PlatformPlanPriceScalarFieldEnum)[keyof typeof PlatformPlanPriceScalarFieldEnum]
 
 
+export const PlatformPlanFeatureScalarFieldEnum = {
+  id: 'id',
+  plan: 'plan',
+  featureKey: 'featureKey',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlatformPlanFeatureScalarFieldEnum = (typeof PlatformPlanFeatureScalarFieldEnum)[keyof typeof PlatformPlanFeatureScalarFieldEnum]
+
+
 export const OwnerBillingInvoiceScalarFieldEnum = {
   id: 'id',
   adminUserId: 'adminUserId',
@@ -168,6 +189,7 @@ export const OwnerBillingInvoiceScalarFieldEnum = {
   razorpaySignature: 'razorpaySignature',
   dueDate: 'dueDate',
   paidAt: 'paidAt',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt'
 } as const
 

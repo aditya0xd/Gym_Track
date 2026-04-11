@@ -10,6 +10,7 @@ export type MemberRow = {
   phone: string;
   billingDuration: MemberBillingDuration;
   planPrice: string;
+  discountInr: string;
   startDate: string;
   endDate: string;
   whatsappEnabled: boolean;
@@ -59,7 +60,12 @@ export function MembersDataTable({ members }: { members: MemberRow[] }) {
                   </span>
                 </td>
                 <td className="px-3 py-2.5 text-foreground sm:px-4 sm:py-3">
-                  {formatInrFromDecimalString(m.planPrice)}
+                  <span>{formatInrFromDecimalString(m.planPrice)}</span>
+                  {Number(m.discountInr) > 0 ? (
+                    <span className="block text-xs text-muted-foreground">
+                      −{formatInrFromDecimalString(m.discountInr)} list discount
+                    </span>
+                  ) : null}
                 </td>
                 <td className="px-3 py-2.5 text-foreground sm:px-4 sm:py-3">
                   {m.startDate}

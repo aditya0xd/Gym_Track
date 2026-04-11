@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -27,12 +27,33 @@ async function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
+function openImagePicker(
+  input: HTMLInputElement | null,
+  mode: "camera" | "files",
+  capture: "user" | "environment",
+) {
+  if (!input) return;
+  if (mode === "camera") {
+    input.setAttribute("capture", capture);
+  } else {
+    input.removeAttribute("capture");
+  }
+  input.click();
+}
+
 export function MemberEnrollForm() {
   const router = useRouter();
+  const memberPhotoInputRef = useRef<HTMLInputElement>(null);
+  const upiScreenshotInputRef = useRef<HTMLInputElement>(null);
+  const [memberPhotoFileName, setMemberPhotoFileName] = useState<string | null>(
+    null,
+  );
+  const [upiFileName, setUpiFileName] = useState<string | null>(null);
   const [hints, setHints] = useState<PriceHint[]>([]);
   const [duration, setDuration] =
     useState<MemberBillingDuration>("ONE_MONTH");
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("NOT_DONE");
+  const [discountStr, setDiscountStr] = useState("");
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
@@ -56,6 +77,14 @@ export function MemberEnrollForm() {
   const hintPrice = useMemo(() => {
     return hints.find((h) => h.duration === duration)?.priceInr ?? null;
   }, [hints, duration]);
+
+  const chargedPreview = useMemo(() => {
+    if (!hintPrice) return null;
+    const list = Number(hintPrice);
+    const disc = discountStr.trim() === "" ? 0 : Number(discountStr);
+    if (!Number.isFinite(list) || !Number.isFinite(disc) || disc < 0) return null;
+    return Math.max(0, list - disc).toFixed(2);
+  }, [hintPrice, discountStr]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -97,6 +126,7 @@ export function MemberEnrollForm() {
       return;
     }
 
+    const discountTrim = discountStr.trim();
     const res = await fetch("/api/owner/members", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -110,6 +140,7 @@ export function MemberEnrollForm() {
         paymentStatus,
         memberPhoto,
         upiScreenshot,
+        discountInr: discountTrim === "" ? undefined : discountTrim,
       }),
     });
 
@@ -178,17 +209,38 @@ export function MemberEnrollForm() {
         </select>
         {hintPrice ? (
           <p className="text-xs text-muted-foreground">
-            Your list price:{" "}
+            List price for this duration:{" "}
             <span className="font-medium text-foreground">
               {formatInrFromDecimalString(hintPrice)}
-            </span>{" "}
-            (charged on enroll)
+            </span>
           </p>
         ) : (
           <p className="text-xs font-medium text-foreground">
             Set this duration&apos;s INR price under Pricing before enrolling.
           </p>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="discountInr">Discount (INR)</Label>
+        <Input
+          id="discountInr"
+          inputMode="decimal"
+          autoComplete="off"
+          placeholder="0"
+          value={discountStr}
+          onChange={(e) =>
+            setDiscountStr(e.target.value.replace(/[^\d.]/g, ""))
+          }
+        />
+        <p className="text-xs text-muted-foreground">
+          Optional. Bargained amount to subtract from the list price above (cannot exceed list price).
+        </p>
+        {hintPrice && chargedPreview !== null ? (
+          <p className="text-sm font-medium text-foreground">
+            Amount charged: {formatInrFromDecimalString(chargedPreview)}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-2">
@@ -203,16 +255,49 @@ export function MemberEnrollForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="memberPhoto">Member photo (upload/capture)</Label>
-        <Input
+        <Label>Member photo</Label>
+        <input
+          ref={memberPhotoInputRef}
           id="memberPhoto"
           name="memberPhoto"
           type="file"
           accept="image/*"
-          capture="environment"
+          className="sr-only"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            setMemberPhotoFileName(f?.name ?? null);
+          }}
         />
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              openImagePicker(memberPhotoInputRef.current, "camera", "user")
+            }
+          >
+            Take photo
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              openImagePicker(memberPhotoInputRef.current, "files", "user")
+            }
+          >
+            Choose image
+          </Button>
+        </div>
+        {memberPhotoFileName ? (
+          <p className="text-xs text-muted-foreground">
+            Selected: <span className="font-medium text-foreground">{memberPhotoFileName}</span>
+          </p>
+        ) : null}
         <p className="text-xs text-muted-foreground">
-          On mobile, this opens camera or gallery. Max 3MB.
+          &quot;Take photo&quot; uses the camera (front on phones). &quot;Choose image&quot; opens
+          gallery or files. Max 3MB.
         </p>
       </div>
 
@@ -231,19 +316,51 @@ export function MemberEnrollForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="upiScreenshot">
+        <Label>
           UPI screenshot {paymentStatus === "DONE" ? "(required)" : "(optional)"}
         </Label>
-        <Input
+        <input
+          ref={upiScreenshotInputRef}
           id="upiScreenshot"
           name="upiScreenshot"
           type="file"
           accept="image/*"
-          capture="environment"
+          className="sr-only"
           required={paymentStatus === "DONE"}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            setUpiFileName(f?.name ?? null);
+          }}
         />
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              openImagePicker(upiScreenshotInputRef.current, "camera", "environment")
+            }
+          >
+            Take photo
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              openImagePicker(upiScreenshotInputRef.current, "files", "environment")
+            }
+          >
+            Choose image
+          </Button>
+        </div>
+        {upiFileName ? (
+          <p className="text-xs text-muted-foreground">
+            Selected: <span className="font-medium text-foreground">{upiFileName}</span>
+          </p>
+        ) : null}
         <p className="text-xs text-muted-foreground">
-          Upload the payment proof screenshot. Max 3MB.
+          Use the camera to snap the payment screen or QR, or pick an existing screenshot. Max 3MB.
         </p>
       </div>
 

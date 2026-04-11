@@ -28,3 +28,21 @@ export function membershipEndDateInclusive(
 export function monthsForDuration(duration: MemberBillingDuration): number {
   return DURATION_MONTHS[duration];
 }
+
+/** UTC calendar day start (date-only semantics for @db.Date fields). */
+export function utcDayStart(d: Date): Date {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+}
+
+/** Whole calendar days from `a` to `b` (UTC date parts), non-negative. */
+export function calendarDaysBetweenUtc(a: Date, b: Date): number {
+  const da = Date.UTC(a.getUTCFullYear(), a.getUTCMonth(), a.getUTCDate());
+  const db = Date.UTC(b.getUTCFullYear(), b.getUTCMonth(), b.getUTCDate());
+  return Math.max(0, Math.round((db - da) / (24 * 60 * 60 * 1000)));
+}
+
+export function addCalendarDaysUtc(d: Date, days: number): Date {
+  const x = new Date(d);
+  x.setUTCDate(x.getUTCDate() + days);
+  return x;
+}

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Member" ADD COLUMN "discountInr" DECIMAL(10,2) NOT NULL DEFAULT 0;

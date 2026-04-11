@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { PageShell } from "@/components/shared/PageShell";
 import { Button } from "@/components/ui/button";
+import { MemberMembershipActions } from "@/components/gym-owner/MemberMembershipActions";
 import { MemberNotificationActions } from "@/components/gym-owner/MemberNotificationActions";
 import { authOptions } from "@/lib/auth";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
@@ -45,7 +46,16 @@ export default async function OwnerMemberDetailPage({
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const in7Days = new Date(today);
   in7Days.setUTCDate(in7Days.getUTCDate() + 7);
-  const status = member.endDate < today ? "Expired" : member.endDate <= in7Days ? "Expiring soon" : "Active";
+  const status =
+    member.membershipStatus === "PAUSED"
+      ? "Paused"
+      : member.endDate < today
+        ? "Expired"
+        : member.endDate <= in7Days
+          ? "Expiring soon"
+          : "Active";
+  const canPause =
+    member.membershipStatus === "ACTIVE" && member.endDate >= today;
 
   return (
     <PageShell>
@@ -74,10 +84,27 @@ export default async function OwnerMemberDetailPage({
             ["Phone", member.phone],
             ["Email", member.email ?? "Not provided"],
             ["Plan", durationLabel(member.billingDuration)],
-            ["Price", formatInrFromDecimalString(member.planPrice.toString())],
+            [
+              "Amount charged",
+              formatInrFromDecimalString(member.planPrice.toString()),
+            ],
+            [
+              "Discount from list price",
+              Number(member.discountInr) > 0
+                ? formatInrFromDecimalString(member.discountInr.toString())
+                : "—",
+            ],
             ["Start date", member.startDate.toISOString().slice(0, 10)],
             ["End date", member.endDate.toISOString().slice(0, 10)],
             ["Days left", daysLeftText(member.endDate)],
+            [
+              "Membership",
+              member.membershipStatus === "PAUSED" ? "Paused / frozen" : "Active",
+            ],
+            [
+              "Paused since",
+              member.pausedAt ? member.pausedAt.toISOString().slice(0, 10) : "—",
+            ],
             ["WhatsApp", member.whatsappEnabled ? "Enabled" : "Disabled"],
           ].map(([k, v]) => (
             <div key={k} className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 last:border-b-0">
@@ -91,7 +118,12 @@ export default async function OwnerMemberDetailPage({
           <Button type="button" variant="outline" disabled>
             Edit
           </Button>
-          <div className="sm:col-span-2">
+          <div className="space-y-3 sm:col-span-2">
+            <MemberMembershipActions
+              memberId={member.id}
+              membershipStatus={member.membershipStatus}
+              canPause={canPause}
+            />
             <MemberNotificationActions memberId={member.id} />
           </div>
         </div>

@@ -31,6 +31,8 @@ export type ReminderLogMinAggregateOutputType = {
   sentAt: Date | null
   status: $Enums.ReminderStatus | null
   message: string | null
+  category: $Enums.ReminderCategory | null
+  relatedEndDate: Date | null
 }
 
 export type ReminderLogMaxAggregateOutputType = {
@@ -40,6 +42,8 @@ export type ReminderLogMaxAggregateOutputType = {
   sentAt: Date | null
   status: $Enums.ReminderStatus | null
   message: string | null
+  category: $Enums.ReminderCategory | null
+  relatedEndDate: Date | null
 }
 
 export type ReminderLogCountAggregateOutputType = {
@@ -49,6 +53,8 @@ export type ReminderLogCountAggregateOutputType = {
   sentAt: number
   status: number
   message: number
+  category: number
+  relatedEndDate: number
   _all: number
 }
 
@@ -60,6 +66,8 @@ export type ReminderLogMinAggregateInputType = {
   sentAt?: true
   status?: true
   message?: true
+  category?: true
+  relatedEndDate?: true
 }
 
 export type ReminderLogMaxAggregateInputType = {
@@ -69,6 +77,8 @@ export type ReminderLogMaxAggregateInputType = {
   sentAt?: true
   status?: true
   message?: true
+  category?: true
+  relatedEndDate?: true
 }
 
 export type ReminderLogCountAggregateInputType = {
@@ -78,6 +88,8 @@ export type ReminderLogCountAggregateInputType = {
   sentAt?: true
   status?: true
   message?: true
+  category?: true
+  relatedEndDate?: true
   _all?: true
 }
 
@@ -160,6 +172,8 @@ export type ReminderLogGroupByOutputType = {
   sentAt: Date
   status: $Enums.ReminderStatus
   message: string
+  category: $Enums.ReminderCategory
+  relatedEndDate: Date | null
   _count: ReminderLogCountAggregateOutputType | null
   _min: ReminderLogMinAggregateOutputType | null
   _max: ReminderLogMaxAggregateOutputType | null
@@ -190,6 +204,8 @@ export type ReminderLogWhereInput = {
   sentAt?: Prisma.DateTimeFilter<"ReminderLog"> | Date | string
   status?: Prisma.EnumReminderStatusFilter<"ReminderLog"> | $Enums.ReminderStatus
   message?: Prisma.StringFilter<"ReminderLog"> | string
+  category?: Prisma.EnumReminderCategoryFilter<"ReminderLog"> | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.DateTimeNullableFilter<"ReminderLog"> | Date | string | null
   member?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
 }
 
@@ -200,6 +216,8 @@ export type ReminderLogOrderByWithRelationInput = {
   sentAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   message?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  relatedEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   member?: Prisma.MemberOrderByWithRelationInput
 }
 
@@ -213,6 +231,8 @@ export type ReminderLogWhereUniqueInput = Prisma.AtLeast<{
   sentAt?: Prisma.DateTimeFilter<"ReminderLog"> | Date | string
   status?: Prisma.EnumReminderStatusFilter<"ReminderLog"> | $Enums.ReminderStatus
   message?: Prisma.StringFilter<"ReminderLog"> | string
+  category?: Prisma.EnumReminderCategoryFilter<"ReminderLog"> | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.DateTimeNullableFilter<"ReminderLog"> | Date | string | null
   member?: Prisma.XOR<Prisma.MemberScalarRelationFilter, Prisma.MemberWhereInput>
 }, "id">
 
@@ -223,6 +243,8 @@ export type ReminderLogOrderByWithAggregationInput = {
   sentAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   message?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  relatedEndDate?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ReminderLogCountOrderByAggregateInput
   _max?: Prisma.ReminderLogMaxOrderByAggregateInput
   _min?: Prisma.ReminderLogMinOrderByAggregateInput
@@ -238,6 +260,8 @@ export type ReminderLogScalarWhereWithAggregatesInput = {
   sentAt?: Prisma.DateTimeWithAggregatesFilter<"ReminderLog"> | Date | string
   status?: Prisma.EnumReminderStatusWithAggregatesFilter<"ReminderLog"> | $Enums.ReminderStatus
   message?: Prisma.StringWithAggregatesFilter<"ReminderLog"> | string
+  category?: Prisma.EnumReminderCategoryWithAggregatesFilter<"ReminderLog"> | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.DateTimeNullableWithAggregatesFilter<"ReminderLog"> | Date | string | null
 }
 
 export type ReminderLogCreateInput = {
@@ -246,6 +270,8 @@ export type ReminderLogCreateInput = {
   sentAt?: Date | string
   status: $Enums.ReminderStatus
   message: string
+  category?: $Enums.ReminderCategory
+  relatedEndDate?: Date | string | null
   member: Prisma.MemberCreateNestedOneWithoutRemindersInput
 }
 
@@ -256,6 +282,8 @@ export type ReminderLogUncheckedCreateInput = {
   sentAt?: Date | string
   status: $Enums.ReminderStatus
   message: string
+  category?: $Enums.ReminderCategory
+  relatedEndDate?: Date | string | null
 }
 
 export type ReminderLogUpdateInput = {
@@ -264,6 +292,8 @@ export type ReminderLogUpdateInput = {
   sentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReminderStatusFieldUpdateOperationsInput | $Enums.ReminderStatus
   message?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumReminderCategoryFieldUpdateOperationsInput | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   member?: Prisma.MemberUpdateOneRequiredWithoutRemindersNestedInput
 }
 
@@ -274,6 +304,8 @@ export type ReminderLogUncheckedUpdateInput = {
   sentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReminderStatusFieldUpdateOperationsInput | $Enums.ReminderStatus
   message?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumReminderCategoryFieldUpdateOperationsInput | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ReminderLogCreateManyInput = {
@@ -283,6 +315,8 @@ export type ReminderLogCreateManyInput = {
   sentAt?: Date | string
   status: $Enums.ReminderStatus
   message: string
+  category?: $Enums.ReminderCategory
+  relatedEndDate?: Date | string | null
 }
 
 export type ReminderLogUpdateManyMutationInput = {
@@ -291,6 +325,8 @@ export type ReminderLogUpdateManyMutationInput = {
   sentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReminderStatusFieldUpdateOperationsInput | $Enums.ReminderStatus
   message?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumReminderCategoryFieldUpdateOperationsInput | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ReminderLogUncheckedUpdateManyInput = {
@@ -300,6 +336,8 @@ export type ReminderLogUncheckedUpdateManyInput = {
   sentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReminderStatusFieldUpdateOperationsInput | $Enums.ReminderStatus
   message?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumReminderCategoryFieldUpdateOperationsInput | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ReminderLogListRelationFilter = {
@@ -319,6 +357,8 @@ export type ReminderLogCountOrderByAggregateInput = {
   sentAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   message?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  relatedEndDate?: Prisma.SortOrder
 }
 
 export type ReminderLogMaxOrderByAggregateInput = {
@@ -328,6 +368,8 @@ export type ReminderLogMaxOrderByAggregateInput = {
   sentAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   message?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  relatedEndDate?: Prisma.SortOrder
 }
 
 export type ReminderLogMinOrderByAggregateInput = {
@@ -337,6 +379,8 @@ export type ReminderLogMinOrderByAggregateInput = {
   sentAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   message?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  relatedEndDate?: Prisma.SortOrder
 }
 
 export type ReminderLogCreateNestedManyWithoutMemberInput = {
@@ -389,12 +433,18 @@ export type EnumReminderStatusFieldUpdateOperationsInput = {
   set?: $Enums.ReminderStatus
 }
 
+export type EnumReminderCategoryFieldUpdateOperationsInput = {
+  set?: $Enums.ReminderCategory
+}
+
 export type ReminderLogCreateWithoutMemberInput = {
   id?: string
   channel: $Enums.Channel
   sentAt?: Date | string
   status: $Enums.ReminderStatus
   message: string
+  category?: $Enums.ReminderCategory
+  relatedEndDate?: Date | string | null
 }
 
 export type ReminderLogUncheckedCreateWithoutMemberInput = {
@@ -403,6 +453,8 @@ export type ReminderLogUncheckedCreateWithoutMemberInput = {
   sentAt?: Date | string
   status: $Enums.ReminderStatus
   message: string
+  category?: $Enums.ReminderCategory
+  relatedEndDate?: Date | string | null
 }
 
 export type ReminderLogCreateOrConnectWithoutMemberInput = {
@@ -441,6 +493,8 @@ export type ReminderLogScalarWhereInput = {
   sentAt?: Prisma.DateTimeFilter<"ReminderLog"> | Date | string
   status?: Prisma.EnumReminderStatusFilter<"ReminderLog"> | $Enums.ReminderStatus
   message?: Prisma.StringFilter<"ReminderLog"> | string
+  category?: Prisma.EnumReminderCategoryFilter<"ReminderLog"> | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.DateTimeNullableFilter<"ReminderLog"> | Date | string | null
 }
 
 export type ReminderLogCreateManyMemberInput = {
@@ -449,6 +503,8 @@ export type ReminderLogCreateManyMemberInput = {
   sentAt?: Date | string
   status: $Enums.ReminderStatus
   message: string
+  category?: $Enums.ReminderCategory
+  relatedEndDate?: Date | string | null
 }
 
 export type ReminderLogUpdateWithoutMemberInput = {
@@ -457,6 +513,8 @@ export type ReminderLogUpdateWithoutMemberInput = {
   sentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReminderStatusFieldUpdateOperationsInput | $Enums.ReminderStatus
   message?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumReminderCategoryFieldUpdateOperationsInput | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ReminderLogUncheckedUpdateWithoutMemberInput = {
@@ -465,6 +523,8 @@ export type ReminderLogUncheckedUpdateWithoutMemberInput = {
   sentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReminderStatusFieldUpdateOperationsInput | $Enums.ReminderStatus
   message?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumReminderCategoryFieldUpdateOperationsInput | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ReminderLogUncheckedUpdateManyWithoutMemberInput = {
@@ -473,6 +533,8 @@ export type ReminderLogUncheckedUpdateManyWithoutMemberInput = {
   sentAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReminderStatusFieldUpdateOperationsInput | $Enums.ReminderStatus
   message?: Prisma.StringFieldUpdateOperationsInput | string
+  category?: Prisma.EnumReminderCategoryFieldUpdateOperationsInput | $Enums.ReminderCategory
+  relatedEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -484,6 +546,8 @@ export type ReminderLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   sentAt?: boolean
   status?: boolean
   message?: boolean
+  category?: boolean
+  relatedEndDate?: boolean
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reminderLog"]>
 
@@ -494,6 +558,8 @@ export type ReminderLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   sentAt?: boolean
   status?: boolean
   message?: boolean
+  category?: boolean
+  relatedEndDate?: boolean
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reminderLog"]>
 
@@ -504,6 +570,8 @@ export type ReminderLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   sentAt?: boolean
   status?: boolean
   message?: boolean
+  category?: boolean
+  relatedEndDate?: boolean
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reminderLog"]>
 
@@ -514,9 +582,11 @@ export type ReminderLogSelectScalar = {
   sentAt?: boolean
   status?: boolean
   message?: boolean
+  category?: boolean
+  relatedEndDate?: boolean
 }
 
-export type ReminderLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "channel" | "sentAt" | "status" | "message", ExtArgs["result"]["reminderLog"]>
+export type ReminderLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "channel" | "sentAt" | "status" | "message" | "category" | "relatedEndDate", ExtArgs["result"]["reminderLog"]>
 export type ReminderLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }
@@ -539,6 +609,11 @@ export type $ReminderLogPayload<ExtArgs extends runtime.Types.Extensions.Interna
     sentAt: Date
     status: $Enums.ReminderStatus
     message: string
+    category: $Enums.ReminderCategory
+    /**
+     * When set, used to dedupe scheduled reminders for a specific membership end date.
+     */
+    relatedEndDate: Date | null
   }, ExtArgs["result"]["reminderLog"]>
   composites: {}
 }
@@ -969,6 +1044,8 @@ export interface ReminderLogFieldRefs {
   readonly sentAt: Prisma.FieldRef<"ReminderLog", 'DateTime'>
   readonly status: Prisma.FieldRef<"ReminderLog", 'ReminderStatus'>
   readonly message: Prisma.FieldRef<"ReminderLog", 'String'>
+  readonly category: Prisma.FieldRef<"ReminderLog", 'ReminderCategory'>
+  readonly relatedEndDate: Prisma.FieldRef<"ReminderLog", 'DateTime'>
 }
     
 
