@@ -109,7 +109,7 @@ export function OwnerMainNav({ email }: { email: string }) {
           id="owner-mobile-nav"
           className={cn(
             "overflow-hidden transition-[max-height,opacity] duration-200 ease-out md:hidden",
-            menuOpen ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0",
+            menuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0",
           )}
           aria-hidden={!menuOpen}
         >
