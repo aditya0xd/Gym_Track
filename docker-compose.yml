@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+      POSTGRES_DB: gym
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gym -d gym"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://gym:gym@db:5432/gym
+      RUN_SEED: "true"
+    command:
+      - sh
+      - -c
+      - |
+        npx prisma migrate deploy
+        if [ "$$RUN_SEED" = "true" ]; then npx tsx prisma/seed.ts; fi
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://gym:gym@db:5432/gym
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: change-me-use-a-long-random-string
+      AUTH_SECRET: change-me-use-a-long-random-string
+      NEXT_PUBLIC_APP_NAME: GymTrack Pro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    env_file:
+      - path: .env
+        required: false
+
+volumes:
+  postgres_data:
