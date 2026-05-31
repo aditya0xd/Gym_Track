@@ -1,4 +1,6 @@
-# Deploy to Vercel production after Development CI passes on main.
+# Manual production deploy to Vercel only.
+#
+# Run: GitHub → Actions → Production → Run workflow
 #
 # Required GitHub secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
 # Get IDs with: npx vercel link  →  .vercel/project.json
@@ -8,14 +10,13 @@
 name: Production
 
 on:
-  workflow_run:
-    workflows:
-      - Development
-    types:
-      - completed
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag, or commit SHA to deploy
+        required: true
+        default: main
+        type: string
 
 concurrency:
   group: production-deploy
@@ -27,10 +28,6 @@ env:
 jobs:
   deploy:
     name: Deploy to Vercel (production)
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -39,7 +36,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ inputs.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
