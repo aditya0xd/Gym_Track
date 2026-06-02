@@ -9,32 +9,91 @@ import {
   membershipEndDateInclusive,
   utcDayStart,
 } from "@/lib/billing/membership-dates";
+import {
+  getCachedOwnerMembersListJson,
+  invalidateOwnerMembersListCache,
+  setCachedOwnerMembersListJson,
+} from "@/lib/cache/owner-members-list";
 import { HttpError } from "@/lib/http/errors";
 import { prisma } from "@/lib/prisma";
 import { memberScope, ownerDurationPriceScope } from "@/lib/tenant/scope";
 
-export async function listMembersForOwner(adminUserId: string) {
+const memberListSelect = {
+  id: true,
+  fullName: true,
+  email: true,
+  phone: true,
+  billingDuration: true,
+  planPrice: true,
+  discountInr: true,
+  paymentStatus: true,
+  memberPhoto: true,
+  upiScreenshot: true,
+  startDate: true,
+  endDate: true,
+  membershipStatus: true,
+  pausedAt: true,
+  whatsappEnabled: true,
+} as const;
+
+type OwnerMemberListItem = {
+  id: string;
+  fullName: string;
+  email: string | null;
+  phone: string;
+  billingDuration: MemberBillingDuration;
+  planPrice: Prisma.Decimal;
+  discountInr: Prisma.Decimal;
+  paymentStatus: PaymentStatus;
+  memberPhoto: string | null;
+  upiScreenshot: string | null;
+  startDate: Date;
+  endDate: Date;
+  membershipStatus: "ACTIVE" | "PAUSED";
+  pausedAt: Date | null;
+  whatsappEnabled: boolean;
+};
+
+type CachedMemberListRow = {
+  startDate: string;
+  endDate: string;
+  pausedAt: string | null;
+  planPrice: string;
+  discountInr: string;
+} & Omit<
+  OwnerMemberListItem,
+  "startDate" | "endDate" | "pausedAt" | "planPrice" | "discountInr"
+>;
+
+function reviveOwnerMemberList(json: string): OwnerMemberListItem[] {
+  const rows = JSON.parse(json) as CachedMemberListRow[];
+  return rows.map((row) => ({
+    ...row,
+    startDate: new Date(row.startDate),
+    endDate: new Date(row.endDate),
+    pausedAt: row.pausedAt ? new Date(row.pausedAt) : null,
+    planPrice: new Prisma.Decimal(row.planPrice),
+    discountInr: new Prisma.Decimal(row.discountInr),
+  }));
+}
+
+async function queryMembersForOwner(adminUserId: string): Promise<OwnerMemberListItem[]> {
   return prisma.member.findMany({
     where: memberScope(adminUserId),
     orderBy: { startDate: "desc" },
-    select: {
-      id: true,
-      fullName: true,
-      email: true,
-      phone: true,
-      billingDuration: true,
-      planPrice: true,
-      discountInr: true,
-      paymentStatus: true,
-      memberPhoto: true,
-      upiScreenshot: true,
-      startDate: true,
-      endDate: true,
-      membershipStatus: true,
-      pausedAt: true,
-      whatsappEnabled: true,
-    },
+    select: memberListSelect,
   });
+}
+
+export async function listMembersForOwner(adminUserId: string) {
+  const cached = await getCachedOwnerMembersListJson(adminUserId);
+  if (cached) {
+    return reviveOwnerMemberList(cached);
+  }
+
+  const members = await queryMembersForOwner(adminUserId);
+  await setCachedOwnerMembersListJson(adminUserId, JSON.stringify(members));
+  return members;
 }
 
 export async function getMemberForOwner(adminUserId: string, memberId: string) {
@@ -135,7 +194,7 @@ export async function createMemberForOwner(
   }
   const planPrice = listPrice.minus(discountInr);
 
-  return prisma.member.create({
+  const member = await prisma.member.create({
     data: {
       fullName: input.fullName.trim(),
       email: input.email?.trim() ? input.email.trim().toLowerCase() : null,
@@ -152,6 +211,8 @@ export async function createMemberForOwner(
       adminUser: { connect: { id: adminUserId } },
     },
   });
+  await invalidateOwnerMembersListCache(adminUserId);
+  return member;
 }
 
 export async function pauseMembershipForOwner(adminUserId: string, memberId: string) {
@@ -168,7 +229,7 @@ export async function pauseMembershipForOwner(adminUserId: string, memberId: str
     throw new HttpError(400, "Cannot pause an expired membership.");
   }
 
-  return prisma.member.update({
+  const updated = await prisma.member.update({
     where: { id: memberId },
     data: { membershipStatus: "PAUSED", pausedAt: new Date() },
     select: {
@@ -178,6 +239,8 @@ export async function pauseMembershipForOwner(adminUserId: string, memberId: str
       endDate: true,
     },
   });
+  await invalidateOwnerMembersListCache(adminUserId);
+  return updated;
 }
 
 export async function resumeMembershipForOwner(adminUserId: string, memberId: string) {
@@ -195,7 +258,7 @@ export async function resumeMembershipForOwner(adminUserId: string, memberId: st
   const daysFrozen = calendarDaysBetweenUtc(pauseDay, today);
   const newEndDate = addCalendarDaysUtc(member.endDate, daysFrozen);
 
-  return prisma.member.update({
+  const updated = await prisma.member.update({
     where: { id: memberId },
     data: {
       membershipStatus: "ACTIVE",
@@ -209,4 +272,6 @@ export async function resumeMembershipForOwner(adminUserId: string, memberId: st
       endDate: true,
     },
   });
+  await invalidateOwnerMembersListCache(adminUserId);
+  return updated;
 }

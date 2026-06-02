@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,32 +13,64 @@ import type { MemberBillingDuration } from "@/generated/prisma/client";
 
 type PriceRow = { duration: MemberBillingDuration; priceInr: string | null };
 
-export function DurationPricingForm() {
-  const [rows, setRows] = useState<PriceRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+async function fetchPricing(): Promise<{ prices: PriceRow[] }> {
+  const res = await fetch("/api/owner/pricing");
+  if (!res.ok) {
+    throw new Error("Could not load your prices.");
+  }
+  return res.json();
+}
 
+export function DurationPricingForm() {
+  const queryClient = useQueryClient();
+  const [rows, setRows] = useState<PriceRow[]>([]);
+
+  // 1. Fetching pricing with useQuery
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["pricing"],
+    queryFn: fetchPricing,
+  });
+
+  // Keep local editing state in sync when query data is loaded/updated
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await fetch("/api/owner/pricing");
+    if (data?.prices) {
+      setRows(data.prices);
+    }
+  }, [data]);
+
+  // Display error toast if query fails
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || "Failed to load pricing.");
+    }
+  }, [error]);
+
+  // 2. Saving pricing with useMutation
+  const mutation = useMutation({
+    mutationFn: async (prices: { duration: MemberBillingDuration; priceInr: string }[]) => {
+      const res = await fetch("/api/owner/pricing", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prices }),
+      });
+      const responseData = await res.json();
       if (!res.ok) {
-        if (!cancelled) {
-          toast.error("Could not load your prices.");
-          setLoading(false);
-        }
-        return;
+        throw new Error(responseData.message ?? "Could not save prices.");
       }
-      const data = (await res.json()) as { prices: PriceRow[] };
-      if (!cancelled) {
-        setRows(data.prices ?? []);
-        setLoading(false);
+      return responseData as { message?: string; prices?: PriceRow[] };
+    },
+    onSuccess: (responseData) => {
+      if (responseData.prices) {
+        queryClient.setQueryData(["pricing"], responseData);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["pricing"] });
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+      toast.success("Pricing updated successfully.");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   function setPrice(duration: MemberBillingDuration, value: string) {
     setRows((prev) =>
@@ -44,35 +78,24 @@ export function DurationPricingForm() {
     );
   }
 
-  async function onSubmit(e: FormEvent) {
+  function onSubmit(e: FormEvent) {
     e.preventDefault();
-    setSaving(true);
 
     const prices = rows.map((r) => ({
       duration: r.duration,
       priceInr: r.priceInr ?? "0",
     }));
 
-    const res = await fetch("/api/owner/pricing", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prices }),
-    });
-
-    const data = (await res.json()) as { message?: string; prices?: PriceRow[] };
-    if (!res.ok) {
-      toast.error(data.message ?? "Could not save prices.");
-      setSaving(false);
-      return;
-    }
-
-    if (data.prices) setRows(data.prices);
-    toast.success("Pricing updated.");
-    setSaving(false);
+    mutation.mutate(prices);
   }
 
-  if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading your prices…</p>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading your prices…</p>
+      </div>
+    );
   }
 
   return (
@@ -108,8 +131,8 @@ export function DurationPricingForm() {
         })}
       </div>
 
-      <Button type="submit" disabled={saving}>
-        {saving ? "Saving…" : "Save prices"}
+      <Button type="submit" disabled={mutation.isPending}>
+        {mutation.isPending ? "Saving…" : "Save prices"}
       </Button>
     </form>
   );
