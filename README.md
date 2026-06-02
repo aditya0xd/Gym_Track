@@ -135,6 +135,12 @@ Required or commonly used variables:
 - `ACCESS_TOKEN_SECRET`: optional override
 - `REFRESH_TOKEN_SECRET`: optional override
 
+### Cache (Redis)
+
+- `REDIS_URL`: Redis connection string
+  - **Development**: `redis://localhost:6379` (Docker local)
+  - **Production**: Upstash Redis URL from https://console.upstash.com (format: `redis://:password@host:port`)
+
 ### Twilio
 
 - `TWILIO_ACCOUNT_SID`

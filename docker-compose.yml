@@ -58,6 +58,7 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://gym:gym@db:5432/gym
+      # For production, use Upstash Redis URL instead: https://console.upstash.com
       REDIS_URL: redis://redis:6379
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_SECRET: change-me-use-a-long-random-string
