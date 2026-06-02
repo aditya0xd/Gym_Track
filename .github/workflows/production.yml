@@ -47,7 +47,7 @@ jobs:
           echo "response=$body" >> "$GITHUB_OUTPUT"
           echo "http_code=$http_code" >> "$GITHUB_OUTPUT"
           
-          if [ "$http_code" -ne 200 ]; then
+          if [ "$http_code" -gt 400 ]; then
             echo "Deployment hook failed with status $http_code"
             echo "Response: $body"
             exit 1

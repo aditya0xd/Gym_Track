@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { HttpError } from "@/lib/http/errors";
+import { invalidateCachedOwner } from "@/lib/auth-cache";
 import {
   changeOwnerPlan,
   getOwnerManagePlanData,
@@ -50,6 +51,10 @@ export async function PATCH(request: Request) {
     if (!result.changed) {
       return NextResponse.json({ message: "You are already on this plan." });
     }
+    
+    // Invalidate cache so next JWT callback fetches fresh data
+    await invalidateCachedOwner(session.user.id);
+    
     return NextResponse.json({ message: "Plan updated. Billing invoice created." });
   } catch (e) {
     if (e instanceof HttpError) {

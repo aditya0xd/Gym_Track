@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { HttpError } from "@/lib/http/errors";
+import { invalidateCachedOwner } from "@/lib/auth-cache";
 import { updateGymOwnerSubscription } from "@/server/superadmin/gym-owner.service";
 import type { OwnerSubscriptionPlan } from "@/generated/prisma/client";
 
@@ -72,6 +73,10 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   try {
     const updated = await updateGymOwnerSubscription(id, patch);
+    
+    // Invalidate cache so next JWT callback fetches fresh data
+    await invalidateCachedOwner(id);
+    
     return NextResponse.json({
       gymOwner: {
         id: updated.id,

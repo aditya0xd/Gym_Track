@@ -23,6 +23,17 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
 
+  // Network-first for HTML page navigations (fixes iOS + Android PWA stale login page).
+  // On app open the server always runs middleware/auth redirects before the SW cache
+  // can serve a stale /login shell to an already-authenticated user.
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(OFFLINE_URL)),
+    );
+    return;
+  }
+
+  // Cache-first for static assets (JS, CSS, images, fonts, icons).
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
