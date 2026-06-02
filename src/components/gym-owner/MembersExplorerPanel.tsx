@@ -49,9 +49,15 @@ function daysText(endDateIso: string) {
   return `${diff}d left`;
 }
 
-export function MembersExplorerPanel({ members }: { members: MemberItem[] }) {
+export function MembersExplorerPanel({
+  members,
+  initialStatusFilter = "ALL",
+}: {
+  members: MemberItem[];
+  initialStatusFilter?: StatusFilter;
+}) {
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatusFilter);
   const [planFilter, setPlanFilter] = useState<PlanFilter>("ALL");
 
   const filtered = useMemo(() => {

@@ -5,6 +5,7 @@ import { AppToaster } from "@/components/providers/AppToaster";
 import { PwaInstallPrompt } from "@/components/providers/PwaInstallPrompt";
 import { PwaRegister } from "@/components/providers/PwaRegister";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { QueryProvider } from "@/components/providers/Query-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -50,12 +51,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground antialiased">
-        <SessionProvider>
-          <PwaRegister />
-          {children}
-          <AppToaster />
-          <PwaInstallPrompt />
-        </SessionProvider>
+        <QueryProvider>
+          <SessionProvider>
+            <PwaRegister />
+            {children}
+            <AppToaster />
+            <PwaInstallPrompt />
+          </SessionProvider>
+        </QueryProvider>
       </body>
     </html>
   );

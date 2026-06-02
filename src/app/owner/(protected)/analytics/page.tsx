@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 
-import { OwnerAnalyticsDashboard } from "@/components/gym-owner/OwnerAnalyticsDashboard";
+import { OwnerAnalyticsClient } from "@/components/gym-owner/OwnerAnalyticsClient";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { PageShell } from "@/components/shared/PageShell";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
-import { getOwnerAnalytics } from "@/server/gym-owner/analytics.service";
 
 export const metadata = {
   title: "Analytics | Gym owner",
@@ -18,8 +19,6 @@ export default async function OwnerAnalyticsPage() {
   if (!session?.user?.id || session.user.role !== "gym_owner") {
     redirect("/login");
   }
-
-  const analytics = await getOwnerAnalytics(session.user.id);
 
   return (
     <PageShell>
@@ -32,7 +31,16 @@ export default async function OwnerAnalyticsPage() {
           </Button>
         }
       />
-      <OwnerAnalyticsDashboard data={analytics} />
+      <Suspense
+        fallback={
+          <div className="flex min-h-[400px] flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Loading analytics...</p>
+          </div>
+        }
+      >
+        <OwnerAnalyticsClient />
+      </Suspense>
     </PageShell>
   );
 }
