@@ -55,7 +55,7 @@ export async function PATCH(request: Request) {
     // Invalidate cache so next JWT callback fetches fresh data
     await invalidateCachedOwner(session.user.id);
     
-    return NextResponse.json({ message: "Plan updated. Billing invoice created." });}
+    return NextResponse.json({ message: "Plan updated. Billing invoice created." });
   } catch (e) {
     if (e instanceof HttpError) {
       return NextResponse.json({ message: e.message }, { status: e.status });
