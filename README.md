@@ -24,18 +24,63 @@ The app is designed around two roles:
 
 ## Tech Stack
 
-- Next.js `16.2.1`
-- React `19`
-- TypeScript
-- Prisma `7`
-- PostgreSQL
-- NextAuth with credentials provider
-- Tailwind CSS `4`
-- shadcn/ui style components
-- Twilio for reminders
-- Razorpay for subscription payments
-- `pdf-lib` for receipt generation
-- Recharts for analytics visualizations
+### Core Framework & Language
+- **Next.js** `16.2.1` — React framework with App Router
+- **React** `19.2.4` — UI library
+- **TypeScript** `5` — Type safety and developer experience
+
+### Database & ORM
+- **Prisma** `7.5.0` — ORM with migrations and seeding
+- **PostgreSQL** — Relational database
+- **Supabase** `2.100.0` — Backend infrastructure
+
+### Authentication & Session Management
+- **NextAuth.js** `4.24.13` — Credentials-based authentication with JWT
+- **jose** `6.2.2` — JWT signing and verification
+- **bcryptjs** `3.0.3` — Password hashing
+
+### Frontend & Styling
+- **Tailwind CSS** `4` — Utility-first CSS framework
+- **shadcn/ui** `4.1.0` — Reusable component library
+- **Lucide React** `1.7.0` — Icon library
+- **Radix UI** `1.4.3` — Headless UI components
+- **class-variance-authority** `0.7.1` — Component variant management
+
+### State Management & Data Fetching
+- **React Query (TanStack Query)** `5.100.14` — Server state management
+- **Redis** `6.0.0` — Caching layer
+
+### UI & Notifications
+- **Sonner** `2.0.7` — Toast notifications
+- **clsx** `2.1.1` — Conditional CSS classes
+- **tailwind-merge** `3.5.0` — Tailwind utility merging
+
+### Payment & Billing
+- **Razorpay** `2.9.6` — Payment gateway integration
+- **pdf-lib** `1.17.1` — PDF receipt generation
+
+### Analytics & Charts
+- **Recharts** `3.8.1` — Data visualization library
+
+### API Documentation
+- **Swagger UI React** `5.32.6` — OpenAPI documentation
+- **swagger-jsdoc** `6.3.0` — JSDoc to OpenAPI converter
+
+### Utilities
+- **dotenv** `17.3.1` — Environment variable management
+- **pg** `8.20.0` — PostgreSQL database driver
+- **tsx** `4.21.0` — TypeScript executor for Node.js
+
+### Containerization & DevOps
+- **Docker** — Container runtime with multi-stage builds
+- **Docker Compose** — Multi-container orchestration
+  - PostgreSQL `16-alpine` — Database container
+  - Redis `7-alpine` — Cache container
+  - Node.js `20-alpine` — Application runtime
+
+### Development Tools
+- **ESLint** `9` — Code quality and linting
+- **Prisma CLI** — Database management and migrations
 
 ## Main Product Areas
 

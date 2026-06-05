@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
       name: "next-auth.session-token",
       options: {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
         maxAge: REMEMBER_MAX_AGE_SEC, // cookie ceiling; JWT exp is the real enforcer

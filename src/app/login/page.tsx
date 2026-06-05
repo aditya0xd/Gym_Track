@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import LoginForm from "@/components/LoginForm";
 
 export const metadata = {
@@ -5,7 +8,17 @@ export const metadata = {
   description: "Gym owners and superadmin sign in.",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await getServerSession(authOptions);
+
+  if (session) {
+    if (session.user.role === "superadmin") {
+      redirect("/superadmin/gym-owners");
+    } else {
+      redirect("/owner/dashboard");
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8 sm:px-6 sm:py-10">
       <LoginForm className="w-full max-w-md shadow-sm" />

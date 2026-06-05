@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getSession, signIn, signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,7 @@ export default function LoginForm({ className }: LoginFormProps) {
         : "";
     const rememberMe = formData.get("rememberMe") === "on";
 
+    // First check credentials without redirecting
     const result = await signIn("credentials", {
       email,
       password,
@@ -57,15 +58,10 @@ export default function LoginForm({ className }: LoginFormProps) {
       return;
     }
 
-    const session = await getSession();
-    const role = session?.user?.role;
-    if (role === "superadmin") {
-      toast.success("Signed in as superadmin.");
-      router.push("/superadmin/gym-owners");
-    } else {
-      toast.success("Signed in.");
-      router.push("/owner/dashboard");
-    }
+    // Login successful, redirect
+    toast.success("Signed in successfully.");
+    // Middleware will handle role-based redirect
+    router.push("/owner/dashboard");
     router.refresh();
     setLoginPending(false);
   }
@@ -113,6 +109,7 @@ export default function LoginForm({ className }: LoginFormProps) {
     }
 
     toast.success("Welcome! Your gym owner account is ready.");
+    // Middleware will handle role-based redirect
     router.push("/owner/dashboard");
     router.refresh();
     setSignupPending(false);
