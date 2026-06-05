@@ -35,7 +35,12 @@ export const authOptions: NextAuthOptions = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        // Only mark secure when we're actually serving over HTTPS.
+        // Using only NODE_ENV=production breaks mobile/LAN testing over HTTP
+        // and causes "too many redirects" because the cookie is silently dropped.
+        secure:
+          process.env.NODE_ENV === "production" &&
+          (process.env.NEXTAUTH_URL?.startsWith("https://") ?? false),
         maxAge: REMEMBER_MAX_AGE_SEC, // cookie ceiling; JWT exp is the real enforcer
       },
     },
