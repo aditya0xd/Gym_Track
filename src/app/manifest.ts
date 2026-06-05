@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "GymTrack Pro",
     short_name: "GymTrack",
     description: "Gym owner and superadmin portal with reminders and billing.",
-    start_url: "/login",
+    start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
