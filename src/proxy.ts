@@ -46,7 +46,11 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req, secret });
+  const token = await getToken({
+    req,
+    secret,
+    cookieName: "next-auth.session-token",
+  });
 
   if (!token) {
     if (isApiOwner || isApiSuperadmin) {

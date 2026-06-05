@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -23,11 +23,23 @@ type LoginFormProps = {
 };
 
 export default function LoginForm({ className }: LoginFormProps) {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [loginPending, setLoginPending] = useState(false);
   const [signupPending, setSignupPending] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
+
+  // After login, navigate to callbackUrl (set by proxy for protected routes)
+  // or fall back to "/" which lets the root page handle role-based routing.
+  // Use window.location.href (hard navigation) so the browser always sends
+  // the freshly-set session cookie on the next server request — fixes the
+  // "too many redirects" loop on mobile where soft navigation can race.
+  function navigateAfterLogin() {
+    const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+    // Only allow same-origin callbackUrls to prevent open redirects
+    const destination = callbackUrl.startsWith("/") ? callbackUrl : "/";
+    window.location.href = destination;
+  }
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,12 +70,10 @@ export default function LoginForm({ className }: LoginFormProps) {
       return;
     }
 
-    // Login successful, redirect
+    // Login successful — hard-navigate so the fresh cookie is sent to the server
     toast.success("Signed in successfully.");
-    // Middleware will handle role-based redirect
-    router.push("/owner/dashboard");
-    router.refresh();
-    setLoginPending(false);
+    navigateAfterLogin();
+    // Note: setLoginPending(false) intentionally omitted — the page is navigating away
   }
 
   async function handleSignupSubmit(event: FormEvent<HTMLFormElement>) {
@@ -109,10 +119,8 @@ export default function LoginForm({ className }: LoginFormProps) {
     }
 
     toast.success("Welcome! Your gym owner account is ready.");
-    // Middleware will handle role-based redirect
-    router.push("/owner/dashboard");
-    router.refresh();
-    setSignupPending(false);
+    navigateAfterLogin();
+    // Note: setSignupPending(false) intentionally omitted — the page is navigating away
   }
 
   async function handleLogout() {
