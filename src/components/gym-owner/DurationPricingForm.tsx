@@ -47,7 +47,9 @@ export function DurationPricingForm() {
 
   // 2. Saving pricing with useMutation
   const mutation = useMutation({
-    mutationFn: async (prices: { duration: MemberBillingDuration; priceInr: string }[]) => {
+    mutationFn: async (
+      prices: { duration: MemberBillingDuration; priceInr: string }[],
+    ) => {
       const res = await fetch("/api/owner/pricing", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -74,7 +76,9 @@ export function DurationPricingForm() {
 
   function setPrice(duration: MemberBillingDuration, value: string) {
     setRows((prev) =>
-      prev.map((r) => (r.duration === duration ? { ...r, priceInr: value } : r)),
+      prev.map((r) =>
+        r.duration === duration ? { ...r, priceInr: value } : r,
+      ),
     );
   }
 
@@ -99,11 +103,14 @@ export function DurationPricingForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto w-full min-w-0 max-w-md space-y-6">
-      <p className="text-sm text-muted-foreground">
+    <form
+      onSubmit={onSubmit}
+      className="mx-auto w-full min-w-0 max-w-md space-y-6"
+    >
+      {/* <p className="text-sm text-muted-foreground">
         Set list prices in INR for each membership length. These amounts apply when
         you enroll a member for that duration.
-      </p>
+      </p> */}
 
       <div className="space-y-4">
         {MEMBER_BILLING_DURATION_OPTIONS.map((opt) => {

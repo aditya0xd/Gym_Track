@@ -50,8 +50,7 @@ export function MemberEnrollForm() {
   );
   const [upiFileName, setUpiFileName] = useState<string | null>(null);
   const [hints, setHints] = useState<PriceHint[]>([]);
-  const [duration, setDuration] =
-    useState<MemberBillingDuration>("ONE_MONTH");
+  const [duration, setDuration] = useState<MemberBillingDuration>("ONE_MONTH");
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("NOT_DONE");
   const [discountStr, setDiscountStr] = useState("");
   const [pending, setPending] = useState(false);
@@ -62,7 +61,9 @@ export function MemberEnrollForm() {
       const res = await fetch("/api/owner/pricing");
       if (!res.ok) {
         if (!cancelled) {
-          toast.error("Could not load your pricing. Try again or open Pricing.");
+          toast.error(
+            "Could not load your pricing. Try again or open Pricing.",
+          );
         }
         return;
       }
@@ -82,7 +83,8 @@ export function MemberEnrollForm() {
     if (!hintPrice) return null;
     const list = Number(hintPrice);
     const disc = discountStr.trim() === "" ? 0 : Number(discountStr);
-    if (!Number.isFinite(list) || !Number.isFinite(disc) || disc < 0) return null;
+    if (!Number.isFinite(list) || !Number.isFinite(disc) || disc < 0)
+      return null;
     return Math.max(0, list - disc).toFixed(2);
   }, [hintPrice, discountStr]);
 
@@ -159,7 +161,10 @@ export function MemberEnrollForm() {
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto w-full min-w-0 max-w-lg space-y-5">
+    <form
+      onSubmit={onSubmit}
+      className="mx-auto w-full min-w-0 max-w-lg space-y-5"
+    >
       <div className="space-y-2">
         <Label htmlFor="fullName">Full name</Label>
         <Input
@@ -182,12 +187,7 @@ export function MemberEnrollForm() {
 
       <div className="space-y-2">
         <Label htmlFor="phone">Phone</Label>
-        <Input
-          id="phone"
-          name="phone"
-          required
-          placeholder="10-digit mobile"
-        />
+        <Input id="phone" name="phone" required placeholder="10-digit mobile" />
       </div>
 
       <div className="space-y-2">
@@ -234,7 +234,7 @@ export function MemberEnrollForm() {
           }
         />
         <p className="text-xs text-muted-foreground">
-          Optional. Bargained amount to subtract from the list price above (cannot exceed list price).
+          {/* Optional. Bargained amount to subtract from the list price above (cannot exceed list price). */}
         </p>
         {hintPrice && chargedPreview !== null ? (
           <p className="text-sm font-medium text-foreground">
@@ -292,12 +292,17 @@ export function MemberEnrollForm() {
         </div>
         {memberPhotoFileName ? (
           <p className="text-xs text-muted-foreground">
-            Selected: <span className="font-medium text-foreground">{memberPhotoFileName}</span>
+            Selected:{" "}
+            <span className="font-medium text-foreground">
+              {memberPhotoFileName}
+            </span>
           </p>
         ) : null}
         <p className="text-xs text-muted-foreground">
-          &quot;Take photo&quot; uses the camera (front on phones). &quot;Choose image&quot; opens
-          gallery or files. Max 3MB.
+          {/* &quot;Take photo&quot; uses the camera (front on phones). &quot;Choose
+          image&quot; opens gallery or 
+          file*/}{" "}
+          Max size 3MB.
         </p>
       </div>
 
@@ -317,7 +322,8 @@ export function MemberEnrollForm() {
 
       <div className="space-y-2">
         <Label>
-          UPI screenshot {paymentStatus === "DONE" ? "(required)" : "(optional)"}
+          UPI screenshot{" "}
+          {paymentStatus === "DONE" ? "(required)" : "(optional)"}
         </Label>
         <input
           ref={upiScreenshotInputRef}
@@ -338,7 +344,11 @@ export function MemberEnrollForm() {
             variant="outline"
             size="sm"
             onClick={() =>
-              openImagePicker(upiScreenshotInputRef.current, "camera", "environment")
+              openImagePicker(
+                upiScreenshotInputRef.current,
+                "camera",
+                "environment",
+              )
             }
           >
             Take photo
@@ -348,7 +358,11 @@ export function MemberEnrollForm() {
             variant="outline"
             size="sm"
             onClick={() =>
-              openImagePicker(upiScreenshotInputRef.current, "files", "environment")
+              openImagePicker(
+                upiScreenshotInputRef.current,
+                "files",
+                "environment",
+              )
             }
           >
             Choose image
@@ -356,11 +370,14 @@ export function MemberEnrollForm() {
         </div>
         {upiFileName ? (
           <p className="text-xs text-muted-foreground">
-            Selected: <span className="font-medium text-foreground">{upiFileName}</span>
+            Selected:{" "}
+            <span className="font-medium text-foreground">{upiFileName}</span>
           </p>
         ) : null}
         <p className="text-xs text-muted-foreground">
-          Use the camera to snap the payment screen or QR, or pick an existing screenshot. Max 3MB.
+          {/* Use the camera to snap the payment screen or QR, or pick an existing
+          screenshot.*/}{" "}
+          Max size 3MB.
         </p>
       </div>
 
@@ -372,7 +389,10 @@ export function MemberEnrollForm() {
           defaultChecked
           className="size-4 rounded border-input accent-black"
         />
-        <Label htmlFor="whatsappEnabled" className="font-normal text-muted-foreground">
+        <Label
+          htmlFor="whatsappEnabled"
+          className="font-normal text-muted-foreground"
+        >
           WhatsApp reminders (otherwise SMS)
         </Label>
       </div>

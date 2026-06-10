@@ -37,7 +37,12 @@ export default function LoginForm({ className }: LoginFormProps) {
   function navigateAfterLogin() {
     const callbackUrl = searchParams.get("callbackUrl") ?? "/";
     // Only allow same-origin callbackUrls to prevent open redirects
-    const destination = callbackUrl.startsWith("/") ? callbackUrl : "/";
+    const destination =
+      callbackUrl.startsWith("/") &&
+      !callbackUrl.startsWith("//") &&
+      !callbackUrl.startsWith("/\\")
+        ? callbackUrl
+        : "/";
     window.location.href = destination;
   }
 

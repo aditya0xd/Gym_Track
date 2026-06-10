@@ -20,15 +20,14 @@ export default async function OwnerPricingPage() {
 
   return (
     <PageShell>
-      <PageHeader
-        title="Membership prices (INR)"
-        description="Per duration list prices used when enrolling members."
-      />
+      <PageHeader title="Membership prices (INR)" />
       <Suspense
         fallback={
           <div className="flex flex-col items-center justify-center gap-2 py-12">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading your prices…</p>
+            <p className="text-sm text-muted-foreground">
+              Loading your prices…
+            </p>
           </div>
         }
       >

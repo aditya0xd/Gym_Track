@@ -18,7 +18,7 @@ export default async function OwnerProtectedLayout({
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <OwnerMainNav email={session.user.email ?? ""} />
+      <OwnerMainNav />
       <div className="pb-16 md:pb-0">{children}</div>
       <OwnerBottomNav />
     </div>

@@ -20,4 +20,3 @@ function getPrisma() {
 }
 
 export const prisma = getPrisma();
-
