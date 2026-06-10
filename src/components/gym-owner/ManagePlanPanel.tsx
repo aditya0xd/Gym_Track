@@ -5,7 +5,10 @@ import { CreditCard, Download, MoreVertical, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import type { BillingStatus, OwnerSubscriptionPlan } from "@/generated/prisma/client";
+import type {
+  BillingStatus,
+  OwnerSubscriptionPlan,
+} from "@/generated/prisma/client";
 import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 import { Button } from "@/components/ui/button";
@@ -37,8 +40,11 @@ type ManagePlanData = {
 export function ManagePlanPanel() {
   const [data, setData] = useState<ManagePlanData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPlan, setSelectedPlan] = useState<OwnerSubscriptionPlan>("TRIAL");
-  const [invoiceFilter, setInvoiceFilter] = useState<"ALL" | BillingStatus>("ALL");
+  const [selectedPlan, setSelectedPlan] =
+    useState<OwnerSubscriptionPlan>("TRIAL");
+  const [invoiceFilter, setInvoiceFilter] = useState<"ALL" | BillingStatus>(
+    "ALL",
+  );
   const [savingPlan, setSavingPlan] = useState(false);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -60,7 +66,10 @@ export function ManagePlanPanel() {
     const res = await fetch("/api/owner/manage-plan");
     const json = (await res.json()) as ManagePlanData | { message?: string };
     if (!res.ok) {
-      toast.error((json as { message?: string }).message ?? "Could not load billing info.");
+      toast.error(
+        (json as { message?: string }).message ??
+          "Could not load billing info.",
+      );
       setLoading(false);
       return;
     }
@@ -142,9 +151,12 @@ export function ManagePlanPanel() {
 
   async function handlePayNow(invoiceId: string) {
     setPayingId(invoiceId);
-    const orderRes = await fetch(`/api/owner/billing/${invoiceId}/razorpay/order`, {
-      method: "POST",
-    });
+    const orderRes = await fetch(
+      `/api/owner/billing/${invoiceId}/razorpay/order`,
+      {
+        method: "POST",
+      },
+    );
     const orderData = (await orderRes.json()) as {
       message?: string;
       keyId?: string;
@@ -153,7 +165,12 @@ export function ManagePlanPanel() {
       currency?: string;
       invoiceId?: string;
     };
-    if (!orderRes.ok || !orderData.keyId || !orderData.orderId || !orderData.invoiceId) {
+    if (
+      !orderRes.ok ||
+      !orderData.keyId ||
+      !orderData.orderId ||
+      !orderData.invoiceId
+    ) {
       toast.error(orderData.message ?? "Could not start payment.");
       setPayingId(null);
       return;
@@ -211,23 +228,31 @@ export function ManagePlanPanel() {
   }
 
   if (loading || !data) {
-    return <p className="text-sm text-muted-foreground">Loading plan and billing details…</p>;
+    return (
+      <p className="text-sm text-muted-foreground">
+        Loading plan and billing details…
+      </p>
+    );
   }
 
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-base font-semibold text-foreground">Manage plan</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Upgrade or downgrade your gym owner plan. A new invoice is generated on plan change.
+        <p className="mt-1 text-xs text-muted-foreground">
+          Upgrade or downgrade your gym owner plan. A new invoice is generated
+          on plan change.
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border border-border bg-background p-3">
             <p className="text-xs text-muted-foreground">Current plan</p>
-            <p className="text-sm font-semibold text-foreground">{data.currentPlan}</p>
+            <p className="text-sm font-semibold text-foreground">
+              {data.currentPlan}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Trial ends: {data.trialEndsAt ? data.trialEndsAt.slice(0, 10) : "N/A"}
+              Trial ends:{" "}
+              {data.trialEndsAt ? data.trialEndsAt.slice(0, 10) : "N/A"}
             </p>
           </div>
           <div className="rounded-lg border border-border bg-background p-3">
@@ -240,18 +265,24 @@ export function ManagePlanPanel() {
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="w-full sm:max-w-[220px]">
-            <label htmlFor="ownerPlan" className="mb-1 block text-sm text-muted-foreground">
+            <label
+              htmlFor="ownerPlan"
+              className="mb-1 block text-sm text-muted-foreground"
+            >
               Plan
             </label>
             <select
               id="ownerPlan"
               value={selectedPlan}
-              onChange={(e) => setSelectedPlan(e.target.value as OwnerSubscriptionPlan)}
+              onChange={(e) =>
+                setSelectedPlan(e.target.value as OwnerSubscriptionPlan)
+              }
               className="min-h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
             >
               {OWNER_SUBSCRIPTION_PLAN_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
-                  {o.label} ({formatInrFromDecimalString(data.planPrices[o.value])})
+                  {o.label} (
+                  {formatInrFromDecimalString(data.planPrices[o.value])})
                 </option>
               ))}
             </select>
@@ -269,13 +300,18 @@ export function ManagePlanPanel() {
       <div className="overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm">
         <div className="border-b border-border bg-muted/30 px-3 py-2.5 sm:px-4">
           <div className="flex items-center gap-2">
-            <label htmlFor="invoiceFilter" className="text-xs text-muted-foreground">
+            <label
+              htmlFor="invoiceFilter"
+              className="text-xs text-muted-foreground"
+            >
               Filter invoices
             </label>
             <select
               id="invoiceFilter"
               value={invoiceFilter}
-              onChange={(e) => setInvoiceFilter(e.target.value as "ALL" | BillingStatus)}
+              onChange={(e) =>
+                setInvoiceFilter(e.target.value as "ALL" | BillingStatus)
+              }
               className="min-h-9 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground"
             >
               <option value="ALL">All</option>
@@ -289,12 +325,22 @@ export function ManagePlanPanel() {
           <table className="w-full min-w-[760px] text-sm">
             <thead className="border-b border-border bg-muted/50 text-left text-muted-foreground">
               <tr>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">Date</th>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">Plan</th>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">Amount</th>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">Status</th>
+                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">
+                  Date
+                </th>
+                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">
+                  Plan
+                </th>
+                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">
+                  Amount
+                </th>
+                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">
+                  Status
+                </th>
                 <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">Due</th>
-                <th className="px-3 py-2.5 sm:px-4 sm:py-3 text-right">Action</th>
+                <th className="px-3 py-2.5 sm:px-4 sm:py-3 text-right">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -346,7 +392,9 @@ export function ManagePlanPanel() {
                               </DropdownMenu.Item>
                               <DropdownMenu.Item
                                 className="flex cursor-pointer items-center justify-center rounded-md p-2 outline-none hover:bg-destructive/10 focus:bg-destructive/10 data-disabled:pointer-events-none data-disabled:opacity-40"
-                                disabled={deletingId === inv.id || payingId === inv.id}
+                                disabled={
+                                  deletingId === inv.id || payingId === inv.id
+                                }
                                 onSelect={(e) => {
                                   e.preventDefault();
                                   void handleDeleteInvoice(inv.id);
