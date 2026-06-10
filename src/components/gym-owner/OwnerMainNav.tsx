@@ -37,7 +37,7 @@ function navLinkClass(active: boolean, mobile = false) {
   );
 }
 
-export function OwnerMainNav({ email }: { email: string }) {
+export function OwnerMainNav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -92,9 +92,6 @@ export function OwnerMainNav({ email }: { email: string }) {
             </nav>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <span className="max-w-[220px] truncate text-xs text-muted-foreground">
-              {email}
-            </span>
             <Button
               type="button"
               variant="outline"
@@ -127,7 +124,6 @@ export function OwnerMainNav({ email }: { email: string }) {
               ))}
             </nav>
             <div className="mt-3 border-t border-border pt-3">
-              <p className="mb-3 truncate text-xs text-muted-foreground">{email}</p>
               <Button
                 type="button"
                 variant="outline"

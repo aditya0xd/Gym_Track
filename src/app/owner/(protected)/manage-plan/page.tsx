@@ -18,10 +18,7 @@ export default async function OwnerManagePlanPage() {
 
   return (
     <PageShell>
-      <PageHeader
-        title="Manage plan"
-        description="Upgrade or downgrade plan, review billing details, and pay pending invoices."
-      />
+      <PageHeader title="Manage plan" />
       <ManagePlanPanel />
     </PageShell>
   );

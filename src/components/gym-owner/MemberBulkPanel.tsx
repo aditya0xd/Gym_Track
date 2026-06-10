@@ -16,9 +16,9 @@ function downloadBlob(filename: string, blob: Blob) {
 
 export function MemberBulkPanel() {
   const [importing, setImporting] = useState(false);
-  const [lastErrors, setLastErrors] = useState<{ rowNumber: number; message: string }[] | null>(
-    null,
-  );
+  const [lastErrors, setLastErrors] = useState<
+    { rowNumber: number; message: string }[] | null
+  >(null);
 
   async function downloadExport() {
     const res = await fetch("/api/owner/members/export");
@@ -81,11 +81,15 @@ export function MemberBulkPanel() {
       <div className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-base font-semibold text-foreground">Export</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Download all members as CSV (UTF-8). Includes end date and membership status for your
-          records. Re-import uses the template columns only.
+          {/*Download all members as CSV (UTF-8). Includes end date and membership status for your
+          records. Re-import uses the template columns only. */}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Button type="button" variant="outline" onClick={() => void downloadExport()}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void downloadExport()}
+          >
             Download all members (CSV)
           </Button>
         </div>
@@ -93,15 +97,20 @@ export function MemberBulkPanel() {
 
       <div className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-base font-semibold text-foreground">Import</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Use the template for column names. Required: fullName, phone, billingDuration (
-          ONE_MONTH, THREE_MONTHS, SIX_MONTHS, TWELVE_MONTHS), startDate (YYYY-MM-DD). Optional:
-          email, paymentStatus (NOT_DONE or DONE — DONE rows are skipped for import because UPI proof
-          is required), whatsappEnabled (true/false). Each duration must have a price under Pricing.
-          Maximum 500 rows per file.
-        </p>
+        {/*   <p className="mt-1 text-sm text-muted-foreground">
+          Use the template for column names. Required: fullName, phone,
+          billingDuration ( ONE_MONTH, THREE_MONTHS, SIX_MONTHS, TWELVE_MONTHS),
+          startDate (YYYY-MM-DD). Optional: email, paymentStatus (NOT_DONE or
+          DONE — DONE rows are skipped for import because UPI proof is
+          required), whatsappEnabled (true/false). Each duration must have a
+          price under Pricing. Maximum 500 rows per file.
+        </p>*/}
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <Button type="button" variant="outline" onClick={() => void downloadTemplate()}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void downloadTemplate()}
+          >
             Download template (CSV)
           </Button>
           <label className="inline-flex cursor-pointer items-center gap-2">
