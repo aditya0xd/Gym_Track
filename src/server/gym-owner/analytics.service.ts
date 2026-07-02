@@ -108,71 +108,100 @@ function renewalPipelineForMonth(
 }
 
 export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnalytics> {
-  const members = await prisma.member.findMany({
-    where: memberScope(adminUserId),
-    select: {
-      id: true,
-      phone: true,
-      startDate: true,
-      endDate: true,
-      planPrice: true,
-      paymentStatus: true,
-      membershipStatus: true,
-      updatedAt: true,
-    },
-    orderBy: { startDate: "asc" },
-  });
-
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const currentMonthStart = monthStartFromNow(0);
   const nextMonthStart = monthStartFromNow(1);
 
-  const activeMembers = members.filter(
-    (m) => m.endDate >= today && m.membershipStatus === "ACTIVE",
-  ).length;
-  const pausedMembers = members.filter((m) => m.membershipStatus === "PAUSED").length;
-  const inactiveMembers = members.filter((m) => m.endDate < today).length;
-  const paidMembers = members.filter((m) => m.paymentStatus === "DONE").length;
-  const unpaidMembers = members.length - paidMembers;
+  // Summary stats using SQL aggregation
+  const summary = await prisma.$queryRaw<Array<{
+    total_members: bigint;
+    active_members: bigint;
+    paused_members: bigint;
+    inactive_members: bigint;
+    paid_members: bigint;
+    unpaid_members: bigint;
+    monthly_revenue: bigint;
+  }>>`
+    SELECT
+      COUNT(*) as total_members,
+      SUM(CASE WHEN endDate >= ${today} AND membershipStatus = 'ACTIVE' THEN 1 ELSE 0 END) as active_members,
+      SUM(CASE WHEN membershipStatus = 'PAUSED' THEN 1 ELSE 0 END) as paused_members,
+      SUM(CASE WHEN endDate < ${today} THEN 1 ELSE 0 END) as inactive_members,
+      SUM(CASE WHEN paymentStatus = 'DONE' THEN 1 ELSE 0 END) as paid_members,
+      SUM(CASE WHEN paymentStatus != 'DONE' THEN 1 ELSE 0 END) as unpaid_members,
+      SUM(CASE WHEN paymentStatus = 'DONE' AND startDate >= ${currentMonthStart} AND startDate < ${nextMonthStart} THEN planPrice ELSE 0 END) as monthly_revenue
+    FROM Member
+    WHERE deletedAt IS NULL
+      AND adminUserId = ${adminUserId}
+  `;
 
-  const monthlyRevenue = members
-    .filter(
-      (m) =>
-        m.paymentStatus === "DONE" &&
-        m.startDate >= currentMonthStart &&
-        m.startDate < nextMonthStart,
-    )
-    .reduce((sum, m) => sum + Number(m.planPrice), 0);
+  const summaryData = summary[0] || {
+    total_members: BigInt(0),
+    active_members: BigInt(0),
+    paused_members: BigInt(0),
+    inactive_members: BigInt(0),
+    paid_members: BigInt(0),
+    unpaid_members: BigInt(0),
+    monthly_revenue: BigInt(0),
+  };
 
+  const totalMembers = Number(summaryData.total_members);
+  const activeMembers = Number(summaryData.active_members);
+  const pausedMembers = Number(summaryData.paused_members);
+  const inactiveMembers = Number(summaryData.inactive_members);
+  const paidMembers = Number(summaryData.paid_members);
+  const unpaidMembers = Number(summaryData.unpaid_members);
+  const monthlyRevenue = Number(summaryData.monthly_revenue);
+
+  // Trends using SQL GROUP BY
   const trendMonths = Array.from({ length: 6 }, (_, i) => monthStartFromNow(i - 5));
-  const trendByKey = new Map<string, TrendPoint>();
-  for (const month of trendMonths) {
-    trendByKey.set(monthKey(month), {
-      monthKey: monthKey(month),
+  const trendKeys = trendMonths.map(monthKey);
+  
+  const trendResults = await prisma.$queryRaw<Array<{
+    month_key: string;
+    revenue: bigint;
+    count: bigint;
+  }>>`
+    SELECT
+      TO_CHAR(startDate, 'YYYY-MM') as month_key,
+      SUM(CASE WHEN paymentStatus = 'DONE' THEN planPrice ELSE 0 END) as revenue,
+      SUM(CASE WHEN paymentStatus = 'DONE' THEN 1 ELSE 0 END) as count
+    FROM Member
+    WHERE deletedAt IS NULL
+      AND adminUserId = ${adminUserId}
+      AND TO_CHAR(startDate, 'YYYY-MM') IN (${trendKeys.map(k => `'${k}'`).join(',')})
+    GROUP BY TO_CHAR(startDate, 'YYYY-MM')
+    ORDER BY month_key
+  `;
+
+  const trendMap = new Map(trendResults.map(t => [t.month_key, t]));
+  
+  const trends: TrendPoint[] = trendMonths.map(month => {
+    const key = monthKey(month);
+    const data = trendMap.get(key);
+    return {
+      monthKey: key,
       month: monthLabel(month),
-      revenue: 0,
-      paidMembers: 0,
+      revenue: data ? Math.round(Number(data.revenue) * 100) / 100 : 0,
+      paidMembers: data ? Number(data.count) : 0,
       unpaidMembers: 0,
-    });
-  }
+    };
+  });
 
-  for (const m of members) {
-    const key = monthKey(m.startDate);
-    const trend = trendByKey.get(key);
-    if (!trend) continue;
-    if (m.paymentStatus === "DONE") {
-      trend.paidMembers += 1;
-      trend.revenue += Number(m.planPrice);
-    } else {
-      trend.unpaidMembers += 1;
-    }
-  }
-
-  const trends = Array.from(trendByKey.values()).map((t) => ({
-    ...t,
-    revenue: Math.round(t.revenue * 100) / 100,
-  }));
+  // Fetch members only for retention analysis and insights (still needed for complex logic)
+  const members = await prisma.member.findMany({
+    where: memberScope(adminUserId),
+    select: {
+      phone: true,
+      startDate: true,
+      endDate: true,
+      planPrice: true,
+      membershipStatus: true,
+      updatedAt: true,
+    },
+    orderBy: { startDate: "asc" },
+  });
 
   const byPhone = new Map<string, typeof members>();
   for (const member of members) {
@@ -279,7 +308,7 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
 
   return {
     summary: {
-      totalMembers: members.length,
+      totalMembers,
       activeMembers,
       pausedMembers,
       inactiveMembers,
@@ -292,8 +321,8 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
       churnRate: pct(churned, opportunities),
     },
     payments: {
-      successRate: pct(paidMembers, members.length),
-      failureRate: pct(unpaidMembers, members.length),
+      successRate: pct(paidMembers, totalMembers),
+      failureRate: pct(unpaidMembers, totalMembers),
     },
     trends,
     revenueForecast: {

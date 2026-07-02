@@ -1,33 +1,38 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
-import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { HttpError } from "@/lib/http/errors";
+import { withGymOwner } from "@/lib/api-auth";
+import { parseRequestBody, dateSchema, memberBillingDurationSchema, paymentStatusSchema, optionalStringToNullSchema, priceInrSchema } from "@/lib/validation";
 import {
   createMemberForOwner,
   listMembersForOwner,
 } from "@/server/gym-owner/member.service";
-import type {
-  MemberBillingDuration,
-  PaymentStatus,
-} from "@/generated/prisma/client";
+import type { PaymentStatus } from "@/generated/prisma/client";
 
-function isDuration(v: unknown): v is MemberBillingDuration {
-  return MEMBER_BILLING_DURATION_OPTIONS.some((o) => o.value === v);
-}
-
-function isPaymentStatus(v: unknown): v is PaymentStatus {
-  return v === "DONE" || v === "NOT_DONE";
-}
-
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+const createMemberSchema = z.object({
+  fullName: z.string().trim().min(1, "Full name is required"),
+  email: z.string().trim().toLowerCase().email().nullable().optional().transform(v => v ?? null),
+  phone: z.string().trim().min(1, "Phone is required"),
+  billingDuration: memberBillingDurationSchema,
+  whatsappEnabled: z.boolean().default(true),
+  paymentStatus: paymentStatusSchema.default("NOT_DONE"),
+  memberPhoto: z.string().trim().nullable().optional().transform(v => v ?? null),
+  upiScreenshot: z.string().trim().nullable().optional().transform(v => v ?? null),
+  discountInr: priceInrSchema.optional().transform(v => v ?? undefined),
+  startDate: dateSchema,
+}).refine(data => {
+  if (data.paymentStatus === "DONE" && !data.upiScreenshot) {
+    return false;
   }
+  return true;
+}, {
+  message: "UPI screenshot is required when payment is marked done",
+  path: ["upiScreenshot"],
+});
 
-  const members = await listMembersForOwner(session.user.id);
+async function GETHandler(_request: Request, userId: string) {
+  const members = await listMembersForOwner(userId);
   return NextResponse.json(
     members.map((m) => ({
       ...m,
@@ -40,56 +45,13 @@ export async function GET() {
   );
 }
 
-export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+async function POSTHandler(request: Request, userId: string) {
+  const { data, error } = await parseRequestBody(request, createMemberSchema);
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
   }
 
-  const body = (await request.json()) as Record<string, unknown>;
-
-  const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
-  const emailRaw = typeof body.email === "string" ? body.email.trim() : "";
-  const email = emailRaw === "" ? null : emailRaw.toLowerCase();
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
-  const billingDuration = body.billingDuration;
-  const whatsappEnabled =
-    typeof body.whatsappEnabled === "boolean" ? body.whatsappEnabled : true;
-  const paymentStatusRaw = body.paymentStatus;
-  const paymentStatus: PaymentStatus = isPaymentStatus(paymentStatusRaw)
-    ? paymentStatusRaw
-    : "NOT_DONE";
-  const memberPhoto =
-    typeof body.memberPhoto === "string" && body.memberPhoto.trim()
-      ? body.memberPhoto
-      : null;
-  const upiScreenshot =
-    typeof body.upiScreenshot === "string" && body.upiScreenshot.trim()
-      ? body.upiScreenshot
-      : null;
-  const discountInrRaw =
-    typeof body.discountInr === "number"
-      ? String(body.discountInr)
-      : typeof body.discountInr === "string"
-        ? body.discountInr.trim()
-        : "";
-  const startDateRaw = typeof body.startDate === "string" ? body.startDate : "";
-
-  if (!fullName || !phone || !isDuration(billingDuration) || !startDateRaw) {
-    return NextResponse.json(
-      { message: "fullName, phone, billingDuration, and startDate are required." },
-      { status: 400 },
-    );
-  }
-
-  if (paymentStatus === "DONE" && !upiScreenshot) {
-    return NextResponse.json(
-      { message: "UPI screenshot is required when payment is marked done." },
-      { status: 400 },
-    );
-  }
-
-  const startParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(startDateRaw);
+  const startParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.startDate);
   if (!startParts) {
     return NextResponse.json(
       { message: "startDate must be YYYY-MM-DD." },
@@ -106,17 +68,17 @@ export async function POST(request: Request) {
   );
 
   try {
-    const member = await createMemberForOwner(session.user.id, {
-      fullName,
-      email,
-      phone,
-      billingDuration,
+    const member = await createMemberForOwner(userId, {
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone,
+      billingDuration: data.billingDuration,
       startDate,
-      whatsappEnabled,
-      paymentStatus,
-      memberPhoto,
-      upiScreenshot,
-      discountInr: discountInrRaw === "" ? undefined : discountInrRaw,
+      whatsappEnabled: data.whatsappEnabled,
+      paymentStatus: data.paymentStatus,
+      memberPhoto: data.memberPhoto,
+      upiScreenshot: data.upiScreenshot,
+      discountInr: data.discountInr,
     });
 
     return NextResponse.json(
@@ -144,3 +106,6 @@ export async function POST(request: Request) {
     throw e;
   }
 }
+
+export const GET = withGymOwner(GETHandler);
+export const POST = withGymOwner(POSTHandler);

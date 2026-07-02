@@ -2,18 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bolt, Users } from "lucide-react";
+import { LayoutGrid, Users, BarChart3, Tag, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-
-function isMembersPath(pathname: string) {
-  return pathname.startsWith("/owner/members");
-}
 
 export function OwnerBottomNav() {
   const pathname = usePathname();
   const dashboardActive = pathname === "/owner/dashboard";
-  const membersActive = isMembersPath(pathname);
+  const membersActive = pathname.startsWith("/owner/members");
+  const analyticsActive = pathname.startsWith("/owner/analytics");
+  const pricingActive = pathname.startsWith("/owner/pricing");
+  const profileActive = pathname.startsWith("/owner/manage-plan");
 
   const itemClass = (active: boolean) =>
     cn(
@@ -25,14 +24,27 @@ export function OwnerBottomNav() {
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur md:hidden">
       <div className="mx-auto flex w-full max-w-6xl items-stretch gap-1 px-2 py-1">
         <Link href="/owner/dashboard" className={itemClass(dashboardActive)}>
-          <Bolt className="size-4" />
+          <LayoutGrid className="size-4" />
           Dashboard
         </Link>
         <Link href="/owner/members" className={itemClass(membersActive)}>
           <Users className="size-4" />
           Members
         </Link>
+        <Link href="/owner/analytics" className={itemClass(analyticsActive)}>
+          <BarChart3 className="size-4" />
+          Analytics
+        </Link>
+        <Link href="/owner/pricing" className={itemClass(pricingActive)}>
+          <Tag className="size-4" />
+          Pricing
+        </Link>
+        <Link href="/owner/manage-plan" className={itemClass(profileActive)}>
+          <User className="size-4" />
+          Profile
+        </Link>
       </div>
     </nav>
   );
 }
+

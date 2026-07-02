@@ -11,6 +11,7 @@ export async function getCachedOwnerMembersListJson(
 
   try {
     const redis = await getRedis();
+    if (!redis?.isReady) return null;
     const raw = await redis.get(ownerMembersListCacheKey(adminUserId));
     return typeof raw === "string" ? raw : null;
   } catch (err) {
@@ -27,6 +28,7 @@ export async function setCachedOwnerMembersListJson(
 
   try {
     const redis = await getRedis();
+    if (!redis?.isReady) return;
     await redis.set(ownerMembersListCacheKey(adminUserId), json, {
       EX: OWNER_MEMBERS_LIST_TTL_SEC,
     });
@@ -42,6 +44,7 @@ export async function invalidateOwnerMembersListCache(
 
   try {
     const redis = await getRedis();
+    if (!redis?.isReady) return;
     await redis.del(ownerMembersListCacheKey(adminUserId));
   } catch (err) {
     console.error("[redis] invalidateOwnerMembersListCache", err);

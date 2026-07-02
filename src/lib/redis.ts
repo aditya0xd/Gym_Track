@@ -12,36 +12,64 @@ export function isRedisConfigured(): boolean {
 /**
  * Returns a connected Redis client. Reuses the same connection in dev (hot reload).
  * Requires `REDIS_URL` (e.g. `redis://localhost:6379`).
+ *
+ * **Graceful fallback:** returns `null` when Redis is not configured or the
+ * connection fails — callers must handle `null` and fall through to the DB.
  */
-export async function getRedis(): Promise<RedisClientType> {
-  if (global.redis?.isOpen) {
+export async function getRedis(): Promise<RedisClientType | null> {
+  if (global.redis?.isReady) {
     return global.redis;
   }
 
   const url = process.env.REDIS_URL?.trim();
   if (!url) {
-    throw new Error("REDIS_URL is not set.");
+    return null;
   }
 
   if (!global.redisConnectPromise) {
-    const client = createClient({ url });
-    client.on("error", (err) => {
-      console.error("[redis]", err);
+    const client = createClient({
+      url,
+      socket: {
+        reconnectStrategy: (retries) => {
+          return Math.min(retries * 100, 3000);
+        }
+      }
+    });
+    client.on("error", (err: any) => {
+      if (err?.code === "ECONNREFUSED" || err?.message?.includes("ECONNREFUSED")) {
+        console.warn("[redis] Connection refused. Client will try to reconnect...");
+      } else {
+        console.error("[redis]", err);
+      }
     });
     client.on("connect", () => {
       console.log("[redis] connected");
     });
     client.on("reconnecting", () => {
-      console.log("[redis] reconnecting");
+      // quiet down reconnect logging
     });
     client.on("end", () => {
       console.log("[redis] disconnected");
     });
-    global.redisConnectPromise = client.connect().then(() => {
+
+    const connect = client.connect().then(() => {
       global.redis = client;
       return client;
     });
+
+    // Surface connection failures so callers get a clean rejection
+    // instead of an unhandled promise rejection.
+    connect.catch((err: unknown) => {
+      console.error("[redis] Initial connection failed:", err);
+    });
+
+    global.redisConnectPromise = connect;
   }
 
-  return global.redisConnectPromise;
+  try {
+    return await global.redisConnectPromise;
+  } catch {
+    // Connection failed — callers fall through to DB
+    return null;
+  }
 }

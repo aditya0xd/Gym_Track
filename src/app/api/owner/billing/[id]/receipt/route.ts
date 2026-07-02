@@ -1,27 +1,19 @@
-import { getServerSession } from "next-auth";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
-import { authOptions } from "@/lib/auth";
 import { HttpError } from "@/lib/http/errors";
+import { withGymOwner } from "@/lib/api-auth";
 import { getInvoiceReceiptForOwner } from "@/server/gym-owner/manage-plan.service";
-
-type RouteContext = { params: Promise<{ id: string }> };
 
 function fmtDate(d: Date | null) {
   if (!d) return "N/A";
   return d.toISOString().slice(0, 10);
 }
 
-export async function GET(_request: Request, context: RouteContext) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const { id } = await context.params;
+async function GETHandler(_request: Request, userId: string, context?: unknown) {
+  const { id } = await (context as { params: Promise<{ id: string }> }).params;
 
   try {
-    const invoice = await getInvoiceReceiptForOwner(session.user.id, id);
+    const invoice = await getInvoiceReceiptForOwner(userId, id);
 
     const pdf = await PDFDocument.create();
     const page = pdf.addPage([595, 842]);
@@ -74,3 +66,5 @@ export async function GET(_request: Request, context: RouteContext) {
     throw e;
   }
 }
+
+export const GET = withGymOwner(GETHandler);

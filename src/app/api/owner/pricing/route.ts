@@ -1,74 +1,48 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
-import { guardGymOwnerPlanFeature } from "@/lib/plan-features/guard";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { HttpError } from "@/lib/http/errors";
+import { withGymOwnerFeature } from "@/lib/api-auth";
+import { parseRequestBody, memberBillingDurationSchema, priceInrSchema } from "@/lib/validation";
 import {
   listDurationPricesForOwner,
   upsertDurationPricesForOwner,
 } from "@/server/gym-owner/pricing.service";
 import type { MemberBillingDuration } from "@/generated/prisma/client";
 
-function isDuration(v: unknown): v is MemberBillingDuration {
-  return MEMBER_BILLING_DURATION_OPTIONS.some((o) => o.value === v);
-}
+const pricingItemSchema = z.object({
+  duration: memberBillingDurationSchema,
+  priceInr: priceInrSchema,
+});
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  const denied = await guardGymOwnerPlanFeature(session, "CUSTOM_MEMBERSHIP_PRICING");
-  if (denied) return denied;
+const updatePricingSchema = z.object({
+  prices: z.array(pricingItemSchema).refine(
+    (items) => items.length === MEMBER_BILLING_DURATION_OPTIONS.length,
+    { message: `Submit all ${MEMBER_BILLING_DURATION_OPTIONS.length} durations with priceInr.` }
+  ).refine(
+    (items) => {
+      const durations = new Set(items.map(i => i.duration));
+      return durations.size === MEMBER_BILLING_DURATION_OPTIONS.length;
+    },
+    { message: "Each duration must appear exactly once." }
+  ),
+});
 
-  const prices = await listDurationPricesForOwner(session!.user.id);
+async function GETHandler(_request: Request, userId: string) {
+  const prices = await listDurationPricesForOwner(userId);
   return NextResponse.json({ prices });
 }
 
-export async function PUT(request: Request) {
-  const session = await getServerSession(authOptions);
-  const denied = await guardGymOwnerPlanFeature(session, "CUSTOM_MEMBERSHIP_PRICING");
-  if (denied) return denied;
-
-  const body = (await request.json()) as { prices?: unknown };
-  if (!Array.isArray(body.prices)) {
-    return NextResponse.json(
-      { message: "Body must include prices: [{ duration, priceInr }, ...]." },
-      { status: 400 },
-    );
-  }
-
-  const parsed: { duration: MemberBillingDuration; priceInr: string }[] = [];
-  for (const row of body.prices) {
-    if (!row || typeof row !== "object") continue;
-    const r = row as Record<string, unknown>;
-    if (!isDuration(r.duration)) continue;
-    if (typeof r.priceInr !== "string" && typeof r.priceInr !== "number") continue;
-    parsed.push({
-      duration: r.duration,
-      priceInr: String(r.priceInr),
-    });
-  }
-
-  if (parsed.length !== MEMBER_BILLING_DURATION_OPTIONS.length) {
-    return NextResponse.json(
-      {
-        message: "Submit all four durations (1, 3, 6, 12 months) with priceInr.",
-      },
-      { status: 400 },
-    );
-  }
-
-  const seen = new Set(parsed.map((p) => p.duration));
-  if (seen.size !== 4) {
-    return NextResponse.json(
-      { message: "Each duration must appear exactly once." },
-      { status: 400 },
-    );
+async function PUTHandler(request: Request, userId: string) {
+  const { data, error } = await parseRequestBody(request, updatePricingSchema);
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
   }
 
   try {
-    await upsertDurationPricesForOwner(session!.user.id, parsed);
-    const prices = await listDurationPricesForOwner(session!.user.id);
+    await upsertDurationPricesForOwner(userId, data.prices);
+    const prices = await listDurationPricesForOwner(userId);
     return NextResponse.json({ prices });
   } catch (e) {
     if (e instanceof HttpError) {
@@ -77,3 +51,6 @@ export async function PUT(request: Request) {
     throw e;
   }
 }
+
+export const GET = withGymOwnerFeature("CUSTOM_MEMBERSHIP_PRICING", GETHandler);
+export const PUT = withGymOwnerFeature("CUSTOM_MEMBERSHIP_PRICING", PUTHandler);

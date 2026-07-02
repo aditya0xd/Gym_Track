@@ -1,34 +1,28 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
 import { HttpError } from "@/lib/http/errors";
+import { withGymOwner } from "@/lib/api-auth";
+import { parseRequestBody } from "@/lib/validation";
 import {
   pauseMembershipForOwner,
   resumeMembershipForOwner,
 } from "@/server/gym-owner/member.service";
 
-type RouteContext = { params: Promise<{ id: string }> };
+const membershipStatusSchema = z.object({
+  action: z.enum(["pause", "resume"]),
+});
 
-function isAction(v: unknown): v is "pause" | "resume" {
-  return v === "pause" || v === "resume";
-}
-
-export async function POST(request: Request, context: RouteContext) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await context.params;
-  const body = (await request.json()) as Record<string, unknown>;
-  if (!isAction(body.action)) {
-    return NextResponse.json({ message: "action must be pause or resume." }, { status: 400 });
+async function POSTHandler(request: Request, userId: string, context?: unknown) {
+  const { id } = await (context as { params: Promise<{ id: string }> }).params;
+  const { data, error } = await parseRequestBody(request, membershipStatusSchema);
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
   }
 
   try {
-    if (body.action === "pause") {
-      const m = await pauseMembershipForOwner(session.user.id, id);
+    if (data.action === "pause") {
+      const m = await pauseMembershipForOwner(userId, id);
       return NextResponse.json({
         message: "Membership paused. Time frozen until you resume.",
         member: {
@@ -39,7 +33,7 @@ export async function POST(request: Request, context: RouteContext) {
         },
       });
     }
-    const m = await resumeMembershipForOwner(session.user.id, id);
+    const m = await resumeMembershipForOwner(userId, id);
     return NextResponse.json({
       message: "Membership resumed. End date extended by the pause duration.",
       member: {
@@ -56,3 +50,5 @@ export async function POST(request: Request, context: RouteContext) {
     throw e;
   }
 }
+
+export const POST = withGymOwner(POSTHandler);

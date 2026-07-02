@@ -23,3 +23,19 @@ export async function guardGymOwnerPlanFeature(
   }
   return null;
 }
+
+/**
+ * Server-side helper for checking if a gym owner has access to a feature.
+ * Returns true if the feature is available, false otherwise.
+ * Use this in server components to conditionally render UI elements.
+ */
+export async function hasGymOwnerPlanFeature(
+  session: Session | null,
+  feature: PlanFeatureKey,
+): Promise<boolean> {
+  if (!session?.user?.id || session.user.role !== "gym_owner") {
+    return false;
+  }
+  const plan = session.user.subscriptionPlan ?? "TRIAL";
+  return await planHasFeature(plan, feature);
+}

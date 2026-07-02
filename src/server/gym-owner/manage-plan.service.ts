@@ -1,5 +1,6 @@
 import type { OwnerSubscriptionPlan } from "@/generated/prisma/client";
 import { HttpError } from "@/lib/http/errors";
+import { invalidateCachedOwner } from "@/lib/auth-cache";
 import { prisma } from "@/lib/prisma";
 import { activeOwnerWhere, ownerInvoiceScope } from "@/lib/tenant/scope";
 import { getPlatformPlanPriceMap } from "@/server/platform-pricing.service";
@@ -71,6 +72,10 @@ export async function changeOwnerPlan(adminUserId: string, nextPlan: OwnerSubscr
       },
     }),
   ]);
+
+  // Invalidate cache so next JWT callback fetches fresh data
+  await invalidateCachedOwner(adminUserId);
+
   return { changed: true as const };
 }
 
