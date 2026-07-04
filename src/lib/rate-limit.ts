@@ -21,7 +21,7 @@ export async function rateLimit(identifier: string, config: RateLimitConfig) {
     console.error("[rate-limit] Failed to get Redis client:", error);
   }
 
-  if (redisClient) {
+  if (redisClient?.isReady) {
     const key = `rate-limit:${identifier}`;
     
     try {

@@ -31,7 +31,7 @@ model Member {
   deletedAt        DateTime?
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
-  adminUser        AdminUser            @relation(fields: [adminUserId], references: [id])
+  adminUser        AdminUser            @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
   reminders        ReminderLog[]
 
   @@index([adminUserId])
@@ -42,7 +42,7 @@ model Member {
 model ReminderLog {
   id             String            @id @default(uuid())
   memberId       String
-  member         Member            @relation(fields: [memberId], references: [id])
+  member         Member            @relation(fields: [memberId], references: [id], onDelete: Cascade)
   channel        Channel
   sentAt         DateTime          @default(now())
   status         ReminderStatus

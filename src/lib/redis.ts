@@ -29,15 +29,21 @@ export async function getRedis(): Promise<RedisClientType | null> {
   if (!global.redisConnectPromise) {
     const client = createClient({
       url,
+      disableOfflineQueue: true,
       socket: {
         reconnectStrategy: (retries) => {
           return Math.min(retries * 100, 3000);
         }
       }
     });
+    let lastErrorLogTime = 0;
     client.on("error", (err: any) => {
       if (err?.code === "ECONNREFUSED" || err?.message?.includes("ECONNREFUSED")) {
-        console.warn("[redis] Connection refused. Client will try to reconnect...");
+        const now = Date.now();
+        if (now - lastErrorLogTime > 10000) { // Log once every 10 seconds
+          console.warn("[redis] Connection refused. Client will keep trying to reconnect silently...");
+          lastErrorLogTime = now;
+        }
       } else {
         console.error("[redis]", err);
       }
@@ -52,15 +58,18 @@ export async function getRedis(): Promise<RedisClientType | null> {
       console.log("[redis] disconnected");
     });
 
-    const connect = client.connect().then(() => {
-      global.redis = client;
-      return client;
+    const bgConnect = client.connect().catch((err: unknown) => {
+      console.error("[redis] Initial connection failed:", err);
     });
 
-    // Surface connection failures so callers get a clean rejection
-    // instead of an unhandled promise rejection.
-    connect.catch((err: unknown) => {
-      console.error("[redis] Initial connection failed:", err);
+    const connect = Promise.race([
+      bgConnect.then(() => client),
+      new Promise<RedisClientType>((resolve) => {
+        setTimeout(() => resolve(client), 200); // 200ms timeout to avoid hanging
+      })
+    ]).then((c) => {
+      global.redis = c;
+      return c;
     });
 
     global.redisConnectPromise = connect;

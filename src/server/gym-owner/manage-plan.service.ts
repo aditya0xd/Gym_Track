@@ -171,6 +171,55 @@ export async function markInvoicePaidFromRazorpay(input: {
   });
 }
 
+export async function handleRazorpayWebhookEvent(event: string, payload: any) {
+  if (event !== "payment.captured" && event !== "payment.failed") {
+    return;
+  }
+
+  const payment = payload.payload.payment.entity;
+  const razorpayOrderId = payment.order_id;
+  const razorpayPaymentId = payment.id;
+
+  if (!razorpayOrderId) return;
+
+  const invoice = await prisma.ownerBillingInvoice.findUnique({
+    where: { razorpayOrderId },
+    select: { id: true, status: true },
+  });
+
+  if (!invoice) {
+    console.warn(`[Webhook] No invoice found for Razorpay order: ${razorpayOrderId}`);
+    return;
+  }
+
+  if (invoice.status !== "PENDING") {
+    // Already processed
+    return;
+  }
+
+  if (event === "payment.captured") {
+    await prisma.ownerBillingInvoice.update({
+      where: { id: invoice.id },
+      data: {
+        status: "PAID",
+        paidAt: new Date(),
+        provider: "RAZORPAY",
+        razorpayPaymentId,
+      },
+    });
+  } else if (event === "payment.failed") {
+    await prisma.ownerBillingInvoice.update({
+      where: { id: invoice.id },
+      data: {
+        status: "FAILED",
+        provider: "RAZORPAY",
+        razorpayPaymentId,
+      },
+    });
+  }
+}
+
+
 export async function getInvoiceReceiptForOwner(adminUserId: string, invoiceId: string) {
   const invoice = await prisma.ownerBillingInvoice.findFirst({
     where: { id: invoiceId, ...ownerInvoiceScope(adminUserId) },
