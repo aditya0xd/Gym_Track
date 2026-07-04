@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/auth";
+import { withSuperAdmin } from "@/lib/api-auth";
 import { listGymOwnersWithStats } from "@/server/superadmin/gym-owner.service";
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "superadmin") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+async function GETHandler(_request: Request, _userId: string) {
   const rows = await listGymOwnersWithStats();
   return NextResponse.json({
     gymOwners: rows.map((g) => ({
@@ -23,3 +17,5 @@ export async function GET() {
     })),
   });
 }
+
+export const GET = withSuperAdmin(GETHandler);

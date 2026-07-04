@@ -1,42 +1,36 @@
 import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
+import { z } from "zod";
 
 import { seedDefaultDurationPricesForOwner } from "@/lib/auth/default-owner-pricing";
 import { prisma } from "@/lib/prisma";
+import { parseRequestBody, emailSchema } from "@/lib/validation";
+import { rateLimit } from "@/lib/rate-limit";
 
-type SignupPayload = {
-  name?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-};
+const signupSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  email: emailSchema,
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as SignupPayload;
-
-  const name = typeof body.name === "string" ? body.name.trim() : "";
-  const email = typeof body.email === "string" ? body.email.toLowerCase().trim() : "";
-  const password = typeof body.password === "string" ? body.password : "";
-  const confirmPassword =
-    typeof body.confirmPassword === "string" ? body.confirmPassword : "";
-
-  if (!name || !email || !password || !confirmPassword) {
-    return NextResponse.json(
-      { message: "All fields are required." },
-      { status: 400 },
-    );
+  const { data, error } = await parseRequestBody(request, signupSchema);
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
   }
 
-  if (password.length < 8) {
-    return NextResponse.json(
-      { message: "Password must be at least 8 characters long." },
-      { status: 400 },
-    );
+  // Rate limit: 5 signups per IP per 15 minutes
+  const ip = request.headers.get("x-forwarded-for") || "unknown";
+  const rateLimitResult = await rateLimit(`signup:${ip}`, { limit: 5, interval: 900 });
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ message: "Too many signups. Please try again later." }, { status: 429 });
   }
 
-  if (password !== confirmPassword) {
-    return NextResponse.json({ message: "Passwords do not match." }, { status: 400 });
-  }
+  const { name, email, password } = data;
 
   const existingUser = await prisma.adminUser.findUnique({ where: { email } });
   if (existingUser) {

@@ -1,20 +1,14 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/auth";
-import { guardGymOwnerPlanFeature } from "@/lib/plan-features/guard";
 import { HttpError } from "@/lib/http/errors";
+import { withGymOwnerFeature } from "@/lib/api-auth";
 import { importMembersFromCsv } from "@/server/gym-owner/member-bulk.service";
 
 export const dynamic = "force-dynamic";
 
 const MAX_BYTES = 2 * 1024 * 1024;
 
-export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  const denied = await guardGymOwnerPlanFeature(session, "BULK_IMPORT_EXPORT");
-  if (denied) return denied;
-
+async function POSTHandler(request: Request, userId: string) {
   const contentType = request.headers.get("content-type") ?? "";
   let text = "";
 
@@ -42,7 +36,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await importMembersFromCsv(session!.user.id, text);
+    const result = await importMembersFromCsv(userId, text);
     return NextResponse.json(result);
   } catch (e) {
     if (e instanceof HttpError) {
@@ -51,3 +45,5 @@ export async function POST(request: Request) {
     throw e;
   }
 }
+
+export const POST = withGymOwnerFeature("BULK_IMPORT_EXPORT", POSTHandler);

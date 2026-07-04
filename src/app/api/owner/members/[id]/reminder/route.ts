@@ -1,36 +1,38 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
-import { guardGymOwnerPlanFeature } from "@/lib/plan-features/guard";
 import { HttpError } from "@/lib/http/errors";
+import { withGymOwnerFeature } from "@/lib/api-auth";
+import { parseRequestBody } from "@/lib/validation";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   sendReminderForOwnerMember,
   type ReminderType,
 } from "@/server/gym-owner/reminder.service";
 
-type RouteContext = { params: Promise<{ id: string }> };
-function isReminderType(v: unknown): v is ReminderType {
-  return v === "MEMBERSHIP_EXPIRY" || v === "PAYMENT_DUE";
-}
+const reminderSchema = z.object({
+  reminderType: z.enum(["MEMBERSHIP_EXPIRY", "PAYMENT_DUE"] as [ReminderType, ...ReminderType[]]).default("MEMBERSHIP_EXPIRY"),
+  message: z.string().trim().optional(),
+});
 
-export async function POST(request: Request, context: RouteContext) {
-  const session = await getServerSession(authOptions);
-  const denied = await guardGymOwnerPlanFeature(session, "MANUAL_MEMBER_REMINDERS");
-  if (denied) return denied;
+async function POSTHandler(request: Request, userId: string, context?: unknown) {
+  const { id } = await (context as { params: Promise<{ id: string }> }).params;
+  const { data, error } = await parseRequestBody(request, reminderSchema);
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
+  }
 
-  const { id } = await context.params;
-  const body = (await request.json()) as Record<string, unknown>;
-  const reminderType = isReminderType(body.reminderType)
-    ? body.reminderType
-    : "MEMBERSHIP_EXPIRY";
-  const messageRaw =
-    typeof body.message === "string" && body.message.trim() ? body.message.trim() : undefined;
+  // Rate limit: 3 reminders per member per minute
+  const ip = request.headers.get("x-forwarded-for") || "unknown";
+  const rateLimitResult = await rateLimit(`reminder:${userId}:${id}:${ip}`, { limit: 3, interval: 60 });
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
+  }
 
   try {
-    const log = await sendReminderForOwnerMember(session!.user.id, id, {
-      reminderType,
-      message: messageRaw,
+    const log = await sendReminderForOwnerMember(userId, id, {
+      reminderType: data.reminderType,
+      message: data.message,
     });
     return NextResponse.json({
       reminder: {
@@ -38,7 +40,7 @@ export async function POST(request: Request, context: RouteContext) {
         channel: log.channel,
         status: log.status,
         sentAt: log.sentAt.toISOString(),
-        reminderType,
+        reminderType: data.reminderType,
       },
     });
   } catch (e) {
@@ -48,3 +50,5 @@ export async function POST(request: Request, context: RouteContext) {
     throw e;
   }
 }
+
+export const POST = withGymOwnerFeature("MANUAL_MEMBER_REMINDERS", POSTHandler);

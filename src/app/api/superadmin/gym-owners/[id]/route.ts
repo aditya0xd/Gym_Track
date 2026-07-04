@@ -1,82 +1,45 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
-import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { HttpError } from "@/lib/http/errors";
-import { invalidateCachedOwner } from "@/lib/auth-cache";
+import { withSuperAdmin } from "@/lib/api-auth";
+import { parseRequestBody, ownerSubscriptionPlanSchema } from "@/lib/validation";
 import { updateGymOwnerSubscription } from "@/server/superadmin/gym-owner.service";
 import type { OwnerSubscriptionPlan } from "@/generated/prisma/client";
 
-function isPlan(v: unknown): v is OwnerSubscriptionPlan {
-  return OWNER_SUBSCRIPTION_PLAN_OPTIONS.some((o) => o.value === v);
-}
+const updateGymOwnerSchema = z.object({
+  subscriptionPlan: ownerSubscriptionPlanSchema.optional(),
+  trialEndsAt: z.union([
+    z.string().datetime("trialEndsAt must be a valid ISO date string"),
+    z.null(),
+  ]).optional(),
+}).refine(data => data.subscriptionPlan !== undefined || data.trialEndsAt !== undefined, {
+  message: "Provide subscriptionPlan and/or trialEndsAt",
+});
 
-type RouteContext = { params: Promise<{ id: string }> };
-
-export async function PATCH(request: Request, context: RouteContext) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "superadmin") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+async function PATCHHandler(request: Request, _userId: string, context?: unknown) {
+  const { id } = await (context as { params: Promise<{ id: string }> }).params;
+  const { data, error } = await parseRequestBody(request, updateGymOwnerSchema);
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
   }
-
-  const { id } = await context.params;
-  const body = (await request.json()) as Record<string, unknown>;
 
   const patch: {
     subscriptionPlan?: OwnerSubscriptionPlan;
     trialEndsAt?: Date | null;
   } = {};
 
-  if (body.subscriptionPlan !== undefined) {
-    if (body.subscriptionPlan === null || body.subscriptionPlan === "") {
-      return NextResponse.json(
-        { message: "subscriptionPlan cannot be empty." },
-        { status: 400 },
-      );
-    }
-    if (!isPlan(body.subscriptionPlan)) {
-      return NextResponse.json(
-        { message: "Invalid subscriptionPlan." },
-        { status: 400 },
-      );
-    }
-    patch.subscriptionPlan = body.subscriptionPlan;
+  if (data.subscriptionPlan !== undefined) {
+    patch.subscriptionPlan = data.subscriptionPlan as OwnerSubscriptionPlan;
   }
 
-  if (body.trialEndsAt !== undefined) {
-    if (body.trialEndsAt === null || body.trialEndsAt === "") {
-      patch.trialEndsAt = null;
-    } else if (typeof body.trialEndsAt === "string") {
-      const d = new Date(body.trialEndsAt);
-      if (Number.isNaN(d.getTime())) {
-        return NextResponse.json(
-          { message: "trialEndsAt must be a valid ISO date string." },
-          { status: 400 },
-        );
-      }
-      patch.trialEndsAt = d;
-    } else {
-      return NextResponse.json(
-        { message: "trialEndsAt must be a string or null." },
-        { status: 400 },
-      );
-    }
-  }
-
-  if (patch.subscriptionPlan === undefined && patch.trialEndsAt === undefined) {
-    return NextResponse.json(
-      { message: "Provide subscriptionPlan and/or trialEndsAt." },
-      { status: 400 },
-    );
+  if (data.trialEndsAt !== undefined) {
+    patch.trialEndsAt = data.trialEndsAt === null ? null : new Date(data.trialEndsAt);
   }
 
   try {
     const updated = await updateGymOwnerSubscription(id, patch);
-    
-    // Invalidate cache so next JWT callback fetches fresh data
-    await invalidateCachedOwner(id);
-    
+
     return NextResponse.json({
       gymOwner: {
         id: updated.id,
@@ -94,3 +57,5 @@ export async function PATCH(request: Request, context: RouteContext) {
     throw e;
   }
 }
+
+export const PATCH = withSuperAdmin(PATCHHandler);

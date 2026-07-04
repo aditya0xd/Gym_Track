@@ -1,5 +1,6 @@
 import type { OwnerSubscriptionPlan } from "@/generated/prisma/client";
 import { HttpError } from "@/lib/http/errors";
+import { invalidateCachedOwner } from "@/lib/auth-cache";
 import { prisma } from "@/lib/prisma";
 import { activeOwnerWhere, ownerInvoiceScope } from "@/lib/tenant/scope";
 import { getPlatformPlanPriceMap } from "@/server/platform-pricing.service";
@@ -71,6 +72,10 @@ export async function changeOwnerPlan(adminUserId: string, nextPlan: OwnerSubscr
       },
     }),
   ]);
+
+  // Invalidate cache so next JWT callback fetches fresh data
+  await invalidateCachedOwner(adminUserId);
+
   return { changed: true as const };
 }
 
@@ -165,6 +170,55 @@ export async function markInvoicePaidFromRazorpay(input: {
     select: { id: true, status: true },
   });
 }
+
+export async function handleRazorpayWebhookEvent(event: string, payload: any) {
+  if (event !== "payment.captured" && event !== "payment.failed") {
+    return;
+  }
+
+  const payment = payload.payload.payment.entity;
+  const razorpayOrderId = payment.order_id;
+  const razorpayPaymentId = payment.id;
+
+  if (!razorpayOrderId) return;
+
+  const invoice = await prisma.ownerBillingInvoice.findUnique({
+    where: { razorpayOrderId },
+    select: { id: true, status: true },
+  });
+
+  if (!invoice) {
+    console.warn(`[Webhook] No invoice found for Razorpay order: ${razorpayOrderId}`);
+    return;
+  }
+
+  if (invoice.status !== "PENDING") {
+    // Already processed
+    return;
+  }
+
+  if (event === "payment.captured") {
+    await prisma.ownerBillingInvoice.update({
+      where: { id: invoice.id },
+      data: {
+        status: "PAID",
+        paidAt: new Date(),
+        provider: "RAZORPAY",
+        razorpayPaymentId,
+      },
+    });
+  } else if (event === "payment.failed") {
+    await prisma.ownerBillingInvoice.update({
+      where: { id: invoice.id },
+      data: {
+        status: "FAILED",
+        provider: "RAZORPAY",
+        razorpayPaymentId,
+      },
+    });
+  }
+}
+
 
 export async function getInvoiceReceiptForOwner(adminUserId: string, invoiceId: string) {
   const invoice = await prisma.ownerBillingInvoice.findFirst({

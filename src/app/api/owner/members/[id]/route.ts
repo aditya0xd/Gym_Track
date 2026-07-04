@@ -1,19 +1,11 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/auth";
+import { withGymOwner } from "@/lib/api-auth";
 import { getMemberForOwner } from "@/server/gym-owner/member.service";
 
-type RouteContext = { params: Promise<{ id: string }> };
-
-export async function GET(request: Request, context: RouteContext) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await context.params;
-  const member = await getMemberForOwner(session.user.id, id);
+async function GETHandler(_request: Request, userId: string, context?: unknown) {
+  const { id } = await (context as { params: Promise<{ id: string }> }).params;
+  const member = await getMemberForOwner(userId, id);
   if (!member) {
     return NextResponse.json({ error: "Member not found" }, { status: 404 });
   }
@@ -33,3 +25,5 @@ export async function GET(request: Request, context: RouteContext) {
     })),
   });
 }
+
+export const GET = withGymOwner(GETHandler);

@@ -1,27 +1,20 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
-import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { HttpError } from "@/lib/http/errors";
-import { invalidateCachedOwner } from "@/lib/auth-cache";
+import { withGymOwner } from "@/lib/api-auth";
+import { parseRequestBody, ownerSubscriptionPlanSchema } from "@/lib/validation";
 import {
   changeOwnerPlan,
   getOwnerManagePlanData,
 } from "@/server/gym-owner/manage-plan.service";
-import type { OwnerSubscriptionPlan } from "@/generated/prisma/client";
 
-function isPlan(v: unknown): v is OwnerSubscriptionPlan {
-  return OWNER_SUBSCRIPTION_PLAN_OPTIONS.some((o) => o.value === v);
-}
+const changePlanSchema = z.object({
+  subscriptionPlan: ownerSubscriptionPlanSchema,
+});
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const data = await getOwnerManagePlanData(session.user.id);
+async function GETHandler(_request: Request, userId: string) {
+  const data = await getOwnerManagePlanData(userId);
   return NextResponse.json({
     ...data,
     trialEndsAt: data.trialEndsAt?.toISOString() ?? null,
@@ -35,26 +28,18 @@ export async function GET() {
   });
 }
 
-export async function PATCH(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = (await request.json()) as Record<string, unknown>;
-  if (!isPlan(body.subscriptionPlan)) {
-    return NextResponse.json({ message: "Invalid subscriptionPlan." }, { status: 400 });
+async function PATCHHandler(request: Request, userId: string) {
+  const { data, error } = await parseRequestBody(request, changePlanSchema);
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
   }
 
   try {
-    const result = await changeOwnerPlan(session.user.id, body.subscriptionPlan);
+    const result = await changeOwnerPlan(userId, data.subscriptionPlan);
     if (!result.changed) {
       return NextResponse.json({ message: "You are already on this plan." });
     }
-    
-    // Invalidate cache so next JWT callback fetches fresh data
-    await invalidateCachedOwner(session.user.id);
-    
+
     return NextResponse.json({ message: "Plan updated. Billing invoice created." });
   } catch (e) {
     if (e instanceof HttpError) {
@@ -63,3 +48,6 @@ export async function PATCH(request: Request) {
     throw e;
   }
 }
+
+export const GET = withGymOwner(GETHandler);
+export const PATCH = withGymOwner(PATCHHandler);

@@ -1,51 +1,41 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { z } from "zod";
 
-import { authOptions } from "@/lib/auth";
 import { HttpError } from "@/lib/http/errors";
+import { withGymOwner } from "@/lib/api-auth";
+import { parseRequestBody } from "@/lib/validation";
 import { verifyRazorpaySignature } from "@/server/integrations/razorpay";
 import { markInvoicePaidFromRazorpay } from "@/server/gym-owner/manage-plan.service";
 
-type RouteContext = { params: Promise<{ id: string }> };
+const razorpayVerifySchema = z.object({
+  razorpayOrderId: z.string().min(1, "razorpayOrderId is required"),
+  razorpayPaymentId: z.string().min(1, "razorpayPaymentId is required"),
+  razorpaySignature: z.string().min(1, "razorpaySignature is required"),
+});
 
-export async function POST(request: Request, context: RouteContext) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await context.params;
-  const body = (await request.json()) as Record<string, unknown>;
-  const razorpayOrderId =
-    typeof body.razorpayOrderId === "string" ? body.razorpayOrderId : "";
-  const razorpayPaymentId =
-    typeof body.razorpayPaymentId === "string" ? body.razorpayPaymentId : "";
-  const razorpaySignature =
-    typeof body.razorpaySignature === "string" ? body.razorpaySignature : "";
-
-  if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
-    return NextResponse.json(
-      { message: "Missing Razorpay verification payload." },
-      { status: 400 },
-    );
+async function POSTHandler(request: Request, userId: string, context?: unknown) {
+  const { id } = await (context as { params: Promise<{ id: string }> }).params;
+  const { data, error } = await parseRequestBody(request, razorpayVerifySchema);
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
   }
 
   try {
     const ok = verifyRazorpaySignature({
-      razorpayOrderId,
-      razorpayPaymentId,
-      razorpaySignature,
+      razorpayOrderId: data.razorpayOrderId,
+      razorpayPaymentId: data.razorpayPaymentId,
+      razorpaySignature: data.razorpaySignature,
     });
     if (!ok) {
       return NextResponse.json({ message: "Invalid payment signature." }, { status: 400 });
     }
 
     await markInvoicePaidFromRazorpay({
-      adminUserId: session.user.id,
+      adminUserId: userId,
       invoiceId: id,
-      razorpayOrderId,
-      razorpayPaymentId,
-      razorpaySignature,
+      razorpayOrderId: data.razorpayOrderId,
+      razorpayPaymentId: data.razorpayPaymentId,
+      razorpaySignature: data.razorpaySignature,
     });
 
     return NextResponse.json({ message: "Payment verified and invoice marked paid." });
@@ -56,3 +46,5 @@ export async function POST(request: Request, context: RouteContext) {
     throw e;
   }
 }
+
+export const POST = withGymOwner(POSTHandler);

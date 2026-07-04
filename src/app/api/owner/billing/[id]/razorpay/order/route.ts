@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 
-import { authOptions } from "@/lib/auth";
 import { HttpError } from "@/lib/http/errors";
+import { withGymOwner } from "@/lib/api-auth";
 import {
   attachRazorpayOrderToInvoice,
   createRazorpayOrderForOwnerInvoice,
@@ -12,17 +11,10 @@ import {
   getRazorpayPublicConfig,
 } from "@/server/integrations/razorpay";
 
-type RouteContext = { params: Promise<{ id: string }> };
-
-export async function POST(_request: Request, context: RouteContext) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id || session.user.role !== "gym_owner") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await context.params;
+async function POSTHandler(_request: Request, userId: string, context?: unknown) {
+  const { id } = await (context as { params: Promise<{ id: string }> }).params;
   try {
-    const invoice = await createRazorpayOrderForOwnerInvoice(session.user.id, id);
+    const invoice = await createRazorpayOrderForOwnerInvoice(userId, id);
     const amountInPaise = Math.round(Number(invoice.amountInr) * 100);
     const order = await createRazorpayOrder({
       amountInPaise,
@@ -34,7 +26,7 @@ export async function POST(_request: Request, context: RouteContext) {
       },
     });
 
-    await attachRazorpayOrderToInvoice(session.user.id, id, order.id);
+    await attachRazorpayOrderToInvoice(userId, id, order.id);
     const { keyId } = getRazorpayPublicConfig();
 
     return NextResponse.json({
@@ -54,3 +46,5 @@ export async function POST(_request: Request, context: RouteContext) {
     );
   }
 }
+
+export const POST = withGymOwner(POSTHandler);

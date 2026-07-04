@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
+import { hasGymOwnerPlanFeature } from "@/lib/plan-features/guard";
 import { listMembersForOwner } from "@/server/gym-owner/member.service";
+import { Users } from "lucide-react";
 
 export const metadata = {
   title: "Dashboard | Gym owner",
@@ -22,6 +24,8 @@ export default async function OwnerDashboardPage() {
   if (!session?.user?.id || session.user.role !== "gym_owner") {
     redirect("/login");
   }
+
+  const hasAnalytics = await hasGymOwnerPlanFeature(session, "ANALYTICS");
 
   const members = await listMembersForOwner(session.user.id);
   const now = new Date();
@@ -66,60 +70,122 @@ export default async function OwnerDashboardPage() {
   return (
     <PageShell>
       <div className="space-y-4">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h1 className="text-xl font-semibold tracking-tight text-foreground">GymTrack Pro</h1>
-              <p className="mt-1 text-xs text-muted-foreground">{todayLabel}</p>
+        <div className="flex items-start justify-between gap-3 pt-2">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-lime-400">Gym Owner</p>
+            <div className="mt-1 flex items-center gap-2">
+              <h1 className="text-3xl font-extrabold tracking-tight text-foreground">GymTrack Pro</h1>
+              <div className="flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold tracking-wider text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                LIVE
+              </div>
             </div>
-            <Button asChild size="sm" variant="outline">
-              <Link href="/owner/members/new">Enroll member</Link>
-            </Button>
+            <p className="mt-1.5 text-xs text-muted-foreground font-medium">{todayLabel}</p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-foreground p-4 text-background">
-          <p className="text-xs uppercase tracking-wide text-background/80">Revenue at risk</p>
-          <p className="mt-2 text-3xl font-bold">
-            {formatInrFromDecimalString(revenueAtRisk.toFixed(2))}
-          </p>
-          <div className="mt-2 flex items-center justify-between">
-            <p className="text-xs text-background/80">
+        <div className="relative overflow-hidden rounded-2xl border border-red-500/10 bg-gradient-to-r from-red-950/45 to-zinc-900/90 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-red-500">
+              <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+              REVENUE AT RISK
+            </div>
+            <button className="flex items-center gap-1 rounded-full bg-[#d4ff00] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#c2e600] transition-colors">
+              WEEK
+              <svg className="h-3 w-3 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </button>
+          </div>
+          <div className="mt-5">
+            <p className="text-4xl font-black tracking-tight text-white">
+              {formatInrFromDecimalString(revenueAtRisk.toFixed(2))}
+            </p>
+            <p className="mt-2.5 text-xs text-muted-foreground">
               from {expiringSoon.length} expiring members this week
             </p>
-            <Button size="sm" variant="secondary" asChild>
-              <Link href="/owner/analytics">Week</Link>
-            </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {statCards.map((card) => (
-            <Link
-              key={card.label}
-              href={card.href}
-              className={`rounded-xl border ${card.accent} bg-card p-3 transition-colors hover:bg-muted/40`}
-            >
-              <p className="text-3xl font-bold text-foreground">{card.value}</p>
-              <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
-                {card.label}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Total Members */}
+          <Link href="/owner/members?status=all" className="rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted/40 flex flex-col justify-between min-h-[110px]">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-lime-400/10 text-lime-400">
+              <Users className="h-4 w-4 stroke-[2.5]" />
+            </div>
+            <div className="mt-3">
+              <p className="text-3xl font-black tracking-tight text-foreground">{totalMembers}</p>
+              <p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Total</p>
+            </div>
+          </Link>
+
+          {/* Active Members */}
+          <Link href="/owner/members?status=active" className="rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted/40 flex flex-col justify-between min-h-[110px]">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+              <svg className="h-4 w-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="mt-3">
+              <p className="text-3xl font-black tracking-tight text-foreground">{activeMembers}</p>
+              <p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Active</p>
+            </div>
+          </Link>
+
+          {/* Expiring Members */}
+          <Link href="/owner/members?status=expiring" className="rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted/40 flex flex-col justify-between min-h-[110px]">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+              <svg className="h-4 w-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="mt-3">
+              <p className="text-3xl font-black tracking-tight text-foreground">{expiringSoon.length}</p>
+              <p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Expiring</p>
+            </div>
+          </Link>
+
+          {/* Paused Members */}
+          <Link href="/owner/members?status=paused" className="rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted/40 flex flex-col justify-between min-h-[110px]">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
+              <svg className="h-4 w-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9v6m-4.5-6v6M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="mt-3">
+              <p className="text-3xl font-black tracking-tight text-foreground">{pausedMembers}</p>
+              <p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Paused</p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Expired and Revenue Lost combined card */}
+        <div className="grid grid-cols-2 divide-x divide-border rounded-2xl border border-border bg-card p-4">
+          <Link href="/owner/members?status=expired" className="px-2 hover:opacity-85 transition-opacity">
+            <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Expired</p>
+            <p className="mt-1.5 text-3xl font-black text-foreground">{expiredMembers.length}</p>
+          </Link>
+          {hasAnalytics ? (
+            <Link href="/owner/analytics" className="px-6 hover:opacity-85 transition-opacity">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Revenue Lost</p>
+              <p className="mt-1.5 text-3xl font-black text-red-500">
+                {formatInrFromDecimalString(revenueLost.toFixed(2))}
               </p>
             </Link>
-          ))}
+          ) : (
+            <div className="px-6">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Revenue Lost</p>
+              <p className="mt-1.5 text-3xl font-black text-red-500">—</p>
+              <p className="mt-2 text-xs font-medium text-muted-foreground">
+                Upgrade to unlock analytics
+              </p>
+            </div>
+          )}
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Revenue lost (expired)
-          </p>
-          <p className="mt-2 text-3xl font-bold text-foreground">
-            {formatInrFromDecimalString(revenueLost.toFixed(2))}
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">Recent members</p>
-          <div className="mt-3 divide-y divide-border">
+        <div className="space-y-2.5">
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-foreground">Recent Members</p>
+          <div className="rounded-2xl border border-border bg-card p-4 divide-y divide-border/60">
             {recentMembers.map((m) => {
               const status =
                 m.membershipStatus === "PAUSED"
@@ -133,22 +199,40 @@ export default async function OwnerDashboardPage() {
                 <Link
                   key={m.id}
                   href={`/owner/members/${m.id}`}
-                  className="flex items-center justify-between gap-3 py-3"
+                  className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">{m.fullName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {durationLabel(m.billingDuration)} ·{" "}
-                      {formatInrFromDecimalString(m.planPrice.toString())}
-                      {Number(m.discountInr) > 0 ? (
-                        <span className="text-muted-foreground/90">
-                          {" "}
-                          (−{formatInrFromDecimalString(m.discountInr.toString())} off list)
-                        </span>
-                      ) : null}
-                    </p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                      {m.memberPhoto ? (
+                        <img src={m.memberPhoto} alt={m.fullName} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-zinc-800 text-sm font-bold text-foreground">
+                          {m.fullName[0]?.toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-foreground">{m.fullName}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {durationLabel(m.billingDuration)} · {formatInrFromDecimalString(m.planPrice.toString())}
+                        {Number(m.discountInr) > 0 ? (
+                          <span className="text-muted-foreground/90">
+                            {" "}
+                            (−{formatInrFromDecimalString(m.discountInr.toString())} off list)
+                          </span>
+                        ) : null}
+                      </p>
+                    </div>
                   </div>
-                  <span className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground">
+                  <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${
+                    status === "Active"
+                      ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                      : status === "Paused"
+                        ? "border-blue-500/20 bg-blue-500/10 text-blue-400"
+                        : status === "Expiring soon"
+                          ? "border-amber-500/20 bg-amber-500/10 text-amber-500"
+                          : "border-red-500/20 bg-red-500/10 text-red-500"
+                  }`}>
                     {status}
                   </span>
                 </Link>
