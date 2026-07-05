@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { X, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -160,251 +161,209 @@ export function MemberEnrollForm() {
 
   const today = new Date().toISOString().slice(0, 10);
 
+  const inputClass = "flex h-14 w-full rounded-xl border-0 bg-[#27272a] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]";
+  const labelClass = "text-[10px] font-bold uppercase tracking-wider text-zinc-400 ml-1";
+
   return (
-    <form
-      onSubmit={onSubmit}
-      className="mx-auto w-full min-w-0 max-w-lg space-y-5"
-    >
-      <div className="space-y-2">
-        <Label htmlFor="fullName">Full name</Label>
-        <Input
-          id="fullName"
-          name="fullName"
-          required
-          placeholder="Member name"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="email">Email (optional)</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="member@email.com"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone</Label>
-        <Input id="phone" name="phone" required placeholder="10-digit mobile" />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="billingDuration">Membership duration</Label>
-        <select
-          id="billingDuration"
-          name="billingDuration"
-          value={duration}
-          onChange={(ev) =>
-            setDuration(ev.target.value as MemberBillingDuration)
-          }
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {MEMBER_BILLING_DURATION_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        {hintPrice ? (
-          <p className="text-xs text-muted-foreground">
-            List price for this duration:{" "}
-            <span className="font-medium text-foreground">
-              {formatInrFromDecimalString(hintPrice)}
-            </span>
+    <div className="mx-auto w-full min-w-0 max-w-md rounded-t-[32px] md:rounded-[32px] bg-[#18181b] p-6 -mx-4 sm:mx-0 shadow-2xl">
+      <div className="flex items-start justify-between pb-6">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+            New Member
           </p>
-        ) : (
-          <p className="text-xs font-medium text-foreground">
-            Set this duration&apos;s INR price under Pricing before enrolling.
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="discountInr">Discount (INR)</Label>
-        <Input
-          id="discountInr"
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0"
-          value={discountStr}
-          onChange={(e) =>
-            setDiscountStr(e.target.value.replace(/[^\d.]/g, ""))
-          }
-        />
-        <p className="text-xs text-muted-foreground">
-          {/* Optional. Bargained amount to subtract from the list price above (cannot exceed list price). */}
-        </p>
-        {hintPrice && chargedPreview !== null ? (
-          <p className="text-sm font-medium text-foreground">
-            Amount charged: {formatInrFromDecimalString(chargedPreview)}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="startDate">Start date</Label>
-        <Input
-          id="startDate"
-          name="startDate"
-          type="date"
-          required
-          defaultValue={today}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Member photo</Label>
-        <input
-          ref={memberPhotoInputRef}
-          id="memberPhoto"
-          name="memberPhoto"
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            setMemberPhotoFileName(f?.name ?? null);
-          }}
-        />
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              openImagePicker(memberPhotoInputRef.current, "camera", "user")
-            }
-          >
-            Take photo
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              openImagePicker(memberPhotoInputRef.current, "files", "user")
-            }
-          >
-            Choose image
-          </Button>
+          <h1 className="mt-1 text-3xl font-extrabold text-white">Enroll Member</h1>
         </div>
-        {memberPhotoFileName ? (
-          <p className="text-xs text-muted-foreground">
-            Selected:{" "}
-            <span className="font-medium text-foreground">
-              {memberPhotoFileName}
-            </span>
-          </p>
-        ) : null}
-        <p className="text-xs text-muted-foreground">
-          {/* &quot;Take photo&quot; uses the camera (front on phones). &quot;Choose
-          image&quot; opens gallery or 
-          file*/}{" "}
-          Max size 3MB.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="paymentStatus">Payment status</Label>
-        <select
-          id="paymentStatus"
-          name="paymentStatus"
-          value={paymentStatus}
-          onChange={(ev) => setPaymentStatus(ev.target.value as PaymentStatus)}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        <Link
+          href="/owner/dashboard"
+          className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-white"
         >
-          <option value="NOT_DONE">Not done</option>
-          <option value="DONE">Done</option>
-        </select>
+          <X className="h-4 w-4 stroke-[3]" />
+        </Link>
       </div>
 
-      <div className="space-y-2">
-        <Label>
-          UPI screenshot{" "}
-          {paymentStatus === "DONE" ? "(required)" : "(optional)"}
-        </Label>
-        <input
-          ref={upiScreenshotInputRef}
-          id="upiScreenshot"
-          name="upiScreenshot"
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          required={paymentStatus === "DONE"}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            setUpiFileName(f?.name ?? null);
-          }}
-        />
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              openImagePicker(
-                upiScreenshotInputRef.current,
-                "camera",
-                "environment",
-              )
-            }
-          >
-            Take photo
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              openImagePicker(
-                upiScreenshotInputRef.current,
-                "files",
-                "environment",
-              )
-            }
-          >
-            Choose image
-          </Button>
+      <form onSubmit={onSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="fullName" className={labelClass}>Full Name</Label>
+          <input
+            id="fullName"
+            name="fullName"
+            required
+            placeholder="e.g. Shahid Khan"
+            className={inputClass}
+          />
         </div>
-        {upiFileName ? (
-          <p className="text-xs text-muted-foreground">
-            Selected:{" "}
-            <span className="font-medium text-foreground">{upiFileName}</span>
-          </p>
-        ) : null}
-        <p className="text-xs text-muted-foreground">
-          {/* Use the camera to snap the payment screen or QR, or pick an existing
-          screenshot.*/}{" "}
-          Max size 3MB.
-        </p>
-      </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          id="whatsappEnabled"
-          name="whatsappEnabled"
-          type="checkbox"
-          defaultChecked
-          className="size-4 rounded border-input accent-black"
-        />
-        <Label
-          htmlFor="whatsappEnabled"
-          className="font-normal text-muted-foreground"
-        >
-          WhatsApp reminders (otherwise SMS)
-        </Label>
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="phone" className={labelClass}>Phone Number</Label>
+          <input 
+            id="phone" 
+            name="phone" 
+            required 
+            placeholder="+91 98765 43210" 
+            className={inputClass} 
+          />
+        </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : "Enroll member"}
-        </Button>
-        <Button type="button" variant="outline" asChild>
-          <Link href="/owner/dashboard">Cancel</Link>
-        </Button>
-      </div>
-    </form>
-  );
+        <div className="space-y-2">
+          <Label htmlFor="email" className={labelClass}>Email (optional)</Label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="member@email.com"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="space-y-3 pt-2">
+          <Label className={labelClass}>Choose Plan</Label>
+          <input type="hidden" name="billingDuration" value={duration} />
+          <div className="grid grid-cols-2 gap-3">
+            {MEMBER_BILLING_DURATION_OPTIONS.map((o) => {
+              const isSelected = duration === o.value;
+              const p = hints.find((h) => h.duration === o.value)?.priceInr;
+              let labelTrimmed = o.label;
+              if (labelTrimmed.toLowerCase() === "12 months") labelTrimmed = "1 Year";
+              
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => setDuration(o.value)}
+                  className={`flex flex-col items-start rounded-xl border-2 p-4 transition-colors ${
+                    isSelected
+                      ? "border-[#d4ff00] bg-zinc-800/40"
+                      : "border-transparent bg-[#27272a] hover:bg-zinc-700"
+                  }`}
+                >
+                  <span className={`text-[11px] font-bold capitalize ${isSelected ? "text-[#d4ff00]" : "text-zinc-300"}`}>
+                    {labelTrimmed}
+                  </span>
+                  <span className={`mt-1 text-2xl font-black ${isSelected ? "text-[#d4ff00]" : "text-white"}`}>
+                    {p ? formatInrFromDecimalString(p) : "—"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {!hintPrice && (
+            <p className="text-xs font-medium text-red-400">
+              Set this duration's INR price under Pricing before enrolling.
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2 pt-2">
+          <Label htmlFor="discountInr" className={labelClass}>Discount (INR)</Label>
+          <input
+            id="discountInr"
+            inputMode="decimal"
+            autoComplete="off"
+            placeholder="0"
+            value={discountStr}
+            onChange={(e) => setDiscountStr(e.target.value.replace(/[^\d.]/g, ""))}
+            className={inputClass}
+          />
+          {hintPrice && chargedPreview !== null && discountStr ? (
+            <p className="text-xs font-medium text-[#d4ff00] ml-1">
+              Final Amount: {formatInrFromDecimalString(chargedPreview)}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="space-y-2">
+            <Label htmlFor="startDate" className={labelClass}>Start date</Label>
+            <input
+              id="startDate"
+              name="startDate"
+              type="date"
+              required
+              defaultValue={today}
+              className={inputClass}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="paymentStatus" className={labelClass}>Payment status</Label>
+            <select
+              id="paymentStatus"
+              name="paymentStatus"
+              value={paymentStatus}
+              onChange={(ev) => setPaymentStatus(ev.target.value as PaymentStatus)}
+              className={inputClass}
+            >
+              <option value="NOT_DONE">Not done</option>
+              <option value="DONE">Done</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="space-y-2">
+            <Label className={labelClass}>Photo</Label>
+            <input
+              ref={memberPhotoInputRef}
+              id="memberPhoto"
+              name="memberPhoto"
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => setMemberPhotoFileName(e.target.files?.[0]?.name ?? null)}
+            />
+            <button
+              type="button"
+              onClick={() => openImagePicker(memberPhotoInputRef.current, "camera", "user")}
+              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${memberPhotoFileName ? 'border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]' : 'border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500'} transition-colors`}
+            >
+              <span className="text-xs font-bold uppercase tracking-wider">{memberPhotoFileName ? 'Photo Selected' : 'Take Photo'}</span>
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            <Label className={labelClass}>UPI {paymentStatus === "DONE" ? "*" : ""}</Label>
+            <input
+              ref={upiScreenshotInputRef}
+              id="upiScreenshot"
+              name="upiScreenshot"
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              required={paymentStatus === "DONE"}
+              onChange={(e) => setUpiFileName(e.target.files?.[0]?.name ?? null)}
+            />
+            <button
+              type="button"
+              onClick={() => openImagePicker(upiScreenshotInputRef.current, "camera", "environment")}
+              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${upiFileName ? 'border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]' : 'border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500'} transition-colors`}
+            >
+              <span className="text-xs font-bold uppercase tracking-wider">{upiFileName ? 'UPI Selected' : 'Add UPI'}</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pt-2 ml-1">
+          <input
+            id="whatsappEnabled"
+            name="whatsappEnabled"
+            type="checkbox"
+            defaultChecked
+            className="size-4 rounded border-zinc-700 bg-[#27272a] accent-[#d4ff00]"
+          />
+          <Label htmlFor="whatsappEnabled" className="text-xs font-medium text-zinc-400">
+            Send WhatsApp reminders
+          </Label>
+        </div>
+
+        <div className="pt-4">
+          <button 
+            type="submit" 
+            disabled={pending}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#d4ff00] text-[13px] font-extrabold uppercase tracking-widest text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
+          >
+            {pending ? "Saving…" : "Enroll Member"}
+            {!pending && <ArrowRight className="h-4 w-4 stroke-[3]" />}
+          </button>
+        </div>
+      </form>
+    </div>)
 }

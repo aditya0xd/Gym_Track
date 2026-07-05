@@ -1086,6 +1086,7 @@ export const AdminUserScalarFieldEnum = {
   name: 'name',
   email: 'email',
   passwordHash: 'passwordHash',
+  profilePhoto: 'profilePhoto',
   subscriptionPlan: 'subscriptionPlan',
   trialEndsAt: 'trialEndsAt',
   deletedAt: 'deletedAt',

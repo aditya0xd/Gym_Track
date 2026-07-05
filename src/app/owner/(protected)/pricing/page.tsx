@@ -19,20 +19,22 @@ export default async function OwnerPricingPage() {
   }
 
   return (
-    <PageShell>
-      <PageHeader title="Membership prices (INR)" />
+    <div className="min-h-screen bg-background px-4 pt-4 pb-24">
+      <div className="mb-6 pt-2">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">Membership</p>
+        <h1 className="mt-1 text-3xl font-extrabold text-foreground">Pricing Plans</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Manage the plans your gym offers</p>
+      </div>
       <Suspense
         fallback={
           <div className="flex flex-col items-center justify-center gap-2 py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">
-              Loading your prices…
-            </p>
+            <Loader2 className="h-6 w-6 animate-spin text-[#d4ff00]" />
+            <p className="text-sm text-muted-foreground">Loading your prices…</p>
           </div>
         }
       >
         <DurationPricingForm />
       </Suspense>
-    </PageShell>
+    </div>
   );
 }
