@@ -5,7 +5,6 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
 import { MembersExplorerClient } from "@/components/gym-owner/MembersExplorerClient";
-import { PageHeader } from "@/components/shared/PageHeader";
 import { PageShell } from "@/components/shared/PageShell";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
@@ -22,19 +21,6 @@ export default async function OwnerMembersPage() {
 
   return (
     <PageShell className="pb-20 md:pb-6">
-      <PageHeader
-        title="Members"
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href="/owner/members/bulk">Bulk CSV</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href="/owner/members/new">Enroll member</Link>
-            </Button>
-          </div>
-        }
-      />
       <Suspense
         fallback={
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-8">

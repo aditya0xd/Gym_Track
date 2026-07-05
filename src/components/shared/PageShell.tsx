@@ -10,7 +10,7 @@ export function PageShell({ children, className }: PageShellProps) {
   return (
     <div
       className={cn(
-        "mx-auto w-full min-w-0 max-w-6xl px-4 py-4 sm:px-6 sm:py-6",
+        "min-h-screen bg-background px-4 pt-4 pb-24",
         className,
       )}
     >

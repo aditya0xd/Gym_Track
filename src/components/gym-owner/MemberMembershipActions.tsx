@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -11,30 +10,35 @@ export function MemberMembershipActions({
   memberId,
   membershipStatus,
   canPause,
+  onSuccess,
 }: {
   memberId: string;
   membershipStatus: MembershipStatus;
   /** False when membership is already expired — pause is not allowed. */
   canPause: boolean;
+  /** Callback to refresh member data after successful action */
+  onSuccess?: () => void;
 }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
   async function apply(action: "pause" | "resume") {
-    setLoading(true);
-    const res = await fetch(`/api/owner/members/${memberId}/membership-status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action }),
-    });
-    const data = (await res.json()) as { message?: string };
-    setLoading(false);
-    if (!res.ok) {
-      toast.error(data.message ?? "Could not update membership.");
-      return;
+    try {
+      const res = await fetch(`/api/owner/members/${memberId}/membership-status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = (await res.json()) as { message?: string };
+      if (!res.ok) {
+        toast.error(data.message ?? "Could not update membership.");
+        return;
+      }
+      toast.success(data.message ?? "Updated.");
+      onSuccess?.();
+      router.refresh();
+    } catch {
+      toast.error("Network error. Please try again.");
     }
-    toast.success(data.message ?? "Updated.");
-    router.refresh();
   }
 
   return (
@@ -43,19 +47,19 @@ export function MemberMembershipActions({
         <Button
           type="button"
           variant="outline"
-          disabled={loading || !canPause}
+          disabled={!canPause}
           onClick={() => apply("pause")}
           title={
             canPause ? undefined : "Cannot pause an expired membership."
           }
         >
-          {loading ? "Working…" : "Pause / freeze"}
+          Pause / freeze
         </Button>
-      ) : (
-        <Button type="button" disabled={loading} onClick={() => apply("resume")}>
-          {loading ? "Working…" : "Resume membership"}
+      ) : membershipStatus === "PAUSED" ? (
+        <Button type="button" onClick={() => apply("resume")}>
+          Resume membership
         </Button>
-      )}
+      ) : null}
     </div>
   );
 }

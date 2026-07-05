@@ -19,12 +19,12 @@ export default async function OwnerPricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 pt-4 pb-24">
-      <div className="mb-6 pt-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">Membership</p>
-        <h1 className="mt-1 text-3xl font-extrabold text-foreground">Pricing Plans</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage the plans your gym offers</p>
-      </div>
+    <PageShell>
+      <PageHeader
+        subtitle="Membership"
+        title="Pricing Plans"
+        description="Manage the plans your gym offers"
+      />
       <Suspense
         fallback={
           <div className="flex flex-col items-center justify-center gap-2 py-12">
@@ -35,6 +35,6 @@ export default async function OwnerPricingPage() {
       >
         <DurationPricingForm />
       </Suspense>
-    </div>
+    </PageShell>
   );
 }

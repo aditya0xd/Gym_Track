@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
+import { Calendar, ChevronDown, ChevronUp, Search } from "lucide-react";
 
-import { formatInrFromDecimalString } from "@/lib/format/inr";
+import { FilterChips } from "@/components/gym-owner/FilterChips";
+import { MemberCard } from "@/components/gym-owner/MemberCard";
 import type { MemberBillingDuration, MembershipStatus } from "@/generated/prisma/client";
 
 type MemberItem = {
@@ -15,6 +16,7 @@ type MemberItem = {
   discountInr: string;
   endDate: string;
   membershipStatus: MembershipStatus;
+  joinedDate?: string;
 };
 
 type StatusFilter = "ALL" | "EXPIRING_SOON" | "EXPIRED" | "PAUSED";
@@ -40,14 +42,6 @@ function statusOf(endDateIso: string, membershipStatus: MembershipStatus) {
   return "ACTIVE";
 }
 
-function daysText(endDateIso: string) {
-  const now = new Date();
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const endDate = new Date(endDateIso);
-  const diff = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return `Expired ${Math.abs(diff)}d ago`;
-  return `${diff}d left`;
-}
 
 export function MembersExplorerPanel({
   members,
@@ -59,6 +53,7 @@ export function MembersExplorerPanel({
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(initialStatusFilter);
   const [planFilter, setPlanFilter] = useState<PlanFilter>("ALL");
+  const [showPlanFilters, setShowPlanFilters] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -78,109 +73,56 @@ export function MembersExplorerPanel({
   }, [members, query, statusFilter, planFilter]);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">Member details</p>
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search by name or phone..."
-        className="mt-3 min-h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
-      />
+    <div className="space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search members..."
+          className="w-full rounded-xl bg-gray-800/50 py-3 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 backdrop-blur-sm"
+        />
+      </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {[
+      <FilterChips
+        options={[
           { id: "ALL", label: "All" },
           { id: "EXPIRING_SOON", label: "Expiring soon" },
           { id: "EXPIRED", label: "Expired" },
           { id: "PAUSED", label: "Paused" },
-        ].map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setStatusFilter(item.id as StatusFilter)}
-            className={`rounded-full border px-3 py-1.5 text-xs ${
-              statusFilter === item.id
-                ? "border-foreground bg-foreground text-background"
-                : "border-border bg-background text-foreground"
-            }`}
-          >
-            {item.label}
-          </button>
+        ]}
+        selectedValue={statusFilter}
+        onSelect={(value) => setStatusFilter(value as StatusFilter)}
+      />
+
+      <button
+        type="button"
+        onClick={() => setShowPlanFilters(!showPlanFilters)}
+        className="mt-3 flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors"
+      >
+        <span>Filter by plan</span>
+        {showPlanFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+      </button>
+
+      {showPlanFilters && (
+        <FilterChips
+          options={[
+            { id: "ALL", label: "All plans", icon: Calendar },
+            { id: "QUARTERLY", label: "Quarterly", icon: Calendar },
+            { id: "MONTHLY", label: "Monthly", icon: Calendar },
+            { id: "ANNUALLY", label: "Annually", icon: Calendar },
+          ]}
+          selectedValue={planFilter}
+          onSelect={(value) => setPlanFilter(value as PlanFilter)}
+        />
+      )}
+
+      <div className="space-y-3">
+        {filtered.map((m) => (
+          <MemberCard key={m.id} {...m} />
         ))}
-      </div>
-
-      <div className="mt-2 flex flex-wrap gap-2">
-        {[
-          { id: "ALL", label: "All plans" },
-          { id: "QUARTERLY", label: "Quarterly" },
-          { id: "MONTHLY", label: "Monthly" },
-          { id: "ANNUALLY", label: "Annually" },
-        ].map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setPlanFilter(item.id as PlanFilter)}
-            className={`rounded-full border px-3 py-1.5 text-xs ${
-              planFilter === item.id
-                ? "border-foreground bg-foreground text-background"
-                : "border-border bg-background text-foreground"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      <p className="mt-3 text-xs text-muted-foreground">{filtered.length} members</p>
-
-      <div className="mt-2 space-y-2">
-        {filtered.map((m) => {
-          const status = statusOf(m.endDate, m.membershipStatus);
-          const tone =
-            status === "EXPIRED"
-              ? "border-border bg-background text-foreground"
-              : status === "EXPIRING_SOON"
-                ? "border-border bg-background text-foreground"
-                : status === "PAUSED"
-                  ? "border-border bg-muted text-foreground"
-                  : "border-border bg-background text-foreground";
-
-          return (
-            <Link
-              key={m.id}
-              href={`/owner/members/${m.id}`}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-3"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-foreground">{m.fullName}</p>
-                <p className="text-xs text-muted-foreground">{m.phone}</p>
-                <p className="mt-1 text-sm font-semibold text-foreground">
-                  {formatInrFromDecimalString(m.planPrice)}
-                  {Number(m.discountInr) > 0 ? (
-                    <span className="ml-1 text-xs font-normal text-muted-foreground">
-                      (−{formatInrFromDecimalString(m.discountInr)} off list)
-                    </span>
-                  ) : null}
-                  <span className="text-xs font-normal text-muted-foreground">/plan</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <span className={`rounded-md border px-2 py-1 text-xs ${tone}`}>
-                  {status === "PAUSED"
-                    ? "Paused"
-                    : status === "EXPIRING_SOON"
-                      ? "Expiring soon"
-                      : status === "EXPIRED"
-                        ? "Expired"
-                        : "Active"}
-                </span>
-                <p className="mt-2 text-xs text-muted-foreground">{daysText(m.endDate)}</p>
-              </div>
-            </Link>
-          );
-        })}
         {filtered.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">No members match filters.</p>
+          <p className="py-12 text-center text-sm text-gray-500">No members found</p>
         ) : null}
       </div>
     </div>

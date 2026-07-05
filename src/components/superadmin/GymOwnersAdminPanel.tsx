@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { OwnerSubscriptionPlan } from "@/generated/prisma/client";
 import { toast } from "sonner";
+import Link from "next/link";
+import { Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
@@ -172,7 +174,15 @@ function GymOwnerEditableRow({
           className="min-h-10 w-full min-w-[200px] rounded-md border border-input bg-background px-2 py-2 text-sm text-foreground shadow-sm sm:min-h-0 sm:py-1.5"
         />
       </td>
-      <td className="px-3 py-2.5 text-right sm:px-4 sm:py-3">
+      <td className="px-3 py-2.5 text-right sm:px-4 sm:py-3 flex items-center justify-end gap-2">
+        <Link
+          href={`/superadmin/gym-owners/${row.id}/members`}
+          className="flex h-9 items-center gap-1.5 rounded-md bg-white/5 px-3 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+          title="Manage Members"
+        >
+          <Users className="h-3.5 w-3.5" />
+          Members
+        </Link>
         <Button type="button" size="sm" disabled={saving} onClick={handleApply}>
           {saving ? "Saving…" : "Apply"}
         </Button>
