@@ -15,6 +15,7 @@ import {
   ChevronRight,
   FileSpreadsheet,
   CreditCard,
+  Settings,
 } from "lucide-react";
 
 import { authOptions } from "@/lib/auth";
@@ -35,7 +36,7 @@ export default async function OwnerProfilePage() {
   // Fetch real owner details from DB to ensure we get the latest email and profilePhoto
   const ownerRecord = await prisma.adminUser.findUnique({
     where: { id: ownerId },
-    select: { name: true, email: true, profilePhoto: true }
+    select: { name: true, email: true, profilePhoto: true },
   });
 
   const ownerName = ownerRecord?.name || session.user.name || "Owner";
@@ -48,8 +49,10 @@ export default async function OwnerProfilePage() {
   });
 
   const now = new Date();
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  
+  const today = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+
   const activeMembers = await prisma.member.count({
     where: {
       adminUserId: ownerId,
@@ -68,7 +71,9 @@ export default async function OwnerProfilePage() {
   return (
     <div className="min-h-screen bg-[#0a0a0c] px-4 pt-4 pb-24 text-white font-sans">
       <div className="mb-6 pt-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">ACCOUNT</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+          ACCOUNT
+        </p>
         <h1 className="mt-1 text-3xl font-extrabold">Profile</h1>
       </div>
 
@@ -77,7 +82,11 @@ export default async function OwnerProfilePage() {
         <div className="flex items-center gap-4 rounded-[1.5rem] bg-[#16161a] p-5">
           <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#d4ff00] bg-zinc-800 text-lg font-bold">
             {profilePhoto ? (
-              <img src={profilePhoto} alt="Profile" className="h-full w-full object-cover" />
+              <img
+                src={profilePhoto}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
             ) : (
               ownerName.substring(0, 2).toUpperCase()
             )}
@@ -92,10 +101,10 @@ export default async function OwnerProfilePage() {
               </span>
             </div>
           </div>
-          
-          <EditProfileDialog 
-            initialName={ownerName} 
-            initialEmail={ownerEmail} 
+
+          <EditProfileDialog
+            initialName={ownerName}
+            initialEmail={ownerEmail}
             initialProfilePhoto={profilePhoto}
           >
             <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-zinc-400 transition-colors hover:text-white">
@@ -128,8 +137,23 @@ export default async function OwnerProfilePage() {
 
         {/* Menu Items */}
         <div className="rounded-[1.5rem] bg-[#16161a] p-2">
-          {/* Menu Item: Edit Gym Details */}
+          {/* Menu Item: Manage Plan */}
           <Link
+            href="/owner/manage-plan"
+            className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
+              <CreditCard className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold">Manage Plan</p>
+              <p className="text-xs text-zinc-500">Subscription & billing</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-zinc-600" />
+          </Link>
+          <div className="mx-4 my-1 h-px bg-white/5" />
+          {/* Menu Item: Edit Gym Details */}
+          {/* <Link
             href="/owner/manage-plan"
             className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
           >
@@ -143,11 +167,11 @@ export default async function OwnerProfilePage() {
             <ChevronRight className="h-4 w-4 text-zinc-600" />
           </Link>
           
-          <div className="mx-4 my-1 h-px bg-white/5" />
+          <div className="mx-4 my-1 h-px bg-white/5" /> */}
 
           {/* Menu Item: Staff Management */}
           <Link
-            href="/owner/profile"
+            href="/owner/profile/staff"
             className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
@@ -180,34 +204,34 @@ export default async function OwnerProfilePage() {
           <div className="mx-4 my-1 h-px bg-white/5" />
 
           {/* Menu Item: Notifications */}
-          <div className="flex items-center gap-4 rounded-2xl p-3">
+          {/* <div className="flex items-center gap-4 rounded-2xl p-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
               <Bell className="h-5 w-5" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-bold">Notifications</p>
-            </div>
-            {/* Toggle mock */}
-            <div className="relative h-6 w-11 rounded-full bg-[#d4ff00]">
+            </div> */}
+          {/* Toggle mock */}
+          {/* <div className="relative h-6 w-11 rounded-full bg-[#d4ff00]">
               <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white"></div>
             </div>
           </div>
 
-          <div className="mx-4 my-1 h-px bg-white/5" />
+          <div className="mx-4 my-1 h-px bg-white/5" /> */}
 
           {/* Menu Item: Expiry Reminders */}
-          <div className="flex items-center gap-4 rounded-2xl p-3">
+          {/* <div className="flex items-center gap-4 rounded-2xl p-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
               <AlarmClock className="h-5 w-5" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-bold">Expiry Reminders</p>
-            </div>
-            {/* Toggle mock */}
-            <div className="relative h-6 w-11 rounded-full bg-[#d4ff00]">
+            </div> */}
+          {/* Toggle mock */}
+          {/* <div className="relative h-6 w-11 rounded-full bg-[#d4ff00]">
               <div className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white"></div>
             </div>
-          </div>
+          </div> */}
 
           <div className="mx-4 my-1 h-px bg-white/5" />
 
@@ -229,6 +253,20 @@ export default async function OwnerProfilePage() {
           <div className="mx-4 my-1 h-px bg-white/5" />
 
           {/* Menu Item: Help & Support */}
+          <Link
+            href="/owner/profile"
+            className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
+              <Settings className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold">Settings</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-zinc-600" />
+          </Link>
+
+          <div className="mx-4 my-1 h-px bg-white/5" />
           <Link
             href="/owner/profile"
             className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
@@ -259,21 +297,6 @@ export default async function OwnerProfilePage() {
           </Link>
 
           <div className="mx-4 my-1 h-px bg-white/5" />
-
-          {/* Menu Item: Manage Plan */}
-          <Link
-            href="/owner/manage-plan"
-            className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
-              <CreditCard className="h-5 w-5" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-bold">Manage Plan</p>
-              <p className="text-xs text-zinc-500">Subscription & billing</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-zinc-600" />
-          </Link>
 
           <div className="mx-4 my-1 h-px bg-white/5" />
 

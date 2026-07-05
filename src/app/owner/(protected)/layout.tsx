@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import Link from "next/link";
 
 import { OwnerBottomNav } from "@/components/gym-owner/OwnerBottomNav";
 import { OwnerMainNav } from "@/components/gym-owner/OwnerMainNav";
