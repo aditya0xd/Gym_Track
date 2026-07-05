@@ -110,7 +110,7 @@ export function SuperAdminCsvUploadDialog({
             <div className="mb-6">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">Super Admin</p>
               <h2 className="mt-0.5 text-xl font-bold">Bulk Upload Members</h2>
-              <p className="mt-0.5 text-sm text-zinc-400">Add multiple members to <span className="text-white font-medium">{ownerName}</span>'s gym</p>
+              <p className="mt-0.5 text-sm text-zinc-400">Add multiple members to <span className="text-white font-medium">{ownerName}</span>&rsquo;s gym</p>
             </div>
 
             <div className="space-y-6">

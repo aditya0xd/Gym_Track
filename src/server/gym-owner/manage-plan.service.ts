@@ -171,7 +171,18 @@ export async function markInvoicePaidFromRazorpay(input: {
   });
 }
 
-export async function handleRazorpayWebhookEvent(event: string, payload: any) {
+interface RazorpayWebhookPayload {
+  payload: {
+    payment: {
+      entity: {
+        order_id?: string;
+        id: string;
+      };
+    };
+  };
+}
+
+export async function handleRazorpayWebhookEvent(event: string, payload: RazorpayWebhookPayload) {
   if (event !== "payment.captured" && event !== "payment.failed") {
     return;
   }

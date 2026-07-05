@@ -147,3 +147,14 @@ body {
 [data-sonner-toast] [data-icon] {
   color: var(--foreground);
 }
+
+/* Shimmer animation for card hover effects */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
