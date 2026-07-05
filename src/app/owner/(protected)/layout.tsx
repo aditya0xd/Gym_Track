@@ -19,10 +19,11 @@ export default async function OwnerProtectedLayout({
 
   return (
     <div className="min-h-full bg-background text-foreground">
-      <OwnerMainNav />
+      <div className="hidden md:block">
+        <OwnerMainNav />
+      </div>
       <div className="pb-16 md:pb-0">{children}</div>
       <OwnerBottomNav />
     </div>
   );
 }
-

@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { PageShell } from "@/components/shared/PageShell";
 import { Button } from "@/components/ui/button";
+import { RevenueAtRiskCard } from "@/components/gym-owner/RevenueAtRiskCard";
 import { authOptions } from "@/lib/auth";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
@@ -32,6 +33,8 @@ export default async function OwnerDashboardPage() {
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const in7Days = new Date(today);
   in7Days.setUTCDate(in7Days.getUTCDate() + 7);
+  const in30Days = new Date(today);
+  in30Days.setUTCDate(in30Days.getUTCDate() + 30);
 
   const totalMembers = members.length;
   const activeMembers = members.filter(
@@ -44,8 +47,15 @@ export default async function OwnerDashboardPage() {
       m.endDate <= in7Days &&
       m.membershipStatus === "ACTIVE",
   );
+  const expiringThisMonth = members.filter(
+    (m) =>
+      m.endDate >= today &&
+      m.endDate <= in30Days &&
+      m.membershipStatus === "ACTIVE",
+  );
   const expiredMembers = members.filter((m) => m.endDate < today);
-  const revenueAtRisk = expiringSoon.reduce((sum, m) => sum + Number(m.planPrice), 0);
+  const revenueAtRiskWeek = expiringSoon.reduce((sum, m) => sum + Number(m.planPrice), 0);
+  const revenueAtRiskMonth = expiringThisMonth.reduce((sum, m) => sum + Number(m.planPrice), 0);
   const revenueLost = expiredMembers.reduce((sum, m) => sum + Number(m.planPrice), 0);
   const recentMembers = members.slice(0, 6);
   const todayLabel = today.toLocaleDateString("en-IN", {
@@ -84,28 +94,12 @@ export default async function OwnerDashboardPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl border border-red-500/10 bg-gradient-to-r from-red-950/45 to-zinc-900/90 p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-red-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-              REVENUE AT RISK
-            </div>
-            <button className="flex items-center gap-1 rounded-full bg-[#d4ff00] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#c2e600] transition-colors">
-              WEEK
-              <svg className="h-3 w-3 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-              </svg>
-            </button>
-          </div>
-          <div className="mt-5">
-            <p className="text-4xl font-black tracking-tight text-white">
-              {formatInrFromDecimalString(revenueAtRisk)}
-            </p>
-            <p className="mt-2.5 text-xs text-muted-foreground">
-              from {expiringSoon.length} expiring members this week
-            </p>
-          </div>
-        </div>
+        <RevenueAtRiskCard
+          weekRevenue={revenueAtRiskWeek}
+          weekCount={expiringSoon.length}
+          monthRevenue={revenueAtRiskMonth}
+          monthCount={expiringThisMonth.length}
+        />
 
         <div className="grid grid-cols-2 gap-3">
           {/* Total Members */}

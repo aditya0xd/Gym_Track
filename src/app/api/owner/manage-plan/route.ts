@@ -40,7 +40,7 @@ async function PATCHHandler(request: Request, userId: string) {
       return NextResponse.json({ message: "You are already on this plan." });
     }
 
-    return NextResponse.json({ message: "Plan updated. Billing invoice created." });
+    return NextResponse.json({ message: "Billing invoice created. Plan will be updated after payment." });
   } catch (e) {
     if (e instanceof HttpError) {
       return NextResponse.json({ message: e.message }, { status: e.status });

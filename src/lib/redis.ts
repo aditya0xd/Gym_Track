@@ -37,7 +37,7 @@ export async function getRedis(): Promise<RedisClientType | null> {
       }
     });
     let lastErrorLogTime = 0;
-    client.on("error", (err: any) => {
+    client.on("error", (err: Error & { code?: string }) => {
       if (err?.code === "ECONNREFUSED" || err?.message?.includes("ECONNREFUSED")) {
         const now = Date.now();
         if (now - lastErrorLogTime > 10000) { // Log once every 10 seconds

@@ -55,7 +55,7 @@ export function OwnerMainNav() {
   }, [pathname]);
 
   return (
-    <header className="hidden md:block border-b border-border bg-card/80 shadow-sm backdrop-blur-sm">
+    <header className="border-b border-border bg-card/80 shadow-sm backdrop-blur-sm">
       <div className="mx-auto min-w-0 max-w-6xl px-4 py-3">
         <div className="flex items-center justify-between gap-3 md:hidden">
           <span className="text-sm font-semibold tracking-tight text-foreground">
