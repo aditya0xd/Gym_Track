@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { MembersExplorerPanel } from "./MembersExplorerPanel";
 
 type StatusFilter = "ALL" | "EXPIRING_SOON" | "EXPIRED" | "PAUSED";
@@ -52,9 +53,16 @@ export function MembersExplorerClient() {
   }
 
   return (
-    <MembersExplorerPanel
-      members={members ?? []}
-      initialStatusFilter={initialFilter}
-    />
+    <>
+      <PageHeader
+        subtitle="MANAGE"
+        title="MEMBERS"
+        count={members?.length}
+      />
+      <MembersExplorerPanel
+        members={members ?? []}
+        initialStatusFilter={initialFilter}
+      />
+    </>
   );
 }

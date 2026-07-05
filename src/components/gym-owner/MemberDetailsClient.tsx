@@ -59,7 +59,7 @@ async function fetchMember(id: string): Promise<MemberDetail> {
 }
 
 export function MemberDetailsClient({ id }: { id: string }) {
-  const { data: member, isLoading, error } = useQuery({
+  const { data: member, isLoading, error, refetch } = useQuery({
     queryKey: ["member", id],
     queryFn: () => fetchMember(id),
   });
@@ -165,6 +165,7 @@ export function MemberDetailsClient({ id }: { id: string }) {
             memberId={member.id}
             membershipStatus={member.membershipStatus}
             canPause={canPause}
+            onSuccess={() => refetch()}
           />
           <MemberNotificationActions memberId={member.id} />
         </div>
