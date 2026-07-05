@@ -365,5 +365,6 @@ export function MemberEnrollForm() {
           </button>
         </div>
       </form>
-    </div>)
+    </div>
+    )
 }

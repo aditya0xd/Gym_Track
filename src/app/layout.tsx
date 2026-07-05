@@ -20,7 +20,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Gym Admin Portal",
-  description: "Login to mint JWT access and refresh tokens for the gym dashboard.",
+  description:
+    "Login to mint JWT access and refresh tokens for the gym dashboard.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

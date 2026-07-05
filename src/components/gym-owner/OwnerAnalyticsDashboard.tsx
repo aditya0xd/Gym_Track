@@ -15,38 +15,55 @@ import {
   AreaChart,
   Legend,
 } from "recharts";
-import { TrendingUp, DollarSign, AlertCircle, CheckCircle, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import {
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+  IndianRupee,
+} from "lucide-react";
 
 import type { OwnerAnalytics } from "@/server/gym-owner/analytics.service";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 
-function StatCard({ 
-  label, 
-  value, 
-  icon: Icon, 
-  trend, 
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  trend,
   trendUp,
-  gradient
-}: { 
-  label: string; 
-  value: string; 
+  gradient,
+}: {
+  label: string;
+  value: string;
   icon?: React.ComponentType<{ className?: string }>;
   trend?: string;
   trendUp?: boolean;
   gradient?: string;
 }) {
-  const gradientStyle = gradient || "from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800";
-  
+  const gradientStyle =
+    gradient ||
+    "from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800";
+
   return (
-    <div className={`group relative overflow-hidden rounded-xl border border-border bg-gradient-to-br ${gradientStyle} p-5 transition-all hover:shadow-lg hover:scale-[1.02]`}>
+    <div
+      className={`group relative overflow-hidden rounded-xl border border-border bg-gradient-to-br ${gradientStyle} p-5 transition-all hover:shadow-lg hover:scale-[1.02]`}
+    >
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer" />
       <div className="relative flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
           <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
           {trend && (
-            <div className={`mt-1 flex items-center gap-1 text-xs ${trendUp ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-              {trendUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            <div
+              className={`mt-1 flex items-center gap-1 text-xs ${trendUp ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+            >
+              {trendUp ? (
+                <ArrowUpRight className="h-3 w-3" />
+              ) : (
+                <ArrowDownRight className="h-3 w-3" />
+              )}
               <span>{trend}</span>
             </div>
           )}
@@ -90,7 +107,7 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
           value={formatInrFromDecimalString(
             String(data.summary.monthlyRevenue),
           )}
-          icon={DollarSign}
+          icon={IndianRupee}
           gradient="from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30"
         />
         <StatCard
@@ -122,10 +139,22 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
       {/* Revenue Forecast - Prominent */}
       <div className="rounded-xl border border-border bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 shadow-sm">
         <div className="mb-4">
-          <h3 className="text-base sm:text-lg font-semibold text-foreground">Revenue Forecast</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-foreground">
+            Revenue Forecast
+          </h3>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Next month: <span className="font-semibold text-foreground">{formatInrFromDecimalString(String(data.revenueForecast.nextMonthCombined))}</span> • 
-            Next 3 months: <span className="font-semibold text-foreground">{formatInrFromDecimalString(String(data.revenueForecast.nextQuarterCombined))}</span>
+            Next month:{" "}
+            <span className="font-semibold text-foreground">
+              {formatInrFromDecimalString(
+                String(data.revenueForecast.nextMonthCombined),
+              )}
+            </span>{" "}
+            • Next 3 months:{" "}
+            <span className="font-semibold text-foreground">
+              {formatInrFromDecimalString(
+                String(data.revenueForecast.nextQuarterCombined),
+              )}
+            </span>
           </p>
         </div>
         <div className="h-[250px] sm:h-[320px]">
@@ -133,40 +162,45 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
             <AreaChart data={revenueForecastChart}>
               <defs>
                 <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
-                <linearGradient id="forecastGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                <linearGradient
+                  id="forecastGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.1} />
               <XAxis
                 dataKey="month"
-                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                 interval={0}
                 angle={-25}
                 textAnchor="end"
                 height={56}
               />
-              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+              <YAxis
+                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  fontSize: '12px',
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
+                  fontSize: "12px",
                 }}
                 formatter={(value) => {
                   const n = typeof value === "number" ? value : Number(value);
                   return n > 0 ? formatInrFromDecimalString(String(n)) : "—";
                 }}
               />
-              <Legend 
-                wrapperStyle={{ fontSize: '12px' }}
-                iconType="circle"
-              />
+              <Legend wrapperStyle={{ fontSize: "12px" }} iconType="circle" />
               <Area
                 type="monotone"
                 dataKey="actual"
@@ -175,7 +209,7 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#actualGradient)"
-                dot={{ fill: '#10b981', r: 3, strokeWidth: 1 }}
+                dot={{ fill: "#10b981", r: 3, strokeWidth: 1 }}
                 connectNulls={false}
               />
               <Area
@@ -187,7 +221,7 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                 strokeDasharray="5 5"
                 fillOpacity={1}
                 fill="url(#forecastGradient)"
-                dot={{ fill: '#6366f1', r: 3, strokeWidth: 1 }}
+                dot={{ fill: "#6366f1", r: 3, strokeWidth: 1 }}
                 connectNulls={false}
               />
             </AreaChart>
@@ -199,22 +233,36 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Member Status */}
         <div className="rounded-xl border border-border bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-foreground">Member Status</h3>
+          <h3 className="text-base font-semibold text-foreground">
+            Member Status
+          </h3>
           <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
             <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200 p-2 sm:p-3 text-center transition-all hover:shadow-md dark:from-green-950/30 dark:to-emerald-950/30 dark:border-green-800">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-200/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-              <p className="relative text-[10px] sm:text-xs font-medium text-green-700 dark:text-green-400">Active</p>
-              <p className="relative mt-1 text-base sm:text-lg font-bold text-green-900 dark:text-green-300">{data.summary.activeMembers}</p>
+              <p className="relative text-[10px] sm:text-xs font-medium text-green-700 dark:text-green-400">
+                Active
+              </p>
+              <p className="relative mt-1 text-base sm:text-lg font-bold text-green-900 dark:text-green-300">
+                {data.summary.activeMembers}
+              </p>
             </div>
             <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-yellow-50 to-amber-100 border border-yellow-200 p-2 sm:p-3 text-center transition-all hover:shadow-md dark:from-yellow-950/30 dark:to-amber-950/30 dark:border-yellow-800">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-200/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-              <p className="relative text-[10px] sm:text-xs font-medium text-yellow-700 dark:text-yellow-400">Paused</p>
-              <p className="relative mt-1 text-base sm:text-lg font-bold text-yellow-900 dark:text-yellow-300">{data.summary.pausedMembers}</p>
+              <p className="relative text-[10px] sm:text-xs font-medium text-yellow-700 dark:text-yellow-400">
+                Paused
+              </p>
+              <p className="relative mt-1 text-base sm:text-lg font-bold text-yellow-900 dark:text-yellow-300">
+                {data.summary.pausedMembers}
+              </p>
             </div>
             <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-red-50 to-rose-100 border border-red-200 p-2 sm:p-3 text-center transition-all hover:shadow-md dark:from-red-950/30 dark:to-rose-950/30 dark:border-red-800">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-200/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-              <p className="relative text-[10px] sm:text-xs font-medium text-red-700 dark:text-red-400">Inactive</p>
-              <p className="relative mt-1 text-base sm:text-lg font-bold text-red-900 dark:text-red-300">{data.summary.inactiveMembers}</p>
+              <p className="relative text-[10px] sm:text-xs font-medium text-red-700 dark:text-red-400">
+                Inactive
+              </p>
+              <p className="relative mt-1 text-base sm:text-lg font-bold text-red-900 dark:text-red-300">
+                {data.summary.inactiveMembers}
+              </p>
             </div>
           </div>
           <div className="mt-4 h-[180px] sm:h-[220px]">
@@ -234,10 +282,10 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px',
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                    fontSize: "12px",
                   }}
                 />
               </PieChart>
@@ -247,15 +295,21 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
 
         {/* Payment Trends */}
         <div className="rounded-xl border border-border bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4 sm:p-6 shadow-sm">
-          <h3 className="text-base font-semibold text-foreground">Payment Trends</h3>
+          <h3 className="text-base font-semibold text-foreground">
+            Payment Trends
+          </h3>
           <div className="mt-4 flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
             <div className="flex items-center gap-2 rounded-full bg-green-100 px-2 sm:px-3 py-1 dark:bg-green-950/30">
               <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-green-500" />
-              <span className="font-medium text-green-700 dark:text-green-400">Paid: {data.payments.successRate}%</span>
+              <span className="font-medium text-green-700 dark:text-green-400">
+                Paid: {data.payments.successRate}%
+              </span>
             </div>
             <div className="flex items-center gap-2 rounded-full bg-gray-100 px-2 sm:px-3 py-1 dark:bg-gray-800">
               <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-gray-500" />
-              <span className="font-medium text-gray-700 dark:text-gray-400">Unpaid: {data.payments.failureRate}%</span>
+              <span className="font-medium text-gray-700 dark:text-gray-400">
+                Unpaid: {data.payments.failureRate}%
+              </span>
             </div>
           </div>
           <div className="mt-4 h-[180px] sm:h-[220px]">
@@ -266,27 +320,35 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                     <stop offset="0%" stopColor="#10b981" />
                     <stop offset="100%" stopColor="#059669" />
                   </linearGradient>
-                  <linearGradient id="unpaidGradient" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id="unpaidGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop offset="0%" stopColor="#9ca3af" />
                     <stop offset="100%" stopColor="#6b7280" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.1} />
-                <XAxis 
-                  dataKey="month" 
-                  tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
                   interval={0}
                   angle={-25}
                   textAnchor="end"
                   height={45}
                 />
-                <YAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis
+                  tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px',
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                    fontSize: "12px",
                   }}
                 />
                 <Bar
@@ -310,24 +372,36 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
       {/* Revenue Forecast Table - Collapsible Detail */}
       <details className="rounded-xl border border-border bg-card">
         <summary className="cursor-pointer p-3 sm:p-4 hover:bg-muted/50">
-          <h3 className="text-sm sm:text-base font-semibold text-foreground">Revenue Forecast Details</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">Click to view monthly breakdown</p>
+          <h3 className="text-sm sm:text-base font-semibold text-foreground">
+            Revenue Forecast Details
+          </h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Click to view monthly breakdown
+          </p>
         </summary>
         <div className="border-t border-border p-3 sm:p-4">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[400px] text-xs sm:text-sm">
               <thead className="border-b border-border text-left text-muted-foreground">
                 <tr>
-                  <th className="pb-2 sm:pb-3 pr-2 sm:pr-4 font-medium">Month</th>
-                  <th className="pb-2 sm:pb-3 pr-2 sm:pr-4 font-medium">Trend</th>
-                  <th className="pb-2 sm:pb-3 pr-2 sm:pr-4 font-medium">Renewal</th>
+                  <th className="pb-2 sm:pb-3 pr-2 sm:pr-4 font-medium">
+                    Month
+                  </th>
+                  <th className="pb-2 sm:pb-3 pr-2 sm:pr-4 font-medium">
+                    Trend
+                  </th>
+                  <th className="pb-2 sm:pb-3 pr-2 sm:pr-4 font-medium">
+                    Renewal
+                  </th>
                   <th className="pb-2 sm:pb-3 font-medium">Combined</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {data.revenueForecast.months.map((m) => (
                   <tr key={m.monthKey}>
-                    <td className="py-2 sm:py-3 pr-2 sm:pr-4 text-foreground">{m.month}</td>
+                    <td className="py-2 sm:py-3 pr-2 sm:pr-4 text-foreground">
+                      {m.month}
+                    </td>
                     <td className="py-2 sm:py-3 pr-2 sm:pr-4 tabular-nums text-muted-foreground">
                       {formatInrFromDecimalString(String(m.trendBased))}
                     </td>
@@ -349,7 +423,9 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
       <div className="rounded-xl border border-border bg-gradient-to-br from-indigo-50 to-purple-50 p-4 sm:p-6 dark:from-indigo-950/20 dark:to-purple-950/20">
         <div className="flex items-center gap-2 mb-3 sm:mb-4">
           <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600" />
-          <h3 className="text-sm sm:text-base font-semibold text-foreground">Key Insights</h3>
+          <h3 className="text-sm sm:text-base font-semibold text-foreground">
+            Key Insights
+          </h3>
         </div>
         <ul className="space-y-2 sm:space-y-3">
           {data.insights.map((insight) => (
