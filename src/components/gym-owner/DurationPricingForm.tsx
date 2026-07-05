@@ -1,17 +1,26 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, Pencil, Check, X, Zap } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
+import { formatInrFromDecimalString } from "@/lib/format/inr";
 import type { MemberBillingDuration } from "@/generated/prisma/client";
 
 type PriceRow = { duration: MemberBillingDuration; priceInr: string | null };
+
+const DURATION_FEATURES: Record<MemberBillingDuration, string[]> = {
+  ONE_MONTH: ["Full gym access", "Locker facility", "1 free trainer session"],
+  THREE_MONTHS: ["Full gym access", "Locker facility", "5 trainer sessions", "Diet plan"],
+  SIX_MONTHS: ["Full gym access", "Locker facility", "Unlimited trainer sessions", "Diet plan", "Body composition test"],
+  TWELVE_MONTHS: ["Full gym access", "Locker facility", "Unlimited trainer sessions", "Diet plan", "Body composition test", "Premium merchandise"],
+};
+
+const MOST_POPULAR: MemberBillingDuration = "THREE_MONTHS";
+
+
 
 async function fetchPricing(): Promise<{ prices: PriceRow[] }> {
   const res = await fetch("/api/owner/pricing");
@@ -24,6 +33,8 @@ async function fetchPricing(): Promise<{ prices: PriceRow[] }> {
 export function DurationPricingForm() {
   const queryClient = useQueryClient();
   const [rows, setRows] = useState<PriceRow[]>([]);
+  const [editingDuration, setEditingDuration] = useState<MemberBillingDuration | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   // 1. Fetching pricing with useQuery
   const { data, isLoading, error } = useQuery({
@@ -63,84 +74,167 @@ export function DurationPricingForm() {
     },
     onSuccess: (responseData) => {
       if (responseData.prices) {
+        setRows(responseData.prices);
         queryClient.setQueryData(["pricing"], responseData);
       } else {
         queryClient.invalidateQueries({ queryKey: ["pricing"] });
       }
-      toast.success("Pricing updated successfully.");
+      toast.success("Price updated.");
+      setEditingDuration(null);
+      setEditValue("");
     },
     onError: (err) => {
       toast.error(err.message);
     },
   });
 
-  function setPrice(duration: MemberBillingDuration, value: string) {
+  function startEdit(duration: MemberBillingDuration, currentPrice: string | null) {
+    setEditingDuration(duration);
+    setEditValue(currentPrice ?? "");
+  }
+
+  function cancelEdit() {
+    setEditingDuration(null);
+    setEditValue("");
+  }
+
+  function saveEdit(duration: MemberBillingDuration) {
+    const newPrice = editValue || "0";
+    // Optimistically update local state immediately so UI reflects the change
     setRows((prev) =>
-      prev.map((r) =>
-        r.duration === duration ? { ...r, priceInr: value } : r,
-      ),
+      prev.map((r) => r.duration === duration ? { ...r, priceInr: newPrice } : r)
     );
-  }
-
-  function onSubmit(e: FormEvent) {
-    e.preventDefault();
-
-    const prices = rows.map((r) => ({
+    const allPrices = rows.map((r) => ({
       duration: r.duration,
-      priceInr: r.priceInr ?? "0",
+      priceInr: r.duration === duration ? newPrice : (r.priceInr ?? "0"),
     }));
-
-    mutation.mutate(prices);
+    mutation.mutate(allPrices);
   }
+
+
+  const durationLabel = (value: MemberBillingDuration) => {
+    const opt = MEMBER_BILLING_DURATION_OPTIONS.find((o) => o.value === value);
+    if (!opt) return value;
+    return opt.label.toLowerCase() === "12 months" ? "1 Year" : opt.label;
+  };
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Loading your prices…</p>
+      <div className="flex flex-col items-center justify-center gap-2 py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-[#d4ff00]" />
+        <p className="text-sm text-zinc-400">Loading your prices…</p>
       </div>
     );
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="mx-auto w-full min-w-0 max-w-md space-y-6"
-    >
-      {/* <p className="text-sm text-muted-foreground">
-        Set list prices in INR for each membership length. These amounts apply when
-        you enroll a member for that duration.
-      </p> */}
+    <div className="space-y-4 pb-8">
+      {MEMBER_BILLING_DURATION_OPTIONS.map((opt) => {
+        const row = rows.find((r) => r.duration === opt.value);
+        const price = row?.priceInr;
+        const isPopular = opt.value === MOST_POPULAR;
+        const isEditing = editingDuration === opt.value;
+        const features = DURATION_FEATURES[opt.value];
 
-      <div className="space-y-4">
-        {MEMBER_BILLING_DURATION_OPTIONS.map((opt) => {
-          const row = rows.find((r) => r.duration === opt.value);
-          const value = row?.priceInr ?? "";
-          return (
-            <div key={opt.value} className="space-y-2">
-              <Label htmlFor={`price-${opt.value}`}>{opt.label}</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                  ₹
-                </span>
-                <Input
-                  id={`price-${opt.value}`}
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={value}
-                  onChange={(ev) => setPrice(opt.value, ev.target.value)}
-                  className="pl-8"
-                  required
-                />
+        return (
+          <div
+            key={opt.value}
+            className={`relative rounded-2xl border bg-card transition-colors ${
+              isPopular ? "border-[#d4ff00]/30" : "border-border"
+            }`}
+          >
+            {isPopular && (
+              <div className="absolute -top-3 right-4 flex items-center gap-1 rounded-full bg-[#d4ff00] px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-black">
+                <Zap className="h-3 w-3 fill-black stroke-0" />
+                Most Popular
+              </div>
+            )}
+
+            <div className="p-5">
+              {/* Header row */}
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xl font-black text-foreground capitalize">{durationLabel(opt.value)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Membership</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  {isEditing ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xl font-black text-[#d4ff00]">₹</span>
+                      <input
+                        autoFocus
+                        type="text"
+                        inputMode="decimal"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value.replace(/[^\d.]/g, ""))}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveEdit(opt.value);
+                          if (e.key === "Escape") cancelEdit();
+                        }}
+                        className="w-24 rounded-lg bg-muted px-2 py-1 text-right text-xl font-black text-[#d4ff00] outline-none ring-1 ring-[#d4ff00]/50 focus:ring-[#d4ff00]"
+                        placeholder="0"
+                      />
+                    </div>
+                  ) : (
+                    <p className={`text-3xl font-black ${isPopular ? "text-[#d4ff00]" : "text-foreground"}`}>
+                      {price && Number(price) > 0
+                        ? formatInrFromDecimalString(price)
+                        : <span className="text-muted-foreground text-lg font-medium">Not set</span>}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Features */}
+              <ul className="mt-4 space-y-2">
+                {features.map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Check className="h-3.5 w-3.5 shrink-0 text-[#d4ff00]" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Action buttons */}
+              <div className="mt-5 flex gap-2">
+                {isEditing ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => saveEdit(opt.value)}
+                      disabled={mutation.isPending}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#d4ff00] py-2.5 text-[11px] font-black uppercase tracking-widest text-black transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70"
+                    >
+                      {mutation.isPending
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <Check className="h-4 w-4 stroke-[3]" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <X className="h-4 w-4 stroke-[2.5]" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(opt.value, price ?? null)}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-muted py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      <Button type="submit" disabled={mutation.isPending}>
-        {mutation.isPending ? "Saving…" : "Save prices"}
-      </Button>
-    </form>
+          </div>
+        );
+      })}
+    </div>
   );
 }

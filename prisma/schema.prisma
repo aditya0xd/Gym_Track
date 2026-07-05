@@ -60,6 +60,7 @@ model AdminUser {
   name             String
   email            String                  @unique
   passwordHash     String
+  profilePhoto     String?                 @db.Text
   subscriptionPlan OwnerSubscriptionPlan   @default(TRIAL)
   trialEndsAt      DateTime?
   deletedAt        DateTime?

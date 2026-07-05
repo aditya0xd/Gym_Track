@@ -125,15 +125,15 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
   }>>`
     SELECT
       COUNT(*) as total_members,
-      SUM(CASE WHEN endDate >= ${today} AND membershipStatus = 'ACTIVE' THEN 1 ELSE 0 END) as active_members,
-      SUM(CASE WHEN membershipStatus = 'PAUSED' THEN 1 ELSE 0 END) as paused_members,
-      SUM(CASE WHEN endDate < ${today} THEN 1 ELSE 0 END) as inactive_members,
-      SUM(CASE WHEN paymentStatus = 'DONE' THEN 1 ELSE 0 END) as paid_members,
-      SUM(CASE WHEN paymentStatus != 'DONE' THEN 1 ELSE 0 END) as unpaid_members,
-      SUM(CASE WHEN paymentStatus = 'DONE' AND startDate >= ${currentMonthStart} AND startDate < ${nextMonthStart} THEN planPrice ELSE 0 END) as monthly_revenue
-    FROM Member
-    WHERE deletedAt IS NULL
-      AND adminUserId = ${adminUserId}
+      SUM(CASE WHEN "endDate" >= ${today} AND "membershipStatus" = 'ACTIVE' THEN 1 ELSE 0 END) as active_members,
+      SUM(CASE WHEN "membershipStatus" = 'PAUSED' THEN 1 ELSE 0 END) as paused_members,
+      SUM(CASE WHEN "endDate" < ${today} THEN 1 ELSE 0 END) as inactive_members,
+      SUM(CASE WHEN "paymentStatus" = 'DONE' THEN 1 ELSE 0 END) as paid_members,
+      SUM(CASE WHEN "paymentStatus" != 'DONE' THEN 1 ELSE 0 END) as unpaid_members,
+      SUM(CASE WHEN "paymentStatus" = 'DONE' AND "startDate" >= ${currentMonthStart} AND "startDate" < ${nextMonthStart} THEN "planPrice" ELSE 0 END) as monthly_revenue
+    FROM "Member"
+    WHERE "deletedAt" IS NULL
+      AND "adminUserId" = ${adminUserId}
   `;
 
   const summaryData = summary[0] || {
@@ -164,14 +164,14 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
     count: bigint;
   }>>`
     SELECT
-      TO_CHAR(startDate, 'YYYY-MM') as month_key,
-      SUM(CASE WHEN paymentStatus = 'DONE' THEN planPrice ELSE 0 END) as revenue,
-      SUM(CASE WHEN paymentStatus = 'DONE' THEN 1 ELSE 0 END) as count
-    FROM Member
-    WHERE deletedAt IS NULL
-      AND adminUserId = ${adminUserId}
-      AND TO_CHAR(startDate, 'YYYY-MM') IN (${trendKeys.map(k => `'${k}'`).join(',')})
-    GROUP BY TO_CHAR(startDate, 'YYYY-MM')
+      TO_CHAR("startDate", 'YYYY-MM') as month_key,
+      SUM(CASE WHEN "paymentStatus" = 'DONE' THEN "planPrice" ELSE 0 END) as revenue,
+      SUM(CASE WHEN "paymentStatus" = 'DONE' THEN 1 ELSE 0 END) as count
+    FROM "Member"
+    WHERE "deletedAt" IS NULL
+      AND "adminUserId" = ${adminUserId}
+      AND TO_CHAR("startDate", 'YYYY-MM') IN (${trendKeys.map(k => `'${k}'`).join(',')})
+    GROUP BY TO_CHAR("startDate", 'YYYY-MM')
     ORDER BY month_key
   `;
 

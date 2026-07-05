@@ -99,7 +99,7 @@ export default async function OwnerDashboardPage() {
           </div>
           <div className="mt-5">
             <p className="text-4xl font-black tracking-tight text-white">
-              {formatInrFromDecimalString(revenueAtRisk.toFixed(2))}
+              {formatInrFromDecimalString(revenueAtRisk)}
             </p>
             <p className="mt-2.5 text-xs text-muted-foreground">
               from {expiringSoon.length} expiring members this week
@@ -166,16 +166,16 @@ export default async function OwnerDashboardPage() {
             <p className="mt-1.5 text-3xl font-black text-foreground">{expiredMembers.length}</p>
           </Link>
           {hasAnalytics ? (
-            <Link href="/owner/analytics" className="px-6 hover:opacity-85 transition-opacity">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Revenue Lost</p>
-              <p className="mt-1.5 text-3xl font-black text-red-500">
-                {formatInrFromDecimalString(revenueLost.toFixed(2))}
+            <Link href="/owner/analytics" className="pl-4 pr-2 min-w-0 hover:opacity-85 transition-opacity">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground truncate">Revenue Lost</p>
+              <p className="mt-1.5 text-2xl md:text-3xl font-black text-red-500 truncate" title={formatInrFromDecimalString(revenueLost.toFixed(2))}>
+                {formatInrFromDecimalString(revenueLost.toFixed(0))}
               </p>
             </Link>
           ) : (
-            <div className="px-6">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Revenue Lost</p>
-              <p className="mt-1.5 text-3xl font-black text-red-500">—</p>
+            <div className="pl-4 pr-2 min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground truncate">Revenue Lost</p>
+              <p className="mt-1.5 text-2xl md:text-3xl font-black text-red-500">—</p>
               <p className="mt-2 text-xs font-medium text-muted-foreground">
                 Upgrade to unlock analytics
               </p>

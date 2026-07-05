@@ -19,17 +19,8 @@ export default async function OwnerEnrollMemberPage() {
   }
 
   return (
-    <PageShell>
-      <PageHeader
-        title="Enroll member"
-        // description="Uses your saved INR prices for 1 / 3 / 6 / 12 month durations."
-        actions={
-          <Button variant="outline" asChild>
-            <Link href="/owner/dashboard">Back to members</Link>
-          </Button>
-        }
-      />
+    <div className="min-h-screen bg-background pt-4">
       <MemberEnrollForm />
-    </PageShell>
+    </div>
   );
 }
