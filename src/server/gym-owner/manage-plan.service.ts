@@ -57,24 +57,17 @@ export async function changeOwnerPlan(adminUserId: string, nextPlan: OwnerSubscr
   const amountInr = prices[nextPlan];
 
   const now = new Date();
-  await prisma.$transaction([
-    prisma.adminUser.update({
-      where: { id: adminUserId },
-      data: { subscriptionPlan: nextPlan },
-    }),
-    prisma.ownerBillingInvoice.create({
-      data: {
-        adminUserId,
-        plan: nextPlan,
-        amountInr,
-        status: "PENDING",
-        dueDate: addDays(now, 3),
-      },
-    }),
-  ]);
-
-  // Invalidate cache so next JWT callback fetches fresh data
-  await invalidateCachedOwner(adminUserId);
+  // Create invoice with target plan, but don't update subscription plan yet
+  // Plan will be updated only after payment is successful
+  await prisma.ownerBillingInvoice.create({
+    data: {
+      adminUserId,
+      plan: nextPlan,
+      amountInr,
+      status: "PENDING",
+      dueDate: addDays(now, 3),
+    },
+  });
 
   return { changed: true as const };
 }
@@ -98,22 +91,66 @@ export async function deleteOwnerInvoice(adminUserId: string, invoiceId: string)
 export async function payInvoice(adminUserId: string, invoiceId: string) {
   const invoice = await prisma.ownerBillingInvoice.findFirst({
     where: { id: invoiceId, ...ownerInvoiceScope(adminUserId) },
-    select: { id: true, status: true },
+    select: { id: true, status: true, plan: true },
   });
   if (!invoice) throw new HttpError(404, "Invoice not found.");
   if (invoice.status !== "PENDING") {
     throw new HttpError(400, "Only pending invoices can be paid.");
   }
 
-  return prisma.ownerBillingInvoice.update({
+  // Update both invoice status and subscription plan when payment is made
+  await prisma.$transaction([
+    prisma.ownerBillingInvoice.update({
+      where: { id: invoiceId },
+      data: { status: "PAID", paidAt: new Date() },
+    }),
+    prisma.adminUser.update({
+      where: { id: adminUserId },
+      data: { subscriptionPlan: invoice.plan },
+    }),
+  ]);
+
+  // Invalidate cache so next JWT callback fetches fresh data
+  await invalidateCachedOwner(adminUserId);
+
+  return {
+    id: invoice.id,
+    status: "PAID" as const,
+    paidAt: new Date(),
+  };
+}
+
+// Superadmin function to approve an invoice (manual payment approval)
+export async function approveInvoiceBySuperAdmin(invoiceId: string) {
+  const invoice = await prisma.ownerBillingInvoice.findUnique({
     where: { id: invoiceId },
-    data: { status: "PAID", paidAt: new Date() },
-    select: {
-      id: true,
-      status: true,
-      paidAt: true,
-    },
+    select: { id: true, status: true, plan: true, adminUserId: true },
   });
+  if (!invoice) throw new HttpError(404, "Invoice not found.");
+  if (invoice.status !== "PENDING") {
+    throw new HttpError(400, "Only pending invoices can be approved.");
+  }
+
+  // Update both invoice status and subscription plan when approved
+  await prisma.$transaction([
+    prisma.ownerBillingInvoice.update({
+      where: { id: invoiceId },
+      data: { status: "PAID", paidAt: new Date(), provider: "MANUAL" },
+    }),
+    prisma.adminUser.update({
+      where: { id: invoice.adminUserId },
+      data: { subscriptionPlan: invoice.plan },
+    }),
+  ]);
+
+  // Invalidate cache so next JWT callback fetches fresh data
+  await invalidateCachedOwner(invoice.adminUserId);
+
+  return {
+    id: invoice.id,
+    status: "PAID" as const,
+    paidAt: new Date(),
+  };
 }
 
 export async function createRazorpayOrderForOwnerInvoice(adminUserId: string, invoiceId: string) {
@@ -152,23 +189,37 @@ export async function markInvoicePaidFromRazorpay(input: {
       ...ownerInvoiceScope(input.adminUserId),
       razorpayOrderId: input.razorpayOrderId,
     },
-    select: { id: true, status: true },
+    select: { id: true, status: true, plan: true },
   });
   if (!invoice) throw new HttpError(404, "Invoice not found for Razorpay order.");
   if (invoice.status === "PAID") return invoice;
   if (invoice.status !== "PENDING") throw new HttpError(400, "Invoice is not payable.");
 
-  return prisma.ownerBillingInvoice.update({
-    where: { id: input.invoiceId },
-    data: {
-      status: "PAID",
-      paidAt: new Date(),
-      provider: "RAZORPAY",
-      razorpayPaymentId: input.razorpayPaymentId,
-      razorpaySignature: input.razorpaySignature,
-    },
-    select: { id: true, status: true },
-  });
+  // Update both invoice status and subscription plan when payment is made
+  await prisma.$transaction([
+    prisma.ownerBillingInvoice.update({
+      where: { id: input.invoiceId },
+      data: {
+        status: "PAID",
+        paidAt: new Date(),
+        provider: "RAZORPAY",
+        razorpayPaymentId: input.razorpayPaymentId,
+        razorpaySignature: input.razorpaySignature,
+      },
+    }),
+    prisma.adminUser.update({
+      where: { id: input.adminUserId },
+      data: { subscriptionPlan: invoice.plan },
+    }),
+  ]);
+
+  // Invalidate cache so next JWT callback fetches fresh data
+  await invalidateCachedOwner(input.adminUserId);
+
+  return {
+    id: invoice.id,
+    status: "PAID" as const,
+  };
 }
 
 interface RazorpayWebhookPayload {
