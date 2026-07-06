@@ -3,13 +3,14 @@ import { z } from "zod";
 import { hash } from "bcryptjs";
 
 import { withGymOwner } from "@/lib/api-auth";
-import { parseRequestBody } from "@/lib/validation";
+import { imageDataUrlSchema, parseRequestBody } from "@/lib/validation";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 
 const updateProfileSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   email: z.string().trim().toLowerCase().email("Invalid email address"),
-  profilePhoto: z.string().trim().nullable().optional().transform(v => v || null),
+  profilePhoto: imageDataUrlSchema("Profile photo"),
   newPassword: z.string().trim().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
 });
 
@@ -39,7 +40,7 @@ async function PUTHandler(request: Request, userId: string) {
   }
 
   // Prepare update data
-  const updateData: any = {
+  const updateData: Prisma.AdminUserUpdateInput = {
     name: data.name,
     email: data.email,
     profilePhoto: data.profilePhoto,
@@ -65,9 +66,10 @@ async function PUTHandler(request: Request, userId: string) {
         profilePhoto: updatedUser.profilePhoto,
       }
     });
-  } catch (err: any) {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
-      { message: "Could not update profile", error: err.message },
+      { message: "Could not update profile", error: message },
       { status: 500 }
     );
   }
