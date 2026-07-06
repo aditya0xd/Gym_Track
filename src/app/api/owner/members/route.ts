@@ -3,12 +3,11 @@ import { z } from "zod";
 
 import { HttpError } from "@/lib/http/errors";
 import { withGymOwner } from "@/lib/api-auth";
-import { parseRequestBody, dateSchema, memberBillingDurationSchema, paymentStatusSchema, optionalStringToNullSchema, priceInrSchema } from "@/lib/validation";
+import { parseRequestBody, dateSchema, imageDataUrlSchema, memberBillingDurationSchema, paymentStatusSchema, priceInrSchema } from "@/lib/validation";
 import {
   createMemberForOwner,
   listMembersForOwner,
 } from "@/server/gym-owner/member.service";
-import type { PaymentStatus } from "@/generated/prisma/client";
 
 const createMemberSchema = z.object({
   fullName: z.string().trim().min(1, "Full name is required"),
@@ -17,8 +16,8 @@ const createMemberSchema = z.object({
   billingDuration: memberBillingDurationSchema,
   whatsappEnabled: z.boolean().default(true),
   paymentStatus: paymentStatusSchema.default("NOT_DONE"),
-  memberPhoto: z.string().trim().nullable().optional().transform(v => v ?? null),
-  upiScreenshot: z.string().trim().nullable().optional().transform(v => v ?? null),
+  memberPhoto: imageDataUrlSchema("Member photo"),
+  upiScreenshot: imageDataUrlSchema("UPI screenshot"),
   discountInr: priceInrSchema.optional().transform(v => v ?? undefined),
   startDate: dateSchema,
 }).refine(data => {
