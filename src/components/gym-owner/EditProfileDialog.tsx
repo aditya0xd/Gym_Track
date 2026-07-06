@@ -5,11 +5,53 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2, X, Upload, Check } from "lucide-react";
-import Compressor from "compressorjs";
 import Cropper from "react-easy-crop";
+import type { Area } from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+const RAW_FILE_MAX_BYTES = 15 * 1024 * 1024;
+const MAX_ENCODED_LENGTH = Math.ceil((MAX_IMAGE_BYTES / 3) * 4) + 40;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+async function compressImage(
+  file: File | Blob,
+  maxDim = 800,
+  quality = 0.6,
+): Promise<Blob> {
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("CANVAS_UNSUPPORTED");
+    ctx.drawImage(bitmap, 0, 0, w, h);
+
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("ENCODE_FAILED"))),
+        "image/jpeg",
+        quality,
+      );
+    });
+  } finally {
+    bitmap.close();
+  }
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(new Error("Could not read image."));
+    reader.readAsDataURL(blob);
+  });
+}
 
 export function EditProfileDialog({
   initialName,
@@ -33,7 +75,7 @@ export function EditProfileDialog({
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -79,18 +121,30 @@ export function EditProfileDialog({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      toast.error("Profile photo must be a JPEG, PNG, or WebP image.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > RAW_FILE_MAX_BYTES) {
+      toast.error("That photo is too large — please choose a smaller image.");
+      e.target.value = "";
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       if (typeof event.target?.result === "string") {
         setImageToCrop(event.target.result);
       }
     };
+    reader.onerror = () => toast.error("Could not read selected image.");
     reader.readAsDataURL(file);
-    // Reset file input
     e.target.value = "";
   };
 
-  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
+  const onCropComplete = (_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
 
@@ -98,35 +152,29 @@ export function EditProfileDialog({
     if (!imageToCrop || !croppedAreaPixels) return;
 
     try {
-      const croppedImageFile = await getCroppedImg(imageToCrop, croppedAreaPixels);
+      const croppedImageFile = await getCroppedImg(
+        imageToCrop,
+        croppedAreaPixels,
+      );
       if (!croppedImageFile) throw new Error("Cropping failed");
 
-      new Compressor(croppedImageFile, {
-        quality: 0.6,
-        maxWidth: 800,
-        maxHeight: 800,
-        success(result) {
-          if (result.size > MAX_IMAGE_BYTES) {
-            toast.error("Profile photo must be under 3MB after compression.");
-            setImageToCrop(null);
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            if (typeof event.target?.result === "string") {
-              setProfilePhoto(event.target.result);
-              setImageToCrop(null);
-            }
-          };
-          reader.readAsDataURL(result);
-        },
-        error() {
-          toast.error("Could not compress profile photo.");
-          setImageToCrop(null);
-        },
-      });
-    } catch (e) {
-      toast.error("Failed to crop image.");
+      const compressedBlob = await compressImage(croppedImageFile);
+      const dataUrl = await blobToDataUrl(compressedBlob);
+
+      if (dataUrl.length > MAX_ENCODED_LENGTH) {
+        toast.error("Profile photo is still too large after compression.");
+        setImageToCrop(null);
+        return;
+      }
+
+      setProfilePhoto(dataUrl);
+      setImageToCrop(null);
+    } catch (err) {
+      toast.error(
+        err instanceof Error && err.message === "CANVAS_UNSUPPORTED"
+          ? "Your device doesn't support image processing. Try a different browser."
+          : "Failed to process cropped image.",
+      );
       setImageToCrop(null);
     }
   };
@@ -181,84 +229,99 @@ export function EditProfileDialog({
 
                 <h2 className="mb-6 text-xl font-bold">Edit Profile</h2>
 
-            <form onSubmit={handleSave} className="space-y-5">
-              {/* Profile Photo */}
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-[#d4ff00] bg-zinc-800">
-                  {profilePhoto ? (
-                    <img src={profilePhoto} alt="Profile" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
-                      {name.substring(0, 2).toUpperCase()}
+                <form onSubmit={handleSave} className="space-y-5">
+                  {/* Profile Photo */}
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-[#d4ff00] bg-zinc-800">
+                      {profilePhoto ? (
+                        <img
+                          src={profilePhoto}
+                          alt="Profile"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
+                          {name.substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 transition-opacity hover:opacity-100">
+                        <Upload className="h-6 w-6 text-white" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleFileChange}
+                        />
+                      </label>
                     </div>
-                  )}
-                  <label className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 transition-opacity hover:opacity-100">
-                    <Upload className="h-6 w-6 text-white" />
+                    <p className="text-xs text-zinc-400">
+                      Click photo to change
+                    </p>
+                  </div>
+
+                  {/* Name */}
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-zinc-300">
+                      Name
+                    </label>
                     <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleFileChange}
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
+                      required
                     />
-                  </label>
-                </div>
-                <p className="text-xs text-zinc-400">Click photo to change</p>
-              </div>
+                  </div>
 
-              {/* Name */}
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-zinc-300">Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
-                  required
-                />
-              </div>
+                  {/* Email */}
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-zinc-300">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
+                      required
+                    />
+                    <p className="mt-1 text-[10px] text-zinc-500">
+                      Changing email will require you to log in with the new
+                      email next time.
+                    </p>
+                  </div>
 
-              {/* Email */}
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-zinc-300">Email Address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
-                  required
-                />
-                <p className="mt-1 text-[10px] text-zinc-500">Changing email will require you to log in with the new email next time.</p>
-              </div>
+                  {/* Password */}
+                  <div>
+                    <label className="mb-1 block text-sm font-semibold text-zinc-300">
+                      New Password (optional)
+                    </label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Leave blank to keep current password"
+                      className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
+                    />
+                  </div>
 
-              {/* Password */}
-              <div>
-                <label className="mb-1 block text-sm font-semibold text-zinc-300">New Password (optional)</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Leave blank to keep current password"
-                  className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
-                />
-              </div>
-
-              {/* Action */}
-              <button
-                type="submit"
-                disabled={mutation.isPending}
-                className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-[#d4ff00] text-sm font-bold text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-              >
-                {mutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </button>
-            </form>
-            </>
+                  {/* Action */}
+                  <button
+                    type="submit"
+                    disabled={mutation.isPending}
+                    className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-[#d4ff00] text-sm font-bold text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {mutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </button>
+                </form>
+              </>
             )}
           </div>
         </div>

@@ -1,11 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { MemberEnrollForm } from "@/components/gym-owner/MemberEnrollForm";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { PageShell } from "@/components/shared/PageShell";
-import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {

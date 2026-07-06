@@ -8,7 +8,6 @@ import { prisma } from "@/lib/prisma";
 import {
   getCachedOwner,
   setCachedOwner,
-  invalidateCachedOwner,
   type CachedOwner,
 } from "@/lib/auth-cache";
 

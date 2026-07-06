@@ -6,6 +6,12 @@ import type { MemberBillingDuration, OwnerSubscriptionPlan, PaymentStatus } from
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 const IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
+class RequestBodyTooLargeError extends Error {
+  constructor(readonly maxBytes: number) {
+    super(`Request body must be under ${Math.floor(maxBytes / 1024 / 1024)}MB.`);
+  }
+}
+
 function hasMatchingImageSignature(bytes: Buffer, mime: string) {
   if (mime === "image/jpeg") {
     return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
@@ -79,19 +85,62 @@ export function imageDataUrlSchema(label: string, maxBytes = MAX_IMAGE_BYTES) {
 /**
  * Helper to parse request body with Zod and return validation error if invalid
  */
-export async function parseRequestBody<T>(request: Request, schema: z.ZodSchema<T>): Promise<{
+async function readRequestTextWithLimit(request: Request, maxBytes: number) {
+  const contentLength = request.headers.get("content-length");
+  if (contentLength) {
+    const parsedLength = Number(contentLength);
+    if (Number.isFinite(parsedLength) && parsedLength > maxBytes) {
+      throw new RequestBodyTooLargeError(maxBytes);
+    }
+  }
+
+  if (!request.body) return "";
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    totalBytes += value.byteLength;
+    if (totalBytes > maxBytes) {
+      await reader.cancel().catch(() => undefined);
+      throw new RequestBodyTooLargeError(maxBytes);
+    }
+
+    chunks.push(value);
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  return new TextDecoder().decode(bytes);
+}
+
+export async function parseRequestBody<T>(request: Request, schema: z.ZodSchema<T>, options?: { maxBytes?: number }): Promise<{
   data?: T;
-  error?: { message: string };
+  error?: { message: string; status?: number };
 }> {
   try {
-    const body = await request.json();
+    const body = options?.maxBytes
+      ? JSON.parse(await readRequestTextWithLimit(request, options.maxBytes))
+      : await request.json();
     const result = schema.safeParse(body);
     if (!result.success) {
       const message = result.error.issues.map((e: z.ZodIssue) => e.message).join(", ");
       return { error: { message } };
     }
     return { data: result.data };
-  } catch {
+  } catch (err) {
+    if (err instanceof RequestBodyTooLargeError) {
+      return { error: { message: err.message, status: 413 } };
+    }
     return { error: { message: "Invalid JSON body" } };
   }
 }

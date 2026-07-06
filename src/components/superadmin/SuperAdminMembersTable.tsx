@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Trash2, Loader2, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 type Member = {
   id: string;
@@ -40,7 +39,7 @@ export function SuperAdminMembersTable({
     try {
       const res = await fetch(
         `/api/superadmin/gym-owners/${ownerId}/members/${memberId}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       const data = await res.json();
       if (!res.ok) {
@@ -58,9 +57,23 @@ export function SuperAdminMembersTable({
 
   function statusBadge(status: string, endDate: string) {
     const expired = new Date(endDate) < new Date();
-    if (status === "PAUSED") return <span className="rounded-full bg-yellow-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-yellow-400">Paused</span>;
-    if (expired) return <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-red-400">Expired</span>;
-    return <span className="rounded-full bg-green-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-green-400">Active</span>;
+    if (status === "PAUSED")
+      return (
+        <span className="rounded-full bg-yellow-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-yellow-400">
+          Paused
+        </span>
+      );
+    if (expired)
+      return (
+        <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-red-400">
+          Expired
+        </span>
+      );
+    return (
+      <span className="rounded-full bg-green-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-green-400">
+        Active
+      </span>
+    );
   }
 
   if (members.length === 0) {
@@ -90,21 +103,36 @@ export function SuperAdminMembersTable({
           </thead>
           <tbody className="divide-y divide-white/5">
             {members.map((m) => (
-              <tr key={m.id} className="bg-transparent transition-colors hover:bg-white/5">
-                <td className="px-4 py-3 font-medium text-white">{m.fullName}</td>
+              <tr
+                key={m.id}
+                className="bg-transparent transition-colors hover:bg-white/5"
+              >
+                <td className="px-4 py-3 font-medium text-white">
+                  {m.fullName}
+                </td>
                 <td className="px-4 py-3">
                   <div className="text-zinc-200">{m.phone}</div>
-                  {m.email && <div className="text-xs text-zinc-500">{m.email}</div>}
+                  {m.email && (
+                    <div className="text-xs text-zinc-500">{m.email}</div>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-zinc-300">
                   {DURATION_LABELS[m.billingDuration] ?? m.billingDuration}
                 </td>
                 <td className="px-4 py-3 text-zinc-300">₹{m.planPrice}</td>
                 <td className="px-4 py-3 text-zinc-400">
-                  {new Date(m.startDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                  {new Date(m.startDate).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 </td>
                 <td className="px-4 py-3 text-zinc-400">
-                  {new Date(m.endDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                  {new Date(m.endDate).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 </td>
                 <td className="px-4 py-3">
                   {statusBadge(m.membershipStatus, m.endDate)}
@@ -116,9 +144,11 @@ export function SuperAdminMembersTable({
                     className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50"
                     title="Delete member"
                   >
-                    {deletingId === m.id
-                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      : <Trash2 className="h-3.5 w-3.5" />}
+                    {deletingId === m.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </td>
               </tr>

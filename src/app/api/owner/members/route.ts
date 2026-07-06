@@ -9,6 +9,8 @@ import {
   listMembersForOwner,
 } from "@/server/gym-owner/member.service";
 
+const MAX_MEMBER_CREATE_BODY_BYTES = 10 * 1024 * 1024;
+
 const createMemberSchema = z.object({
   fullName: z.string().trim().min(1, "Full name is required"),
   email: z.string().trim().toLowerCase().email().nullable().optional().transform(v => v ?? null),
@@ -45,9 +47,11 @@ async function GETHandler(_request: Request, userId: string) {
 }
 
 async function POSTHandler(request: Request, userId: string) {
-  const { data, error } = await parseRequestBody(request, createMemberSchema);
+  const { data, error } = await parseRequestBody(request, createMemberSchema, {
+    maxBytes: MAX_MEMBER_CREATE_BODY_BYTES,
+  });
   if (error || !data) {
-    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
+    return NextResponse.json(error || { message: "Invalid request" }, { status: error?.status ?? 400 });
   }
 
   const startParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.startDate);

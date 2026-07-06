@@ -7,6 +7,8 @@ import { imageDataUrlSchema, parseRequestBody } from "@/lib/validation";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 
+const MAX_PROFILE_UPDATE_BODY_BYTES = 5 * 1024 * 1024;
+
 const updateProfileSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   email: z.string().trim().toLowerCase().email("Invalid email address"),
@@ -15,10 +17,12 @@ const updateProfileSchema = z.object({
 });
 
 async function PUTHandler(request: Request, userId: string) {
-  const { data, error } = await parseRequestBody(request, updateProfileSchema);
+  const { data, error } = await parseRequestBody(request, updateProfileSchema, {
+    maxBytes: MAX_PROFILE_UPDATE_BODY_BYTES,
+  });
   
   if (error || !data) {
-    return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });
+    return NextResponse.json(error || { message: "Invalid request" }, { status: error?.status ?? 400 });
   }
 
   // Check if email changed and if the new email is already taken

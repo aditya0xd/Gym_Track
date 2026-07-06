@@ -5,10 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { X, ArrowRight } from "lucide-react";
-import Compressor from "compressorjs";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
@@ -18,26 +14,49 @@ import type {
 } from "@/generated/prisma/client";
 
 type PriceHint = { duration: MemberBillingDuration; priceInr: string | null };
-const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
-async function compressImage(file: File): Promise<File> {
-  return new Promise((resolve, reject) => {
-    new Compressor(file, {
-      quality: 0.6,
-      maxWidth: 1200,
-      maxHeight: 1200,
-      success(result) {
-        const compressedFile = new File([result], file.name, {
-          type: result.type,
-          lastModified: Date.now(),
-        });
-        resolve(compressedFile);
-      },
-      error(err) {
-        reject(err);
-      },
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+const RAW_FILE_MAX_BYTES = 15 * 1024 * 1024;
+// base64 is ~4/3 the binary size; add slack for the "data:image/jpeg;base64," prefix
+const MAX_ENCODED_LENGTH = Math.ceil((MAX_IMAGE_BYTES / 3) * 4) + 40;
+
+async function compressImage(
+  file: File,
+  maxDim = 1200,
+  quality = 0.6,
+): Promise<File> {
+  if (file.size > RAW_FILE_MAX_BYTES) {
+    throw new Error("FILE_TOO_LARGE");
+  }
+
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("CANVAS_UNSUPPORTED");
+    ctx.drawImage(bitmap, 0, 0, w, h);
+
+    const blob: Blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("ENCODE_FAILED"))),
+        "image/jpeg",
+        quality,
+      );
     });
-  });
+
+    return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  } finally {
+    bitmap.close();
+  }
 }
 
 async function fileToDataUrl(file: File): Promise<string> {
@@ -47,6 +66,16 @@ async function fileToDataUrl(file: File): Promise<string> {
     reader.onerror = () => reject(new Error("Could not read selected image."));
     reader.readAsDataURL(file);
   });
+}
+
+function imageErrorMessage(err: unknown, label: string): string {
+  if (err instanceof Error && err.message === "FILE_TOO_LARGE") {
+    return `${label} is too large — please choose a smaller image.`;
+  }
+  if (err instanceof Error && err.message === "CANVAS_UNSUPPORTED") {
+    return `Your device doesn't support image processing. Try a different browser.`;
+  }
+  return `Could not process ${label.toLowerCase()} on this device.`;
 }
 
 function openImagePicker(
@@ -129,14 +158,15 @@ export function MemberEnrollForm() {
     if (memberPhotoFile instanceof File && memberPhotoFile.size > 0) {
       try {
         const compressed = await compressImage(memberPhotoFile);
-        if (compressed.size > MAX_IMAGE_BYTES) {
-          toast.error("Member photo must be under 3MB after compression.");
+        const dataUrl = await fileToDataUrl(compressed);
+        if (dataUrl.length > MAX_ENCODED_LENGTH) {
+          toast.error("Member photo is still too large after compression.");
           setPending(false);
           return;
         }
-        memberPhoto = await fileToDataUrl(compressed);
+        memberPhoto = dataUrl;
       } catch (err) {
-        toast.error("Could not compress member photo.");
+        toast.error(imageErrorMessage(err, "Member photo"));
         setPending(false);
         return;
       }
@@ -145,14 +175,15 @@ export function MemberEnrollForm() {
     if (upiScreenshotFile instanceof File && upiScreenshotFile.size > 0) {
       try {
         const compressed = await compressImage(upiScreenshotFile);
-        if (compressed.size > MAX_IMAGE_BYTES) {
-          toast.error("UPI screenshot must be under 3MB after compression.");
+        const dataUrl = await fileToDataUrl(compressed);
+        if (dataUrl.length > MAX_ENCODED_LENGTH) {
+          toast.error("UPI screenshot is still too large after compression.");
           setPending(false);
           return;
         }
-        upiScreenshot = await fileToDataUrl(compressed);
+        upiScreenshot = dataUrl;
       } catch (err) {
-        toast.error("Could not compress UPI screenshot.");
+        toast.error(imageErrorMessage(err, "UPI screenshot"));
         setPending(false);
         return;
       }
@@ -196,8 +227,10 @@ export function MemberEnrollForm() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const inputClass = "flex h-14 w-full rounded-xl border-0 bg-[#27272a] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]";
-  const labelClass = "text-[10px] font-bold uppercase tracking-wider text-zinc-400 ml-1";
+  const inputClass =
+    "flex h-14 w-full rounded-xl border-0 bg-[#27272a] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]";
+  const labelClass =
+    "text-[10px] font-bold uppercase tracking-wider text-zinc-400 ml-1";
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-md rounded-t-[32px] md:rounded-[32px] bg-[#18181b] p-6 -mx-4 sm:mx-0 shadow-2xl">
@@ -206,7 +239,9 @@ export function MemberEnrollForm() {
           <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
             New Member
           </p>
-          <h1 className="mt-1 text-3xl font-extrabold text-white">Enroll Member</h1>
+          <h1 className="mt-1 text-3xl font-extrabold text-white">
+            Enroll Member
+          </h1>
         </div>
         <Link
           href="/owner/dashboard"
@@ -218,7 +253,9 @@ export function MemberEnrollForm() {
 
       <form onSubmit={onSubmit} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="fullName" className={labelClass}>Full Name</Label>
+          <Label htmlFor="fullName" className={labelClass}>
+            Full Name
+          </Label>
           <input
             id="fullName"
             name="fullName"
@@ -229,18 +266,22 @@ export function MemberEnrollForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone" className={labelClass}>Phone Number</Label>
-          <input 
-            id="phone" 
-            name="phone" 
-            required 
-            placeholder="+91 98765 43210" 
-            className={inputClass} 
+          <Label htmlFor="phone" className={labelClass}>
+            Phone Number
+          </Label>
+          <input
+            id="phone"
+            name="phone"
+            required
+            placeholder="+91 98765 43210"
+            className={inputClass}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className={labelClass}>Email (optional)</Label>
+          <Label htmlFor="email" className={labelClass}>
+            Email (optional)
+          </Label>
           <input
             id="email"
             name="email"
@@ -258,8 +299,9 @@ export function MemberEnrollForm() {
               const isSelected = duration === o.value;
               const p = hints.find((h) => h.duration === o.value)?.priceInr;
               let labelTrimmed = o.label;
-              if (labelTrimmed.toLowerCase() === "12 months") labelTrimmed = "1 Year";
-              
+              if (labelTrimmed.toLowerCase() === "12 months")
+                labelTrimmed = "1 Year";
+
               return (
                 <button
                   key={o.value}
@@ -271,10 +313,14 @@ export function MemberEnrollForm() {
                       : "border-transparent bg-[#27272a] hover:bg-zinc-700"
                   }`}
                 >
-                  <span className={`text-[11px] font-bold capitalize ${isSelected ? "text-[#d4ff00]" : "text-zinc-300"}`}>
+                  <span
+                    className={`text-[11px] font-bold capitalize ${isSelected ? "text-[#d4ff00]" : "text-zinc-300"}`}
+                  >
                     {labelTrimmed}
                   </span>
-                  <span className={`mt-1 text-2xl font-black ${isSelected ? "text-[#d4ff00]" : "text-white"}`}>
+                  <span
+                    className={`mt-1 text-2xl font-black ${isSelected ? "text-[#d4ff00]" : "text-white"}`}
+                  >
                     {p ? formatInrFromDecimalString(p) : "—"}
                   </span>
                 </button>
@@ -289,14 +335,18 @@ export function MemberEnrollForm() {
         </div>
 
         <div className="space-y-2 pt-2">
-          <Label htmlFor="discountInr" className={labelClass}>Discount (INR)</Label>
+          <Label htmlFor="discountInr" className={labelClass}>
+            Discount (INR)
+          </Label>
           <input
             id="discountInr"
             inputMode="decimal"
             autoComplete="off"
             placeholder="0"
             value={discountStr}
-            onChange={(e) => setDiscountStr(e.target.value.replace(/[^\d.]/g, ""))}
+            onChange={(e) =>
+              setDiscountStr(e.target.value.replace(/[^\d.]/g, ""))
+            }
             className={inputClass}
           />
           {hintPrice && chargedPreview !== null && discountStr ? (
@@ -308,7 +358,9 @@ export function MemberEnrollForm() {
 
         <div className="grid grid-cols-2 gap-3 pt-2">
           <div className="space-y-2">
-            <Label htmlFor="startDate" className={labelClass}>Start date</Label>
+            <Label htmlFor="startDate" className={labelClass}>
+              Start date
+            </Label>
             <input
               id="startDate"
               name="startDate"
@@ -319,12 +371,16 @@ export function MemberEnrollForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="paymentStatus" className={labelClass}>Payment status</Label>
+            <Label htmlFor="paymentStatus" className={labelClass}>
+              Payment status
+            </Label>
             <select
               id="paymentStatus"
               name="paymentStatus"
               value={paymentStatus}
-              onChange={(ev) => setPaymentStatus(ev.target.value as PaymentStatus)}
+              onChange={(ev) =>
+                setPaymentStatus(ev.target.value as PaymentStatus)
+              }
               className={inputClass}
             >
               <option value="NOT_DONE">Not done</option>
@@ -343,19 +399,31 @@ export function MemberEnrollForm() {
               type="file"
               accept="image/*"
               className="sr-only"
-              onChange={(e) => setMemberPhotoFileName(e.target.files?.[0]?.name ?? null)}
+              onChange={(e) =>
+                setMemberPhotoFileName(e.target.files?.[0]?.name ?? null)
+              }
             />
             <button
               type="button"
-              onClick={() => openImagePicker(memberPhotoInputRef.current, "camera", "user")}
-              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${memberPhotoFileName ? 'border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]' : 'border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500'} transition-colors`}
+              onClick={() =>
+                openImagePicker(
+                  memberPhotoInputRef.current,
+                  "camera",
+                  "environment",
+                )
+              }
+              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${memberPhotoFileName ? "border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]" : "border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500"} transition-colors`}
             >
-              <span className="text-xs font-bold uppercase tracking-wider">{memberPhotoFileName ? 'Photo Selected' : 'Take Photo'}</span>
+              <span className="text-xs font-bold uppercase tracking-wider">
+                {memberPhotoFileName ? "Photo Selected" : "Take Photo"}
+              </span>
             </button>
           </div>
 
           <div className="space-y-2">
-            <Label className={labelClass}>UPI {paymentStatus === "DONE" ? "*" : ""}</Label>
+            <Label className={labelClass}>
+              UPI {paymentStatus === "DONE" ? "*" : ""}
+            </Label>
             <input
               ref={upiScreenshotInputRef}
               id="upiScreenshot"
@@ -364,14 +432,24 @@ export function MemberEnrollForm() {
               accept="image/*"
               className="sr-only"
               required={paymentStatus === "DONE"}
-              onChange={(e) => setUpiFileName(e.target.files?.[0]?.name ?? null)}
+              onChange={(e) =>
+                setUpiFileName(e.target.files?.[0]?.name ?? null)
+              }
             />
             <button
               type="button"
-              onClick={() => openImagePicker(upiScreenshotInputRef.current, "camera", "environment")}
-              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${upiFileName ? 'border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]' : 'border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500'} transition-colors`}
+              onClick={() =>
+                openImagePicker(
+                  upiScreenshotInputRef.current,
+                  "camera",
+                  "environment",
+                )
+              }
+              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${upiFileName ? "border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]" : "border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500"} transition-colors`}
             >
-              <span className="text-xs font-bold uppercase tracking-wider">{upiFileName ? 'UPI Selected' : 'Add UPI'}</span>
+              <span className="text-xs font-bold uppercase tracking-wider">
+                {upiFileName ? "UPI Selected" : "Add UPI"}
+              </span>
             </button>
           </div>
         </div>
@@ -384,14 +462,17 @@ export function MemberEnrollForm() {
             defaultChecked
             className="size-4 rounded border-zinc-700 bg-[#27272a] accent-[#d4ff00]"
           />
-          <Label htmlFor="whatsappEnabled" className="text-xs font-medium text-zinc-400">
+          <Label
+            htmlFor="whatsappEnabled"
+            className="text-xs font-medium text-zinc-400"
+          >
             Send WhatsApp reminders
           </Label>
         </div>
 
         <div className="pt-4">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={pending}
             className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#d4ff00] text-[13px] font-extrabold uppercase tracking-widest text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
           >
@@ -401,5 +482,5 @@ export function MemberEnrollForm() {
         </div>
       </form>
     </div>
-    )
+  );
 }
