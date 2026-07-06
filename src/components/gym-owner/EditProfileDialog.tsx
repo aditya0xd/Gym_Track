@@ -4,7 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2, X, Upload } from "lucide-react";
+import { Loader2, X, Upload, Check } from "lucide-react";
+import Compressor from "compressorjs";
+import Cropper from "react-easy-crop";
+import getCroppedImg from "@/lib/cropImage";
+
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
 export function EditProfileDialog({
   initialName,
@@ -24,6 +29,11 @@ export function EditProfileDialog({
   const [email, setEmail] = useState(initialEmail);
   const [profilePhoto, setProfilePhoto] = useState(initialProfilePhoto || "");
   const [newPassword, setNewPassword] = useState("");
+
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -69,16 +79,56 @@ export function EditProfileDialog({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // For a real app you'd upload this to an S3 bucket or Cloudinary. 
-    // Here we'll convert it to a base64 string to store directly.
-    // It works for testing, but in production, real uploads are preferred.
     const reader = new FileReader();
     reader.onload = (event) => {
       if (typeof event.target?.result === "string") {
-        setProfilePhoto(event.target.result);
+        setImageToCrop(event.target.result);
       }
     };
     reader.readAsDataURL(file);
+    // Reset file input
+    e.target.value = "";
+  };
+
+  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleCropConfirm = async () => {
+    if (!imageToCrop || !croppedAreaPixels) return;
+
+    try {
+      const croppedImageFile = await getCroppedImg(imageToCrop, croppedAreaPixels);
+      if (!croppedImageFile) throw new Error("Cropping failed");
+
+      new Compressor(croppedImageFile, {
+        quality: 0.6,
+        maxWidth: 800,
+        maxHeight: 800,
+        success(result) {
+          if (result.size > MAX_IMAGE_BYTES) {
+            toast.error("Profile photo must be under 3MB after compression.");
+            setImageToCrop(null);
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            if (typeof event.target?.result === "string") {
+              setProfilePhoto(event.target.result);
+              setImageToCrop(null);
+            }
+          };
+          reader.readAsDataURL(result);
+        },
+        error() {
+          toast.error("Could not compress profile photo.");
+          setImageToCrop(null);
+        },
+      });
+    } catch (e) {
+      toast.error("Failed to crop image.");
+      setImageToCrop(null);
+    }
   };
 
   return (
@@ -90,14 +140,46 @@ export function EditProfileDialog({
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="relative w-full max-w-md overflow-hidden rounded-[1.5rem] bg-[#16161a] p-6 text-white shadow-2xl">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-zinc-400 transition-colors hover:bg-white/20 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            {imageToCrop ? (
+              <div className="flex flex-col h-full">
+                <h2 className="mb-4 text-xl font-bold">Crop Profile Photo</h2>
+                <div className="relative h-64 w-full mb-4 bg-black rounded-xl overflow-hidden">
+                  <Cropper
+                    image={imageToCrop}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={1}
+                    onCropChange={setCrop}
+                    onCropComplete={onCropComplete}
+                    onZoomChange={setZoom}
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setImageToCrop(null)}
+                    className="flex h-11 flex-1 items-center justify-center rounded-xl border border-white/10 bg-zinc-800 text-sm font-bold transition-colors hover:bg-zinc-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCropConfirm}
+                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#d4ff00] text-sm font-bold text-black transition-colors hover:bg-[#bce600]"
+                  >
+                    <Check className="h-4 w-4" />
+                    Confirm Crop
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-zinc-400 transition-colors hover:bg-white/20 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
 
-            <h2 className="mb-6 text-xl font-bold">Edit Profile</h2>
+                <h2 className="mb-6 text-xl font-bold">Edit Profile</h2>
 
             <form onSubmit={handleSave} className="space-y-5">
               {/* Profile Photo */}
@@ -176,6 +258,8 @@ export function EditProfileDialog({
                 )}
               </button>
             </form>
+            </>
+            )}
           </div>
         </div>
       )}
