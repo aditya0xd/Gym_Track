@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { X, ArrowRight } from "lucide-react";
+import Compressor from "compressorjs";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,26 @@ import type {
 
 type PriceHint = { duration: MemberBillingDuration; priceInr: string | null };
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    new Compressor(file, {
+      quality: 0.6,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      success(result) {
+        const compressedFile = new File([result], file.name, {
+          type: result.type,
+          lastModified: Date.now(),
+        });
+        resolve(compressedFile);
+      },
+      error(err) {
+        reject(err);
+      },
+    });
+  });
+}
 
 async function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -106,21 +127,35 @@ export function MemberEnrollForm() {
     let upiScreenshot: string | null = null;
 
     if (memberPhotoFile instanceof File && memberPhotoFile.size > 0) {
-      if (memberPhotoFile.size > MAX_IMAGE_BYTES) {
-        toast.error("Member photo must be under 3MB.");
+      try {
+        const compressed = await compressImage(memberPhotoFile);
+        if (compressed.size > MAX_IMAGE_BYTES) {
+          toast.error("Member photo must be under 3MB after compression.");
+          setPending(false);
+          return;
+        }
+        memberPhoto = await fileToDataUrl(compressed);
+      } catch (err) {
+        toast.error("Could not compress member photo.");
         setPending(false);
         return;
       }
-      memberPhoto = await fileToDataUrl(memberPhotoFile);
     }
 
     if (upiScreenshotFile instanceof File && upiScreenshotFile.size > 0) {
-      if (upiScreenshotFile.size > MAX_IMAGE_BYTES) {
-        toast.error("UPI screenshot must be under 3MB.");
+      try {
+        const compressed = await compressImage(upiScreenshotFile);
+        if (compressed.size > MAX_IMAGE_BYTES) {
+          toast.error("UPI screenshot must be under 3MB after compression.");
+          setPending(false);
+          return;
+        }
+        upiScreenshot = await fileToDataUrl(compressed);
+      } catch (err) {
+        toast.error("Could not compress UPI screenshot.");
         setPending(false);
         return;
       }
-      upiScreenshot = await fileToDataUrl(upiScreenshotFile);
     }
 
     if (paymentStatus === "DONE" && !upiScreenshot) {
