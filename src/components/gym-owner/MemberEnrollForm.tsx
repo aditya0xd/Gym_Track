@@ -8,75 +8,20 @@ import { X, ArrowRight } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
+import {
+  IMAGE_ACCEPT,
+  IMAGE_PROCESSING_PRESETS,
+} from "@/lib/image-processing/config";
+import {
+  imageErrorMessage as sharedImageErrorMessage,
+  processImage,
+} from "@/lib/image-processing/client";
 import type {
   MemberBillingDuration,
   PaymentStatus,
 } from "@/generated/prisma/client";
 
 type PriceHint = { duration: MemberBillingDuration; priceInr: string | null };
-
-const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
-const RAW_FILE_MAX_BYTES = 15 * 1024 * 1024;
-// base64 is ~4/3 the binary size; add slack for the "data:image/jpeg;base64," prefix
-const MAX_ENCODED_LENGTH = Math.ceil((MAX_IMAGE_BYTES / 3) * 4) + 40;
-
-async function compressImage(
-  file: File,
-  maxDim = 1200,
-  quality = 0.6,
-): Promise<File> {
-  if (file.size > RAW_FILE_MAX_BYTES) {
-    throw new Error("FILE_TOO_LARGE");
-  }
-
-  const bitmap = await createImageBitmap(file);
-  try {
-    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
-    const w = Math.max(1, Math.round(bitmap.width * scale));
-    const h = Math.max(1, Math.round(bitmap.height * scale));
-
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("CANVAS_UNSUPPORTED");
-    ctx.drawImage(bitmap, 0, 0, w, h);
-
-    const blob: Blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error("ENCODE_FAILED"))),
-        "image/jpeg",
-        quality,
-      );
-    });
-
-    return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
-      type: "image/jpeg",
-      lastModified: Date.now(),
-    });
-  } finally {
-    bitmap.close();
-  }
-}
-
-async function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result ?? ""));
-    reader.onerror = () => reject(new Error("Could not read selected image."));
-    reader.readAsDataURL(file);
-  });
-}
-
-function imageErrorMessage(err: unknown, label: string): string {
-  if (err instanceof Error && err.message === "FILE_TOO_LARGE") {
-    return `${label} is too large — please choose a smaller image.`;
-  }
-  if (err instanceof Error && err.message === "CANVAS_UNSUPPORTED") {
-    return `Your device doesn't support image processing. Try a different browser.`;
-  }
-  return `Could not process ${label.toLowerCase()} on this device.`;
-}
 
 function openImagePicker(
   input: HTMLInputElement | null,
@@ -157,16 +102,13 @@ export function MemberEnrollForm() {
 
     if (memberPhotoFile instanceof File && memberPhotoFile.size > 0) {
       try {
-        const compressed = await compressImage(memberPhotoFile);
-        const dataUrl = await fileToDataUrl(compressed);
-        if (dataUrl.length > MAX_ENCODED_LENGTH) {
-          toast.error("Member photo is still too large after compression.");
-          setPending(false);
-          return;
-        }
-        memberPhoto = dataUrl;
+        const processed = await processImage(
+          memberPhotoFile,
+          IMAGE_PROCESSING_PRESETS.memberPhoto,
+        );
+        memberPhoto = processed.dataUrl;
       } catch (err) {
-        toast.error(imageErrorMessage(err, "Member photo"));
+        toast.error(sharedImageErrorMessage(err, "Member photo"));
         setPending(false);
         return;
       }
@@ -174,16 +116,13 @@ export function MemberEnrollForm() {
 
     if (upiScreenshotFile instanceof File && upiScreenshotFile.size > 0) {
       try {
-        const compressed = await compressImage(upiScreenshotFile);
-        const dataUrl = await fileToDataUrl(compressed);
-        if (dataUrl.length > MAX_ENCODED_LENGTH) {
-          toast.error("UPI screenshot is still too large after compression.");
-          setPending(false);
-          return;
-        }
-        upiScreenshot = dataUrl;
+        const processed = await processImage(
+          upiScreenshotFile,
+          IMAGE_PROCESSING_PRESETS.upiScreenshot,
+        );
+        upiScreenshot = processed.dataUrl;
       } catch (err) {
-        toast.error(imageErrorMessage(err, "UPI screenshot"));
+        toast.error(sharedImageErrorMessage(err, "UPI screenshot"));
         setPending(false);
         return;
       }
@@ -329,7 +268,7 @@ export function MemberEnrollForm() {
           </div>
           {!hintPrice && (
             <p className="text-xs font-medium text-red-400">
-              Set this duration's INR price under Pricing before enrolling.
+              Set this duration&apos;s INR price under Pricing before enrolling.
             </p>
           )}
         </div>
@@ -397,7 +336,7 @@ export function MemberEnrollForm() {
               id="memberPhoto"
               name="memberPhoto"
               type="file"
-              accept="image/*"
+              accept={IMAGE_ACCEPT}
               className="sr-only"
               onChange={(e) =>
                 setMemberPhotoFileName(e.target.files?.[0]?.name ?? null)
@@ -429,7 +368,7 @@ export function MemberEnrollForm() {
               id="upiScreenshot"
               name="upiScreenshot"
               type="file"
-              accept="image/*"
+              accept={IMAGE_ACCEPT}
               className="sr-only"
               required={paymentStatus === "DONE"}
               onChange={(e) =>

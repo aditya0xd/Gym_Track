@@ -7,51 +7,13 @@ import { useMutation } from "@tanstack/react-query";
 import { Loader2, X, Upload, Check } from "lucide-react";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
-import getCroppedImg from "@/lib/cropImage";
-
-const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
-const RAW_FILE_MAX_BYTES = 15 * 1024 * 1024;
-const MAX_ENCODED_LENGTH = Math.ceil((MAX_IMAGE_BYTES / 3) * 4) + 40;
-const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-
-async function compressImage(
-  file: File | Blob,
-  maxDim = 800,
-  quality = 0.6,
-): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
-  try {
-    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
-    const w = Math.max(1, Math.round(bitmap.width * scale));
-    const h = Math.max(1, Math.round(bitmap.height * scale));
-
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("CANVAS_UNSUPPORTED");
-    ctx.drawImage(bitmap, 0, 0, w, h);
-
-    return await new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error("ENCODE_FAILED"))),
-        "image/jpeg",
-        quality,
-      );
-    });
-  } finally {
-    bitmap.close();
-  }
-}
-
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result ?? ""));
-    reader.onerror = () => reject(new Error("Could not read image."));
-    reader.readAsDataURL(blob);
-  });
-}
+import {
+  ALLOWED_IMAGE_TYPE_SET,
+  IMAGE_ACCEPT,
+  IMAGE_PROCESSING_PRESETS,
+  RAW_FILE_MAX_BYTES,
+} from "@/lib/image-processing/config";
+import { imageErrorMessage, processImage } from "@/lib/image-processing/client";
 
 export function EditProfileDialog({
   initialName,
@@ -72,6 +34,7 @@ export function EditProfileDialog({
   const [profilePhoto, setProfilePhoto] = useState(initialProfilePhoto || "");
   const [newPassword, setNewPassword] = useState("");
 
+  const [imageToCropFile, setImageToCropFile] = useState<File | null>(null);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -117,11 +80,19 @@ export function EditProfileDialog({
     mutation.mutate();
   };
 
+  const resetCropState = () => {
+    setImageToCropFile(null);
+    setImageToCrop(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    if (!ALLOWED_IMAGE_TYPE_SET.has(file.type)) {
       toast.error("Profile photo must be a JPEG, PNG, or WebP image.");
       e.target.value = "";
       return;
@@ -136,6 +107,7 @@ export function EditProfileDialog({
     const reader = new FileReader();
     reader.onload = (event) => {
       if (typeof event.target?.result === "string") {
+        setImageToCropFile(file);
         setImageToCrop(event.target.result);
       }
     };
@@ -149,33 +121,19 @@ export function EditProfileDialog({
   };
 
   const handleCropConfirm = async () => {
-    if (!imageToCrop || !croppedAreaPixels) return;
+    if (!imageToCropFile || !imageToCrop || !croppedAreaPixels) return;
 
     try {
-      const croppedImageFile = await getCroppedImg(
-        imageToCrop,
-        croppedAreaPixels,
-      );
-      if (!croppedImageFile) throw new Error("Cropping failed");
+      const processed = await processImage(imageToCropFile, {
+        ...IMAGE_PROCESSING_PRESETS.profilePhoto,
+        crop: croppedAreaPixels,
+      });
 
-      const compressedBlob = await compressImage(croppedImageFile);
-      const dataUrl = await blobToDataUrl(compressedBlob);
-
-      if (dataUrl.length > MAX_ENCODED_LENGTH) {
-        toast.error("Profile photo is still too large after compression.");
-        setImageToCrop(null);
-        return;
-      }
-
-      setProfilePhoto(dataUrl);
-      setImageToCrop(null);
+      setProfilePhoto(processed.dataUrl);
+      resetCropState();
     } catch (err) {
-      toast.error(
-        err instanceof Error && err.message === "CANVAS_UNSUPPORTED"
-          ? "Your device doesn't support image processing. Try a different browser."
-          : "Failed to process cropped image.",
-      );
-      setImageToCrop(null);
+      toast.error(imageErrorMessage(err, "Profile photo"));
+      resetCropState();
     }
   };
 
@@ -204,7 +162,7 @@ export function EditProfileDialog({
                 </div>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setImageToCrop(null)}
+                    onClick={resetCropState}
                     className="flex h-11 flex-1 items-center justify-center rounded-xl border border-white/10 bg-zinc-800 text-sm font-bold transition-colors hover:bg-zinc-700"
                   >
                     Cancel
@@ -248,7 +206,7 @@ export function EditProfileDialog({
                         <Upload className="h-6 w-6 text-white" />
                         <input
                           type="file"
-                          accept="image/*"
+                          accept={IMAGE_ACCEPT}
                           className="hidden"
                           onChange={handleFileChange}
                         />

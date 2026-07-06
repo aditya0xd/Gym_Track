@@ -28,7 +28,6 @@ const memberListSelect = {
   discountInr: true,
   paymentStatus: true,
   memberPhoto: true,
-  upiScreenshot: true,
   startDate: true,
   endDate: true,
   membershipStatus: true,
@@ -46,7 +45,6 @@ type OwnerMemberListItem = {
   discountInr: Prisma.Decimal;
   paymentStatus: PaymentStatus;
   memberPhoto: string | null;
-  upiScreenshot: string | null;
   startDate: Date;
   endDate: Date;
   membershipStatus: "ACTIVE" | "PAUSED";
@@ -67,14 +65,21 @@ type CachedMemberListRow = {
 
 function reviveOwnerMemberList(json: string): OwnerMemberListItem[] {
   const rows = JSON.parse(json) as CachedMemberListRow[];
-  return rows.map((row) => ({
-    ...row,
-    startDate: new Date(row.startDate),
-    endDate: new Date(row.endDate),
-    pausedAt: row.pausedAt ? new Date(row.pausedAt) : null,
-    planPrice: new Prisma.Decimal(row.planPrice),
-    discountInr: new Prisma.Decimal(row.discountInr),
-  }));
+  return rows.map((row) => {
+    const safeRow = {
+      ...row,
+    } as CachedMemberListRow & { upiScreenshot?: unknown };
+    delete safeRow.upiScreenshot;
+
+    return {
+      ...safeRow,
+      startDate: new Date(row.startDate),
+      endDate: new Date(row.endDate),
+      pausedAt: row.pausedAt ? new Date(row.pausedAt) : null,
+      planPrice: new Prisma.Decimal(row.planPrice),
+      discountInr: new Prisma.Decimal(row.discountInr),
+    };
+  });
 }
 
 async function queryMembersForOwner(adminUserId: string): Promise<OwnerMemberListItem[]> {
@@ -156,6 +161,12 @@ function parseDiscountInr(raw: string | undefined): Prisma.Decimal {
   return new Prisma.Decimal(s);
 }
 
+function isUniqueConstraintError(err: unknown) {
+  return (
+    err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002"
+  );
+}
+
 export async function createMemberForOwner(
   adminUserId: string,
   input: CreateMemberInput,
@@ -194,23 +205,32 @@ export async function createMemberForOwner(
   }
   const planPrice = listPrice.minus(discountInr);
 
-  const member = await prisma.member.create({
-    data: {
-      fullName: input.fullName.trim(),
-      email: input.email?.trim() ? input.email.trim().toLowerCase() : null,
-      phone: input.phone.trim(),
-      billingDuration: input.billingDuration,
-      planPrice,
-      discountInr,
-      paymentStatus: input.paymentStatus,
-      memberPhoto: input.memberPhoto,
-      upiScreenshot: input.upiScreenshot,
-      startDate: start,
-      endDate: endDate,
-      whatsappEnabled: input.whatsappEnabled,
-      adminUser: { connect: { id: adminUserId } },
-    },
-  });
+  let member;
+  try {
+    member = await prisma.member.create({
+      data: {
+        fullName: input.fullName.trim(),
+        email: input.email?.trim() ? input.email.trim().toLowerCase() : null,
+        phone: input.phone.trim(),
+        billingDuration: input.billingDuration,
+        planPrice,
+        discountInr,
+        paymentStatus: input.paymentStatus,
+        memberPhoto: input.memberPhoto,
+        upiScreenshot: input.upiScreenshot,
+        startDate: start,
+        endDate: endDate,
+        whatsappEnabled: input.whatsappEnabled,
+        adminUser: { connect: { id: adminUserId } },
+      },
+    });
+  } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      throw new HttpError(409, "A member with this email already exists.");
+    }
+    throw err;
+  }
+
   await invalidateOwnerMembersListCache(adminUserId);
   return member;
 }
