@@ -14,12 +14,18 @@ export async function POST(request: Request) {
     try {
       const isValid = verifyRazorpayWebhookSignature(rawBody, signature);
       if (!isValid) {
-        return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Invalid signature" },
+          { status: 400 },
+        );
       }
     } catch (err: any) {
       if (err.message === "RAZORPAY_WEBHOOK_SECRET is missing.") {
         console.error("Razorpay Webhook Secret not configured.");
-        return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Webhook not configured" },
+          { status: 500 },
+        );
       }
       throw err;
     }
@@ -32,6 +38,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Razorpay webhook error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }

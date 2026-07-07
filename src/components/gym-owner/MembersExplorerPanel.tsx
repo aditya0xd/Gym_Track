@@ -16,6 +16,7 @@ type MemberItem = {
   discountInr: string;
   endDate: string;
   membershipStatus: MembershipStatus;
+  memberPhoto: string | null;
   joinedDate?: string;
 };
 

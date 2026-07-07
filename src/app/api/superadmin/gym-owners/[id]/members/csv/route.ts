@@ -4,7 +4,12 @@ import { randomUUID } from "crypto";
 import { withSuperAdmin } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 
-const VALID_DURATIONS = ["ONE_MONTH", "THREE_MONTHS", "SIX_MONTHS", "TWELVE_MONTHS"] as const;
+const VALID_DURATIONS = [
+  "ONE_MONTH",
+  "THREE_MONTHS",
+  "SIX_MONTHS",
+  "TWELVE_MONTHS",
+] as const;
 type BillingDuration = (typeof VALID_DURATIONS)[number];
 
 function parseCSV(text: string): Record<string, string>[] {
@@ -32,9 +37,14 @@ async function POSTHandler(
 ) {
   const { id: ownerId } = (context as { params: { id: string } }).params;
 
-  const owner = await prisma.adminUser.findUnique({ where: { id: ownerId, deletedAt: null } });
+  const owner = await prisma.adminUser.findUnique({
+    where: { id: ownerId, deletedAt: null },
+  });
   if (!owner) {
-    return NextResponse.json({ message: "Gym owner not found" }, { status: 404 });
+    return NextResponse.json(
+      { message: "Gym owner not found" },
+      { status: 404 },
+    );
   }
 
   let text: string;
@@ -42,11 +52,17 @@ async function POSTHandler(
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     if (!file) {
-      return NextResponse.json({ message: "No file uploaded" }, { status: 400 });
+      return NextResponse.json(
+        { message: "No file uploaded" },
+        { status: 400 },
+      );
     }
     text = await file.text();
   } catch {
-    return NextResponse.json({ message: "Could not read file" }, { status: 400 });
+    return NextResponse.json(
+      { message: "Could not read file" },
+      { status: 400 },
+    );
   }
 
   const rows = parseCSV(text);
@@ -60,23 +76,46 @@ async function POSTHandler(
     const fullName = row["fullname"] || row["full_name"] || row["name"] || "";
     const phone = row["phone"] || row["mobile"] || "";
     const email = row["email"] || "";
-    const billingDuration = (row["billingduration"] || row["billing_duration"] || row["duration"] || "").toUpperCase() as BillingDuration;
-    const planPrice = row["planprice"] || row["plan_price"] || row["price"] || "";
+    const billingDuration = (
+      row["billingduration"] ||
+      row["billing_duration"] ||
+      row["duration"] ||
+      ""
+    ).toUpperCase() as BillingDuration;
+    const planPrice =
+      row["planprice"] || row["plan_price"] || row["price"] || "";
     const startDate = row["startdate"] || row["start_date"] || "";
     const endDate = row["enddate"] || row["end_date"] || "";
 
-    if (!fullName) { errors.push(`Row ${rowNum}: Missing fullName`); continue; }
-    if (!phone) { errors.push(`Row ${rowNum}: Missing phone`); continue; }
-    if (!VALID_DURATIONS.includes(billingDuration)) {
-      errors.push(`Row ${rowNum}: Invalid billingDuration "${billingDuration}". Must be one of: ${VALID_DURATIONS.join(", ")}`);
+    if (!fullName) {
+      errors.push(`Row ${rowNum}: Missing fullName`);
       continue;
     }
-    if (!planPrice || isNaN(Number(planPrice))) { errors.push(`Row ${rowNum}: Invalid planPrice`); continue; }
+    if (!phone) {
+      errors.push(`Row ${rowNum}: Missing phone`);
+      continue;
+    }
+    if (!VALID_DURATIONS.includes(billingDuration)) {
+      errors.push(
+        `Row ${rowNum}: Invalid billingDuration "${billingDuration}". Must be one of: ${VALID_DURATIONS.join(", ")}`,
+      );
+      continue;
+    }
+    if (!planPrice || isNaN(Number(planPrice))) {
+      errors.push(`Row ${rowNum}: Invalid planPrice`);
+      continue;
+    }
 
     const start = toDate(startDate);
     const end = toDate(endDate);
-    if (!start) { errors.push(`Row ${rowNum}: Invalid startDate "${startDate}"`); continue; }
-    if (!end) { errors.push(`Row ${rowNum}: Invalid endDate "${endDate}"`); continue; }
+    if (!start) {
+      errors.push(`Row ${rowNum}: Invalid startDate "${startDate}"`);
+      continue;
+    }
+    if (!end) {
+      errors.push(`Row ${rowNum}: Invalid endDate "${endDate}"`);
+      continue;
+    }
 
     try {
       await prisma.member.create({
@@ -94,7 +133,9 @@ async function POSTHandler(
       });
       created++;
     } catch (err: any) {
-      errors.push(`Row ${rowNum}: Database error — ${err?.message ?? "unknown"}`);
+      errors.push(
+        `Row ${rowNum}: Database error — ${err?.message ?? "unknown"}`,
+      );
     }
   }
 

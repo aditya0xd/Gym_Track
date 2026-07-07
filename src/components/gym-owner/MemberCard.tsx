@@ -4,7 +4,10 @@ import Link from "next/link";
 import { User } from "lucide-react";
 
 import { formatInrFromDecimalString } from "@/lib/format/inr";
-import type { MemberBillingDuration, MembershipStatus } from "@/generated/prisma/client";
+import type {
+  MemberBillingDuration,
+  MembershipStatus,
+} from "@/generated/prisma/client";
 
 type MemberCardProps = {
   id: string;
@@ -15,13 +18,16 @@ type MemberCardProps = {
   discountInr: string;
   endDate: string;
   membershipStatus: MembershipStatus;
+  memberPhoto: string | null;
   joinedDate?: string;
 };
 
 function statusOf(endDateIso: string, membershipStatus: MembershipStatus) {
   if (membershipStatus === "PAUSED") return "PAUSED";
   const now = new Date();
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const today = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
   const in7 = new Date(today);
   in7.setUTCDate(in7.getUTCDate() + 7);
   const endDate = new Date(endDateIso);
@@ -40,7 +46,11 @@ function durationText(billingDuration: MemberBillingDuration) {
 
 function formatDate(dateIso: string) {
   const date = new Date(dateIso);
-  return date.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+  return date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export function MemberCard({
@@ -52,6 +62,7 @@ export function MemberCard({
   discountInr,
   endDate,
   membershipStatus,
+  memberPhoto,
   joinedDate,
 }: MemberCardProps) {
   const status = statusOf(endDate, membershipStatus);
@@ -69,17 +80,28 @@ export function MemberCard({
       href={`/owner/members/${id}`}
       className="flex items-center gap-3 rounded-xl bg-gray-800/50 p-3 backdrop-blur-sm"
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-700">
-        <User className="h-6 w-6 text-gray-400" />
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-700">
+        {memberPhoto ? (
+          <img
+            src={memberPhoto}
+            alt={fullName}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <User className="h-6 w-6 text-gray-400" />
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-white">{fullName}</p>
         <p className="mt-0.5 text-xs text-gray-400">
-          {durationText(billingDuration)} · {formatInrFromDecimalString(planPrice)}
+          {durationText(billingDuration)} ·{" "}
+          {formatInrFromDecimalString(planPrice)}
           {joinedDate ? ` · Joined ${formatDate(joinedDate)}` : ""}
         </p>
       </div>
-      <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusColor}`}>
+      <span
+        className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusColor}`}
+      >
         {status === "PAUSED"
           ? "Paused"
           : status === "EXPIRING_SOON"
