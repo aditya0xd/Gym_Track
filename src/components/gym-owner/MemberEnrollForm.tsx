@@ -199,7 +199,7 @@ export function MemberEnrollForm() {
             id="fullName"
             name="fullName"
             required
-            placeholder="e.g. Shahid Khan"
+            placeholder="e.g. Rahul Sharma"
             className={inputClass}
           />
         </div>
