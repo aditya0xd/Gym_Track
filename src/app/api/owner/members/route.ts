@@ -45,6 +45,7 @@ async function GETHandler(_request: Request, userId: string) {
       planPrice: m.planPrice.toString(),
       discountInr: m.discountInr.toString(),
       amountPaid: m.amountPaid.toString(),
+      paymentStatus: m.paymentStatus,
       startDate: m.startDate.toISOString().slice(0, 10),
       endDate: m.endDate.toISOString().slice(0, 10),
       pausedAt: m.pausedAt?.toISOString() ?? null,
