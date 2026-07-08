@@ -26,6 +26,7 @@ const memberListSelect = {
   billingDuration: true,
   planPrice: true,
   discountInr: true,
+  amountPaid: true,
   paymentStatus: true,
   memberPhoto: true,
   startDate: true,
@@ -43,6 +44,7 @@ type OwnerMemberListItem = {
   billingDuration: MemberBillingDuration;
   planPrice: Prisma.Decimal;
   discountInr: Prisma.Decimal;
+  amountPaid: Prisma.Decimal;
   paymentStatus: PaymentStatus;
   memberPhoto: string | null;
   startDate: Date;
@@ -58,9 +60,10 @@ type CachedMemberListRow = {
   pausedAt: string | null;
   planPrice: string;
   discountInr: string;
+  amountPaid?: string;
 } & Omit<
   OwnerMemberListItem,
-  "startDate" | "endDate" | "pausedAt" | "planPrice" | "discountInr"
+  "startDate" | "endDate" | "pausedAt" | "planPrice" | "discountInr" | "amountPaid"
 >;
 
 function reviveOwnerMemberList(json: string): OwnerMemberListItem[] {
@@ -78,6 +81,9 @@ function reviveOwnerMemberList(json: string): OwnerMemberListItem[] {
       pausedAt: row.pausedAt ? new Date(row.pausedAt) : null,
       planPrice: new Prisma.Decimal(row.planPrice),
       discountInr: new Prisma.Decimal(row.discountInr),
+      amountPaid: new Prisma.Decimal(
+        row.amountPaid ?? (row.paymentStatus === "DONE" ? row.planPrice : "0"),
+      ),
     };
   });
 }
@@ -112,6 +118,7 @@ export async function getMemberForOwner(adminUserId: string, memberId: string) {
       billingDuration: true,
       planPrice: true,
       discountInr: true,
+      amountPaid: true,
       paymentStatus: true,
       memberPhoto: true,
       upiScreenshot: true,
@@ -133,6 +140,23 @@ export async function getMemberForOwner(adminUserId: string, memberId: string) {
           message: true,
         },
       },
+      renewals: {
+        orderBy: { createdAt: "desc" },
+        take: 25,
+        select: {
+          id: true,
+          billingDuration: true,
+          planPrice: true,
+          discountInr: true,
+          amountPaid: true,
+          periodStart: true,
+          periodEnd: true,
+          paymentStatus: true,
+          paymentProvider: true,
+          paidAt: true,
+          createdAt: true,
+        },
+      },
     },
   });
 }
@@ -149,14 +173,25 @@ export type CreateMemberInput = {
   upiScreenshot: string | null;
   /** INR off the list price for this duration; default 0. */
   discountInr?: string;
+  /** INR already collected from the member; defaults from paymentStatus when omitted. */
+  amountPaid?: string;
 };
 
-function parseDiscountInr(raw: string | undefined): Prisma.Decimal {
+export type RenewMemberInput = {
+  billingDuration: MemberBillingDuration;
+  periodStart: Date;
+  paymentStatus: PaymentStatus;
+  upiScreenshot: string | null;
+  discountInr?: string;
+  amountPaid?: string;
+};
+
+function parseMoney(raw: string | undefined, label: string): Prisma.Decimal {
   const s = raw?.trim() ?? "";
   if (s === "") return new Prisma.Decimal(0);
   const n = Number(s);
   if (!Number.isFinite(n) || n < 0) {
-    throw new HttpError(400, "Discount must be zero or a positive number.");
+    throw new HttpError(400, `${label} must be zero or a positive number.`);
   }
   return new Prisma.Decimal(s);
 }
@@ -196,7 +231,7 @@ export async function createMemberForOwner(
   const endDate = membershipEndDateInclusive(start, input.billingDuration);
 
   const listPrice = new Prisma.Decimal(priceRow.priceInr.toString());
-  const discountInr = parseDiscountInr(input.discountInr);
+  const discountInr = parseMoney(input.discountInr, "Discount");
   if (discountInr.gt(listPrice)) {
     throw new HttpError(
       400,
@@ -204,25 +239,62 @@ export async function createMemberForOwner(
     );
   }
   const planPrice = listPrice.minus(discountInr);
+  const requestedAmountPaid =
+    input.amountPaid === undefined
+      ? input.paymentStatus === "DONE"
+        ? planPrice
+        : new Prisma.Decimal(0)
+      : parseMoney(input.amountPaid, "Amount paid");
+
+  if (requestedAmountPaid.gt(planPrice)) {
+    throw new HttpError(400, "Amount paid cannot be greater than the final membership amount.");
+  }
+
+  const paymentStatus: PaymentStatus = requestedAmountPaid.eq(0)
+    ? "NOT_DONE"
+    : requestedAmountPaid.eq(planPrice)
+      ? "DONE"
+      : "PARTIAL";
 
   let member;
   try {
-    member = await prisma.member.create({
-      data: {
-        fullName: input.fullName.trim(),
-        email: input.email?.trim() ? input.email.trim().toLowerCase() : null,
-        phone: input.phone.trim(),
-        billingDuration: input.billingDuration,
-        planPrice,
-        discountInr,
-        paymentStatus: input.paymentStatus,
-        memberPhoto: input.memberPhoto,
-        upiScreenshot: input.upiScreenshot,
-        startDate: start,
-        endDate: endDate,
-        whatsappEnabled: input.whatsappEnabled,
-        adminUser: { connect: { id: adminUserId } },
-      },
+    member = await prisma.$transaction(async (tx) => {
+      const createdMember = await tx.member.create({
+        data: {
+          fullName: input.fullName.trim(),
+          email: input.email?.trim() ? input.email.trim().toLowerCase() : null,
+          phone: input.phone.trim(),
+          billingDuration: input.billingDuration,
+          planPrice,
+          discountInr,
+          amountPaid: requestedAmountPaid,
+          paymentStatus,
+          memberPhoto: input.memberPhoto,
+          upiScreenshot: input.upiScreenshot,
+          startDate: start,
+          endDate: endDate,
+          whatsappEnabled: input.whatsappEnabled,
+          adminUser: { connect: { id: adminUserId } },
+        },
+      });
+
+      await tx.membershipRenewal.create({
+        data: {
+          memberId: createdMember.id,
+          billingDuration: input.billingDuration,
+          planPrice,
+          discountInr,
+          amountPaid: requestedAmountPaid,
+          periodStart: start,
+          periodEnd: endDate,
+          paymentStatus,
+          paymentProvider: "MANUAL",
+          upiScreenshot: input.upiScreenshot,
+          paidAt: requestedAmountPaid.gt(0) ? new Date() : null,
+        },
+      });
+
+      return createdMember;
     });
   } catch (err) {
     if (isUniqueConstraintError(err)) {
@@ -233,6 +305,126 @@ export async function createMemberForOwner(
 
   await invalidateOwnerMembersListCache(adminUserId);
   return member;
+}
+
+export async function renewMemberForOwner(
+  adminUserId: string,
+  memberId: string,
+  input: RenewMemberInput,
+) {
+  const member = await prisma.member.findFirst({
+    where: { id: memberId, ...memberScope(adminUserId) },
+    select: { id: true, endDate: true, membershipStatus: true },
+  });
+  if (!member) throw new HttpError(404, "Member not found.");
+
+  const today = utcDayStart(new Date());
+  if (member.endDate >= today) {
+    throw new HttpError(400, "Only expired memberships can be renewed from here.");
+  }
+  if (member.membershipStatus === "PAUSED") {
+    throw new HttpError(400, "Resume the paused membership before renewing.");
+  }
+
+  const priceRow = await prisma.gymOwnerDurationPrice.findFirst({
+    where: {
+      ...ownerDurationPriceScope(adminUserId),
+      duration: input.billingDuration,
+    },
+  });
+  if (!priceRow) {
+    throw new HttpError(
+      400,
+      "No INR price configured for this duration. Add it under Pricing first.",
+    );
+  }
+
+  const periodStart = utcDayStart(input.periodStart);
+  if (periodStart <= member.endDate) {
+    throw new HttpError(
+      400,
+      "Renewal start date must be after the current membership end date.",
+    );
+  }
+
+  const periodEnd = membershipEndDateInclusive(periodStart, input.billingDuration);
+  const listPrice = new Prisma.Decimal(priceRow.priceInr.toString());
+  const discountInr = parseMoney(input.discountInr, "Discount");
+  if (discountInr.gt(listPrice)) {
+    throw new HttpError(
+      400,
+      "Discount cannot be greater than the list price for this membership duration.",
+    );
+  }
+
+  const planPrice = listPrice.minus(discountInr);
+  const requestedAmountPaid =
+    input.amountPaid === undefined
+      ? input.paymentStatus === "DONE"
+        ? planPrice
+        : new Prisma.Decimal(0)
+      : parseMoney(input.amountPaid, "Amount paid");
+
+  if (requestedAmountPaid.gt(planPrice)) {
+    throw new HttpError(400, "Amount paid cannot be greater than the final renewal amount.");
+  }
+
+  const paymentStatus: PaymentStatus = requestedAmountPaid.eq(0)
+    ? "NOT_DONE"
+    : requestedAmountPaid.eq(planPrice)
+      ? "DONE"
+      : "PARTIAL";
+
+  const result = await prisma.$transaction(async (tx) => {
+    const renewal = await tx.membershipRenewal.create({
+      data: {
+        memberId,
+        billingDuration: input.billingDuration,
+        planPrice,
+        discountInr,
+        amountPaid: requestedAmountPaid,
+        periodStart,
+        periodEnd,
+        paymentStatus,
+        paymentProvider: "MANUAL",
+        upiScreenshot: input.upiScreenshot,
+        paidAt: requestedAmountPaid.gt(0) ? new Date() : null,
+      },
+    });
+
+    const updatedMember = await tx.member.update({
+      where: { id: memberId },
+      data: {
+        billingDuration: input.billingDuration,
+        planPrice,
+        discountInr,
+        amountPaid: requestedAmountPaid,
+        paymentStatus,
+        upiScreenshot: input.upiScreenshot,
+        startDate: periodStart,
+        endDate: periodEnd,
+        membershipStatus: "ACTIVE",
+        pausedAt: null,
+      },
+      select: {
+        id: true,
+        billingDuration: true,
+        planPrice: true,
+        discountInr: true,
+        amountPaid: true,
+        paymentStatus: true,
+        upiScreenshot: true,
+        startDate: true,
+        endDate: true,
+        membershipStatus: true,
+      },
+    });
+
+    return { renewal, member: updatedMember };
+  });
+
+  await invalidateOwnerMembersListCache(adminUserId);
+  return result;
 }
 
 export async function pauseMembershipForOwner(adminUserId: string, memberId: string) {

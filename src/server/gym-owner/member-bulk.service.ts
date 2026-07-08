@@ -40,6 +40,7 @@ function isDuration(v: string): v is MemberBillingDuration {
 function parsePaymentStatus(raw: string): PaymentStatus | null {
   const s = raw.trim().toUpperCase();
   if (s === "DONE" || s === "PAID") return "DONE";
+  if (s === "PARTIAL" || s === "PARTLY_PAID") return "PARTIAL";
   if (s === "NOT_DONE" || s === "UNPAID" || s === "PENDING") return "NOT_DONE";
   return null;
 }
@@ -170,7 +171,7 @@ export async function importMembersFromCsv(
     if (!paymentStatus) {
       errors.push({
         rowNumber,
-        message: "paymentStatus must be DONE or NOT_DONE.",
+        message: "paymentStatus must be DONE, PARTIAL, or NOT_DONE.",
       });
       continue;
     }
@@ -183,10 +184,10 @@ export async function importMembersFromCsv(
       continue;
     }
 
-    if (paymentStatus === "DONE") {
+    if (paymentStatus === "DONE" || paymentStatus === "PARTIAL") {
       errors.push({
         rowNumber,
-        message: "Bulk import cannot mark payment DONE (UPI screenshot required). Use NOT_DONE and update in app.",
+        message: "Bulk import cannot record paid or partial payments (UPI screenshot required). Use NOT_DONE and update in app.",
       });
       continue;
     }

@@ -49,6 +49,7 @@ export function MemberEnrollForm() {
   const [duration, setDuration] = useState<MemberBillingDuration>("ONE_MONTH");
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("NOT_DONE");
   const [discountStr, setDiscountStr] = useState("");
+  const [amountPaidStr, setAmountPaidStr] = useState("");
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
@@ -75,14 +76,16 @@ export function MemberEnrollForm() {
     return hints.find((h) => h.duration === duration)?.priceInr ?? null;
   }, [hints, duration]);
 
-  const chargedPreview = useMemo(() => {
+  function calculateChargedPreview(discountValue: string) {
     if (!hintPrice) return null;
     const list = Number(hintPrice);
-    const disc = discountStr.trim() === "" ? 0 : Number(discountStr);
+    const disc = discountValue.trim() === "" ? 0 : Number(discountValue);
     if (!Number.isFinite(list) || !Number.isFinite(disc) || disc < 0)
       return null;
     return Math.max(0, list - disc).toFixed(2);
-  }, [hintPrice, discountStr]);
+  }
+
+  const chargedPreview = calculateChargedPreview(discountStr);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -128,8 +131,9 @@ export function MemberEnrollForm() {
       }
     }
 
-    if (paymentStatus === "DONE" && !upiScreenshot) {
-      toast.error("Upload UPI screenshot when payment is done.");
+    const amountPaidTrim = amountPaidStr.trim();
+    if (paymentStatus !== "NOT_DONE" && !upiScreenshot) {
+      toast.error("Upload UPI screenshot when payment is recorded.");
       setPending(false);
       return;
     }
@@ -149,6 +153,7 @@ export function MemberEnrollForm() {
         memberPhoto,
         upiScreenshot,
         discountInr: discountTrim === "" ? undefined : discountTrim,
+        amountPaid: amountPaidTrim === "" ? undefined : amountPaidTrim,
       }),
     });
 
@@ -283,9 +288,14 @@ export function MemberEnrollForm() {
             autoComplete="off"
             placeholder="0"
             value={discountStr}
-            onChange={(e) =>
-              setDiscountStr(e.target.value.replace(/[^\d.]/g, ""))
-            }
+            onChange={(e) => {
+              const next = e.target.value.replace(/[^\d.]/g, "");
+              setDiscountStr(next);
+              const nextCharged = calculateChargedPreview(next);
+              if (paymentStatus === "DONE" && nextCharged) {
+                setAmountPaidStr(nextCharged);
+              }
+            }}
             className={inputClass}
           />
           {hintPrice && chargedPreview !== null && discountStr ? (
@@ -317,16 +327,45 @@ export function MemberEnrollForm() {
               id="paymentStatus"
               name="paymentStatus"
               value={paymentStatus}
-              onChange={(ev) =>
-                setPaymentStatus(ev.target.value as PaymentStatus)
-              }
+              onChange={(ev) => {
+                const next = ev.target.value as PaymentStatus;
+                setPaymentStatus(next);
+                const nextCharged = calculateChargedPreview(discountStr);
+                if (next === "DONE" && nextCharged) {
+                  setAmountPaidStr(nextCharged);
+                }
+                if (next === "NOT_DONE") {
+                  setAmountPaidStr("");
+                }
+              }}
               className={inputClass}
             >
               <option value="NOT_DONE">Not done</option>
+              <option value="PARTIAL">Partial</option>
               <option value="DONE">Done</option>
             </select>
           </div>
         </div>
+
+        {paymentStatus !== "NOT_DONE" ? (
+          <div className="space-y-2 pt-2">
+            <Label htmlFor="amountPaid" className={labelClass}>
+              Amount paid (INR)
+            </Label>
+            <input
+              id="amountPaid"
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder={paymentStatus === "DONE" ? chargedPreview ?? "0" : "0"}
+              value={amountPaidStr}
+              readOnly={paymentStatus === "DONE"}
+              onChange={(e) =>
+                setAmountPaidStr(e.target.value.replace(/[^\d.]/g, ""))
+              }
+              className={inputClass}
+            />
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-2 gap-3 pt-2">
           <div className="space-y-2">
@@ -361,7 +400,7 @@ export function MemberEnrollForm() {
 
           <div className="space-y-2">
             <Label className={labelClass}>
-              UPI {paymentStatus === "DONE" ? "*" : ""}
+              UPI {paymentStatus !== "NOT_DONE" ? "*" : ""}
             </Label>
             <input
               ref={upiScreenshotInputRef}
@@ -370,7 +409,7 @@ export function MemberEnrollForm() {
               type="file"
               accept={IMAGE_ACCEPT}
               className="sr-only"
-              required={paymentStatus === "DONE"}
+              required={paymentStatus !== "NOT_DONE"}
               onChange={(e) =>
                 setUpiFileName(e.target.files?.[0]?.name ?? null)
               }

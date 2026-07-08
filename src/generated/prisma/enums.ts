@@ -74,6 +74,7 @@ export type MembershipStatus = (typeof MembershipStatus)[keyof typeof Membership
 
 export const PaymentStatus = {
   DONE: 'DONE',
+  PARTIAL: 'PARTIAL',
   NOT_DONE: 'NOT_DONE'
 } as const
 

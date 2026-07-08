@@ -1,4 +1,8 @@
-export default function EditMemberPage() {
+export default async function EditMemberPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   return (
     <main className="min-h-screen bg-white text-black dark:bg-slate-950 dark:text-white flex items-center justify-center px-4 py-8">
       <section className="w-full max-w-xl rounded-[2rem] border border-border bg-white shadow-xl shadow-black/5 dark:bg-slate-900/95 p-10">

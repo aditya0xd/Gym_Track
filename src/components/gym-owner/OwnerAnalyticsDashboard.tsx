@@ -275,6 +275,10 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                   outerRadius={60}
                   innerRadius={35}
                   paddingAngle={2}
+                  label={(props: any) =>
+                    props.value > 0 ? `${props.name}: ${props.value}` : ""
+                  }
+                  labelLine={false}
                 >
                   <Cell fill="#10b981" stroke="white" strokeWidth={2} />
                   <Cell fill="#f59e0b" stroke="white" strokeWidth={2} />
@@ -305,6 +309,12 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                 Paid: {data.payments.successRate}%
               </span>
             </div>
+            <div className="flex items-center gap-2 rounded-full bg-yellow-100 px-2 sm:px-3 py-1 dark:bg-yellow-950/30">
+              <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-yellow-500" />
+              <span className="font-medium text-yellow-700 dark:text-yellow-400">
+                Partial: {data.payments.partialRate}%
+              </span>
+            </div>
             <div className="flex items-center gap-2 rounded-full bg-gray-100 px-2 sm:px-3 py-1 dark:bg-gray-800">
               <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-gray-500" />
               <span className="font-medium text-gray-700 dark:text-gray-400">
@@ -319,6 +329,16 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                   <linearGradient id="paidGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#10b981" />
                     <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+                  <linearGradient
+                    id="partialGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="0%" stopColor="#eab308" />
+                    <stop offset="100%" stopColor="#ca8a04" />
                   </linearGradient>
                   <linearGradient
                     id="unpaidGradient"
@@ -342,6 +362,7 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                 />
                 <YAxis
                   tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                  allowDecimals={false}
                 />
                 <Tooltip
                   contentStyle={{
@@ -350,17 +371,30 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                     borderRadius: "8px",
                     fontSize: "12px",
                   }}
+                  formatter={(value: any, name: any) => [
+                    `${String(value)} members`,
+                    String(name ?? ""),
+                  ]}
                 />
                 <Bar
                   dataKey="paidMembers"
                   fill="url(#paidGradient)"
                   name="Paid"
-                  radius={[4, 4, 0, 0]}
+                  stackId="members"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="partialMembers"
+                  fill="url(#partialGradient)"
+                  name="Partial"
+                  stackId="members"
+                  radius={[0, 0, 0, 0]}
                 />
                 <Bar
                   dataKey="unpaidMembers"
                   fill="url(#unpaidGradient)"
                   name="Unpaid"
+                  stackId="members"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -428,9 +462,9 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
           </h3>
         </div>
         <ul className="space-y-2 sm:space-y-3">
-          {data.insights.map((insight) => (
+          {data.insights.map((insight, i) => (
             <li
-              key={insight}
+              key={i}
               className="flex items-start gap-2 sm:gap-3 rounded-lg border border-indigo-200/50 bg-white/50 p-2 sm:p-3 text-xs sm:text-sm dark:bg-gray-900/50 dark:border-indigo-800/50"
             >
               <span className="mt-0.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-indigo-500" />

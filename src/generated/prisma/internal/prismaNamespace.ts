@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Member: 'Member',
+  MembershipRenewal: 'MembershipRenewal',
   ReminderLog: 'ReminderLog',
   AdminUser: 'AdminUser',
   SuperAdminUser: 'SuperAdminUser',
@@ -407,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "member" | "reminderLog" | "adminUser" | "superAdminUser" | "gymOwnerDurationPrice" | "platformPlanPrice" | "platformPlanFeature" | "ownerBillingInvoice"
+    modelProps: "member" | "membershipRenewal" | "reminderLog" | "adminUser" | "superAdminUser" | "gymOwnerDurationPrice" | "platformPlanPrice" | "platformPlanFeature" | "ownerBillingInvoice"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -482,6 +483,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.MemberCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MemberCountAggregateOutputType> | number
+        }
+      }
+    }
+    MembershipRenewal: {
+      payload: Prisma.$MembershipRenewalPayload<ExtArgs>
+      fields: Prisma.MembershipRenewalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MembershipRenewalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MembershipRenewalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>
+        }
+        findFirst: {
+          args: Prisma.MembershipRenewalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MembershipRenewalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>
+        }
+        findMany: {
+          args: Prisma.MembershipRenewalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>[]
+        }
+        create: {
+          args: Prisma.MembershipRenewalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>
+        }
+        createMany: {
+          args: Prisma.MembershipRenewalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MembershipRenewalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>[]
+        }
+        delete: {
+          args: Prisma.MembershipRenewalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>
+        }
+        update: {
+          args: Prisma.MembershipRenewalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>
+        }
+        deleteMany: {
+          args: Prisma.MembershipRenewalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MembershipRenewalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MembershipRenewalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>[]
+        }
+        upsert: {
+          args: Prisma.MembershipRenewalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipRenewalPayload>
+        }
+        aggregate: {
+          args: Prisma.MembershipRenewalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMembershipRenewal>
+        }
+        groupBy: {
+          args: Prisma.MembershipRenewalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MembershipRenewalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MembershipRenewalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MembershipRenewalCountAggregateOutputType> | number
         }
       }
     }
@@ -1050,6 +1125,7 @@ export const MemberScalarFieldEnum = {
   billingDuration: 'billingDuration',
   planPrice: 'planPrice',
   discountInr: 'discountInr',
+  amountPaid: 'amountPaid',
   paymentStatus: 'paymentStatus',
   memberPhoto: 'memberPhoto',
   upiScreenshot: 'upiScreenshot',
@@ -1065,6 +1141,25 @@ export const MemberScalarFieldEnum = {
 } as const
 
 export type MemberScalarFieldEnum = (typeof MemberScalarFieldEnum)[keyof typeof MemberScalarFieldEnum]
+
+
+export const MembershipRenewalScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  billingDuration: 'billingDuration',
+  planPrice: 'planPrice',
+  discountInr: 'discountInr',
+  amountPaid: 'amountPaid',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  paymentStatus: 'paymentStatus',
+  paymentProvider: 'paymentProvider',
+  upiScreenshot: 'upiScreenshot',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt'
+} as const
+
+export type MembershipRenewalScalarFieldEnum = (typeof MembershipRenewalScalarFieldEnum)[keyof typeof MembershipRenewalScalarFieldEnum]
 
 
 export const ReminderLogScalarFieldEnum = {
@@ -1284,6 +1379,20 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'PaymentProvider'
+ */
+export type EnumPaymentProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentProvider'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentProvider[]'
+ */
+export type ListEnumPaymentProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentProvider[]'>
+    
+
+
+/**
  * Reference to a field of type 'Channel'
  */
 export type EnumChannelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Channel'>
@@ -1364,20 +1473,6 @@ export type EnumBillingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'BillingStatus[]'
  */
 export type ListEnumBillingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'PaymentProvider'
- */
-export type EnumPaymentProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentProvider'>
-    
-
-
-/**
- * Reference to a field of type 'PaymentProvider[]'
- */
-export type ListEnumPaymentProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentProvider[]'>
     
 
 
@@ -1490,6 +1585,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   member?: Prisma.MemberOmit
+  membershipRenewal?: Prisma.MembershipRenewalOmit
   reminderLog?: Prisma.ReminderLogOmit
   adminUser?: Prisma.AdminUserOmit
   superAdminUser?: Prisma.SuperAdminUserOmit

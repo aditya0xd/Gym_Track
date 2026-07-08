@@ -9,17 +9,25 @@ import {
   MessageCircle,
   Camera,
   Upload,
+  X,
+  ReceiptText,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
+import { IMAGE_ACCEPT, IMAGE_PROCESSING_PRESETS } from "@/lib/image-processing/config";
+import {
+  imageErrorMessage as sharedImageErrorMessage,
+  processImage,
+} from "@/lib/image-processing/client";
 import type {
   MemberBillingDuration,
   MembershipStatus,
+  PaymentStatus,
 } from "@/generated/prisma/client";
 
 interface ReminderItem {
@@ -30,6 +38,20 @@ interface ReminderItem {
   message: string;
 }
 
+interface PaymentHistoryItem {
+  id: string;
+  billingDuration: MemberBillingDuration;
+  planPrice: string;
+  discountInr: string;
+  amountPaid: string;
+  periodStart: string;
+  periodEnd: string;
+  paymentStatus: PaymentStatus;
+  paymentProvider: string;
+  paidAt: string | null;
+  createdAt: string;
+}
+
 interface MemberDetail {
   id: string;
   fullName: string;
@@ -38,6 +60,7 @@ interface MemberDetail {
   billingDuration: MemberBillingDuration;
   planPrice: string;
   discountInr: string;
+  amountPaid: string;
   startDate: string;
   endDate: string;
   membershipStatus: MembershipStatus;
@@ -46,7 +69,10 @@ interface MemberDetail {
   memberPhoto: string | null;
   upiScreenshot: string | null;
   reminders: ReminderItem[];
+  renewals: PaymentHistoryItem[];
 }
+
+type PriceHint = { duration: MemberBillingDuration; priceInr: string | null };
 
 function durationLabel(value: string) {
   return (
@@ -70,6 +96,22 @@ function totalDays(startDateStr: string, endDateStr: string) {
   const start = new Date(startDateStr);
   const end = new Date(endDateStr);
   return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function paymentStatusTone(status: PaymentStatus) {
+  if (status === "DONE") {
+    return "bg-[#0d2e12] text-[#4ade80]";
+  }
+  if (status === "PARTIAL") {
+    return "bg-[#3d2e00] text-yellow-400";
+  }
+  return "bg-[#3d1a1a] text-red-400";
+}
+
+function paymentStatusLabel(status: PaymentStatus) {
+  if (status === "DONE") return "Paid";
+  if (status === "PARTIAL") return "Partial";
+  return "Due";
 }
 
 /** SVG arc gauge showing days remaining */
@@ -147,6 +189,7 @@ async function fetchMember(id: string): Promise<MemberDetail> {
 
 export function MemberDetailsClient({ id }: { id: string }) {
   const router = useRouter();
+  const renewalUpiInputRef = useRef<HTMLInputElement>(null);
   const {
     data: member,
     isLoading,
@@ -160,6 +203,67 @@ export function MemberDetailsClient({ id }: { id: string }) {
     "MEMBERSHIP_EXPIRY" | "PAYMENT_DUE" | null
   >(null);
   const [pauseLoading, setPauseLoading] = useState(false);
+  const [priceHints, setPriceHints] = useState<PriceHint[]>([]);
+  const [renewalOpen, setRenewalOpen] = useState(false);
+  const [renewing, setRenewing] = useState(false);
+  const [renewalDuration, setRenewalDuration] =
+    useState<MemberBillingDuration>("ONE_MONTH");
+  const [renewalPeriodStart, setRenewalPeriodStart] = useState("");
+  const [renewalDiscount, setRenewalDiscount] = useState("");
+  const [renewalPaymentStatus, setRenewalPaymentStatus] =
+    useState<PaymentStatus>("NOT_DONE");
+  const [renewalAmountPaid, setRenewalAmountPaid] = useState("");
+  const [renewalUpiFile, setRenewalUpiFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await fetch("/api/owner/pricing");
+      if (!res.ok) return;
+      const data = (await res.json()) as { prices: PriceHint[] };
+      if (!cancelled) setPriceHints(data.prices ?? []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const today = useMemo(() => {
+    const now = new Date();
+    return new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    );
+  }, []);
+  const renewalPrice =
+    priceHints.find((h) => h.duration === renewalDuration)?.priceInr ?? null;
+  const renewalFinalAmount = useMemo(() => {
+    if (!renewalPrice) return null;
+    const list = Number(renewalPrice);
+    const discount =
+      renewalDiscount.trim() === "" ? 0 : Number(renewalDiscount);
+    if (!Number.isFinite(list) || !Number.isFinite(discount) || discount < 0) {
+      return null;
+    }
+    return Math.max(0, list - discount).toFixed(2);
+  }, [renewalDiscount, renewalPrice]);
+
+  useEffect(() => {
+    if (member && !renewalPeriodStart) {
+      const next = new Date(member.endDate);
+      next.setUTCDate(next.getUTCDate() + 1);
+      const start = next > today ? next : today;
+      setRenewalPeriodStart(start.toISOString().slice(0, 10));
+    }
+  }, [member, renewalPeriodStart, today]);
+
+  useEffect(() => {
+    if (renewalPaymentStatus === "DONE" && renewalFinalAmount) {
+      setRenewalAmountPaid(renewalFinalAmount);
+    }
+    if (renewalPaymentStatus === "NOT_DONE") {
+      setRenewalAmountPaid("");
+    }
+  }, [renewalFinalAmount, renewalPaymentStatus]);
 
   if (isLoading) {
     return (
@@ -183,10 +287,6 @@ export function MemberDetailsClient({ id }: { id: string }) {
     );
   }
 
-  const now = new Date();
-  const today = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-  );
   const in7Days = new Date(today);
   in7Days.setUTCDate(in7Days.getUTCDate() + 7);
   const endDate = new Date(member.endDate);
@@ -279,6 +379,79 @@ export function MemberDetailsClient({ id }: { id: string }) {
 
   const planLabel = durationLabel(member.billingDuration);
   const planPrice = formatInrFromDecimalString(member.planPrice);
+  const amountPaid = formatInrFromDecimalString(member.amountPaid);
+  const balanceDue = formatInrFromDecimalString(
+    Math.max(0, Number(member.planPrice) - Number(member.amountPaid)).toFixed(2),
+  );
+  async function renewMembership() {
+    if (!member) return;
+    if (status !== "Expired") {
+      toast.error("Only expired memberships can be renewed from here.");
+      return;
+    }
+    if (!renewalPrice) {
+      toast.error("Set this duration's INR price under Pricing before renewing.");
+      return;
+    }
+    if (!renewalPeriodStart) {
+      toast.error("Choose a renewal start date.");
+      return;
+    }
+    if (renewalPaymentStatus !== "NOT_DONE" && !renewalUpiFile) {
+      toast.error("Upload UPI screenshot when payment is recorded.");
+      return;
+    }
+
+    setRenewing(true);
+    let upiScreenshot: string | null = null;
+    if (renewalUpiFile) {
+      try {
+        const processed = await processImage(
+          renewalUpiFile,
+          IMAGE_PROCESSING_PRESETS.upiScreenshot,
+        );
+        upiScreenshot = processed.dataUrl;
+      } catch (err) {
+        toast.error(sharedImageErrorMessage(err, "UPI screenshot"));
+        setRenewing(false);
+        return;
+      }
+    }
+
+    try {
+      const amountPaid = renewalAmountPaid.trim();
+      const res = await fetch(`/api/owner/members/${member.id}/renewal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          billingDuration: renewalDuration,
+          periodStart: renewalPeriodStart,
+          paymentStatus: renewalPaymentStatus,
+          discountInr: renewalDiscount.trim() === "" ? undefined : renewalDiscount.trim(),
+          amountPaid: amountPaid === "" ? undefined : amountPaid,
+          upiScreenshot,
+        }),
+      });
+      const data = (await res.json()) as { message?: string };
+      if (!res.ok) {
+        toast.error(data.message ?? "Could not renew membership.");
+        return;
+      }
+      toast.success(data.message ?? "Membership renewed.");
+      setRenewalOpen(false);
+      setRenewalUpiFile(null);
+      await refetch();
+      router.refresh();
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setRenewing(false);
+    }
+  }
+
+  function onRenewalUpiChange(e: ChangeEvent<HTMLInputElement>) {
+    setRenewalUpiFile(e.target.files?.[0] ?? null);
+  }
 
   return (
     <>
@@ -356,11 +529,11 @@ export function MemberDetailsClient({ id }: { id: string }) {
             </button>
             <button
               id="member-logs-btn"
-              onClick={() => sendReminder("MEMBERSHIP_EXPIRY")}
-              disabled
+              onClick={() => setRenewalOpen(true)}
+              disabled={status !== "Expired"}
               className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
             >
-              {sendingType === "MEMBERSHIP_EXPIRY" ? "…" : "Logs"}
+              Renew
             </button>
           </div>
         </div>
@@ -380,6 +553,12 @@ export function MemberDetailsClient({ id }: { id: string }) {
                 </span>
               </p>
               <div className="mt-4 space-y-1">
+                <p className="text-[11px] text-gray-400">
+                  Paid: <span className="text-gray-200">{amountPaid}</span>
+                </p>
+                <p className="text-[11px] text-gray-400">
+                  Due: <span className="text-gray-200">{balanceDue}</span>
+                </p>
                 <p className="text-[11px] text-gray-400">
                   Starts:{" "}
                   <span className="text-gray-200">
@@ -443,7 +622,9 @@ export function MemberDetailsClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* ── Member Logs card ── */}
+   
+
+        {/* Member Logs */}
         <div className="rounded-2xl bg-[#1c1c1c] p-4">
           <p className="mb-3 text-[11px] font-extrabold uppercase tracking-widest text-white">
             Member Logs
@@ -490,6 +671,88 @@ export function MemberDetailsClient({ id }: { id: string }) {
                 : "Send payment reminder"}
             </button>
           </div>
+        </div>
+
+             {/* Payment History */}
+        <div className="rounded-2xl bg-[#1c1c1c] p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-[11px] font-extrabold uppercase tracking-widest text-white">
+              Payment History
+            </p>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#2a2a2a]">
+              <ReceiptText className="h-3.5 w-3.5 text-gray-400" />
+            </div>
+          </div>
+
+          {member.renewals.length === 0 ? (
+            <p className="text-sm text-gray-500">No payments recorded yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {member.renewals.map((payment) => {
+                const due = Math.max(
+                  0,
+                  Number(payment.planPrice) - Number(payment.amountPaid),
+                ).toFixed(2);
+
+                return (
+                  <div
+                    key={payment.id}
+                    className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-white">
+                          {durationLabel(payment.billingDuration)}
+                        </p>
+                        <p className="mt-1 text-[11px] text-gray-400">
+                          {payment.periodStart} to {payment.periodEnd}
+                        </p>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${paymentStatusTone(
+                          payment.paymentStatus,
+                        )}`}
+                      >
+                        {paymentStatusLabel(payment.paymentStatus)}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-gray-400">
+                      <p>
+                        Charged:{" "}
+                        <span className="font-semibold text-gray-200">
+                          {formatInrFromDecimalString(payment.planPrice)}
+                        </span>
+                      </p>
+                      <p>
+                        Paid:{" "}
+                        <span className="font-semibold text-gray-200">
+                          {formatInrFromDecimalString(payment.amountPaid)}
+                        </span>
+                      </p>
+                      <p>
+                        Due:{" "}
+                        <span className="font-semibold text-gray-200">
+                          {formatInrFromDecimalString(due)}
+                        </span>
+                      </p>
+                      <p>
+                        Provider:{" "}
+                        <span className="font-semibold text-gray-200">
+                          {payment.paymentProvider}
+                        </span>
+                      </p>
+                    </div>
+
+                    <p className="mt-2 text-[10px] uppercase tracking-wider text-gray-500">
+                      Recorded {payment.createdAt.slice(0, 10)}
+                      {payment.paidAt ? ` - Paid ${payment.paidAt.slice(0, 10)}` : ""}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* ── Upload Documents card ── */}
@@ -542,6 +805,196 @@ export function MemberDetailsClient({ id }: { id: string }) {
           </div>
         </div>
       </div>
+
+      {renewalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-end bg-black/70 p-0 sm:items-center sm:justify-center sm:p-4">
+          <div className="max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-[#18181b] p-5 shadow-2xl sm:max-w-md sm:rounded-2xl">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+                  Renewal
+                </p>
+                <h2 className="mt-1 text-xl font-extrabold text-white">
+                  Renew {member.fullName}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRenewalOpen(false)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="ml-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                  Plan
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {MEMBER_BILLING_DURATION_OPTIONS.map((option) => {
+                    const selected = renewalDuration === option.value;
+                    const price =
+                      priceHints.find((h) => h.duration === option.value)
+                        ?.priceInr ?? null;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setRenewalDuration(option.value)}
+                        className={`rounded-xl border-2 p-3 text-left transition-colors ${
+                          selected
+                            ? "border-[#d4ff00] bg-[#d4ff00]/10"
+                            : "border-transparent bg-[#27272a] hover:bg-zinc-700"
+                        }`}
+                      >
+                        <span className="block text-xs font-bold text-white">
+                          {durationLabel(option.value)}
+                        </span>
+                        <span className="mt-1 block text-sm font-black text-[#d4ff00]">
+                          {price ? formatInrFromDecimalString(price) : "No price"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="renewalStart"
+                    className="ml-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400"
+                  >
+                    Start date
+                  </label>
+                  <input
+                    id="renewalStart"
+                    type="date"
+                    value={renewalPeriodStart}
+                    onChange={(e) => setRenewalPeriodStart(e.target.value)}
+                    className="flex h-12 w-full rounded-xl border-0 bg-[#27272a] px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="renewalDiscount"
+                    className="ml-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400"
+                  >
+                    Discount
+                  </label>
+                  <input
+                    id="renewalDiscount"
+                    inputMode="decimal"
+                    value={renewalDiscount}
+                    onChange={(e) =>
+                      setRenewalDiscount(e.target.value.replace(/[^\d.]/g, ""))
+                    }
+                    placeholder="0"
+                    className="flex h-12 w-full rounded-xl border-0 bg-[#27272a] px-3 text-sm text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="renewalPaymentStatus"
+                  className="ml-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400"
+                >
+                  Payment status
+                </label>
+                <select
+                  id="renewalPaymentStatus"
+                  value={renewalPaymentStatus}
+                  onChange={(e) => {
+                    const next = e.target.value as PaymentStatus;
+                    setRenewalPaymentStatus(next);
+                    if (next === "DONE" && renewalFinalAmount) {
+                      setRenewalAmountPaid(renewalFinalAmount);
+                    }
+                    if (next === "NOT_DONE") {
+                      setRenewalAmountPaid("");
+                    }
+                  }}
+                  className="flex h-12 w-full rounded-xl border-0 bg-[#27272a] px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]"
+                >
+                  <option value="NOT_DONE">Not done</option>
+                  <option value="PARTIAL">Partial</option>
+                  <option value="DONE">Done</option>
+                </select>
+              </div>
+
+              {renewalPaymentStatus !== "NOT_DONE" ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="renewalAmountPaid"
+                      className="ml-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400"
+                    >
+                      Amount paid
+                    </label>
+                    <input
+                      id="renewalAmountPaid"
+                      inputMode="decimal"
+                      value={renewalAmountPaid}
+                      readOnly={renewalPaymentStatus === "DONE"}
+                      onChange={(e) =>
+                        setRenewalAmountPaid(
+                          e.target.value.replace(/[^\d.]/g, ""),
+                        )
+                      }
+                      placeholder={renewalFinalAmount ?? "0"}
+                      className="flex h-12 w-full rounded-xl border-0 bg-[#27272a] px-3 text-sm text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="ml-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                      UPI proof
+                    </label>
+                    <input
+                      ref={renewalUpiInputRef}
+                      type="file"
+                      accept={IMAGE_ACCEPT}
+                      className="sr-only"
+                      onChange={onRenewalUpiChange}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => renewalUpiInputRef.current?.click()}
+                      className={`flex h-12 w-full items-center justify-center rounded-xl border-2 border-dashed text-xs font-bold uppercase tracking-wider ${
+                        renewalUpiFile
+                          ? "border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]"
+                          : "border-zinc-700 bg-[#27272a] text-zinc-400"
+                      }`}
+                    >
+                      {renewalUpiFile ? "Selected" : "Upload"}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="rounded-xl bg-[#101010] p-3 text-xs text-zinc-400">
+                Final amount:{" "}
+                <span className="font-bold text-white">
+                  {renewalFinalAmount
+                    ? formatInrFromDecimalString(renewalFinalAmount)
+                    : "Set pricing"}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={renewMembership}
+                disabled={renewing || !renewalPrice}
+                className="flex h-12 w-full items-center justify-center rounded-xl bg-[#d4ff00] text-xs font-extrabold uppercase tracking-widest text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                {renewing ? "Renewing..." : "Renew membership"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

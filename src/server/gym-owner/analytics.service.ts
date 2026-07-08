@@ -7,6 +7,7 @@ type TrendPoint = {
   revenue: number;
   paidMembers: number;
   unpaidMembers: number;
+  partialMembers: number;
 };
 
 export type RevenueForecastMonth = {
@@ -25,6 +26,7 @@ export type OwnerAnalytics = {
     inactiveMembers: number;
     paidMembers: number;
     unpaidMembers: number;
+    partialMembers: number;
     monthlyRevenue: number;
   };
   retention: {
@@ -33,6 +35,7 @@ export type OwnerAnalytics = {
   };
   payments: {
     successRate: number;
+    partialRate: number;
     failureRate: number;
   };
   trends: TrendPoint[];
@@ -121,6 +124,7 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
     inactive_members: bigint;
     paid_members: bigint;
     unpaid_members: bigint;
+    partial_members: bigint;
     monthly_revenue: bigint;
   }>>`
     SELECT
@@ -129,8 +133,17 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
       SUM(CASE WHEN "membershipStatus" = 'PAUSED' THEN 1 ELSE 0 END) as paused_members,
       SUM(CASE WHEN "endDate" < ${today} THEN 1 ELSE 0 END) as inactive_members,
       SUM(CASE WHEN "paymentStatus" = 'DONE' THEN 1 ELSE 0 END) as paid_members,
-      SUM(CASE WHEN "paymentStatus" != 'DONE' THEN 1 ELSE 0 END) as unpaid_members,
-      SUM(CASE WHEN "paymentStatus" = 'DONE' AND "startDate" >= ${currentMonthStart} AND "startDate" < ${nextMonthStart} THEN "planPrice" ELSE 0 END) as monthly_revenue
+      SUM(CASE WHEN "paymentStatus" = 'NOT_DONE' THEN 1 ELSE 0 END) as unpaid_members,
+      SUM(CASE WHEN "paymentStatus" = 'PARTIAL' THEN 1 ELSE 0 END) as partial_members,
+      COALESCE((
+        SELECT SUM(r."amountPaid")
+        FROM "MembershipRenewal" r
+        JOIN "Member" rm ON rm."id" = r."memberId"
+        WHERE rm."deletedAt" IS NULL
+          AND rm."adminUserId" = ${adminUserId}
+          AND r."paidAt" >= ${currentMonthStart}
+          AND r."paidAt" < ${nextMonthStart}
+      ), 0) as monthly_revenue
     FROM "Member"
     WHERE "deletedAt" IS NULL
       AND "adminUserId" = ${adminUserId}
@@ -143,6 +156,7 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
     inactive_members: BigInt(0),
     paid_members: BigInt(0),
     unpaid_members: BigInt(0),
+    partial_members: BigInt(0),
     monthly_revenue: BigInt(0),
   };
 
@@ -152,40 +166,64 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
   const inactiveMembers = Number(summaryData.inactive_members);
   const paidMembers = Number(summaryData.paid_members);
   const unpaidMembers = Number(summaryData.unpaid_members);
+  const partialMembers = Number(summaryData.partial_members);
   const monthlyRevenue = Number(summaryData.monthly_revenue);
 
   // Trends using SQL GROUP BY
   const trendMonths = Array.from({ length: 6 }, (_, i) => monthStartFromNow(i - 5));
-  const trendKeys = trendMonths.map(monthKey);
+  const trendStart = trendMonths[0]!;
+  const trendEnd = monthStartFromNow(1);
   
-  const trendResults = await prisma.$queryRaw<Array<{
+  const revenueTrends = await prisma.$queryRaw<Array<{
     month_key: string;
     revenue: bigint;
-    count: bigint;
   }>>`
     SELECT
-      TO_CHAR("startDate", 'YYYY-MM') as month_key,
-      SUM(CASE WHEN "paymentStatus" = 'DONE' THEN "planPrice" ELSE 0 END) as revenue,
-      SUM(CASE WHEN "paymentStatus" = 'DONE' THEN 1 ELSE 0 END) as count
-    FROM "Member"
-    WHERE "deletedAt" IS NULL
-      AND "adminUserId" = ${adminUserId}
-      AND TO_CHAR("startDate", 'YYYY-MM') IN (${trendKeys.map(k => `'${k}'`).join(',')})
-    GROUP BY TO_CHAR("startDate", 'YYYY-MM')
-    ORDER BY month_key
+      TO_CHAR(r."paidAt", 'YYYY-MM') as month_key,
+      SUM(r."amountPaid") as revenue
+    FROM "MembershipRenewal" r
+    JOIN "Member" m ON m."id" = r."memberId"
+    WHERE m."deletedAt" IS NULL
+      AND m."adminUserId" = ${adminUserId}
+      AND r."paidAt" >= ${trendStart}
+      AND r."paidAt" < ${trendEnd}
+    GROUP BY TO_CHAR(r."paidAt", 'YYYY-MM')
   `;
 
-  const trendMap = new Map(trendResults.map(t => [t.month_key, t]));
+  const cohortTrends = await prisma.$queryRaw<Array<{
+    month_key: string;
+    count: bigint;
+    unpaid_count: bigint;
+    partial_count: bigint;
+  }>>`
+    SELECT
+      TO_CHAR(r."periodStart", 'YYYY-MM') as month_key,
+      SUM(CASE WHEN r."paymentStatus" = 'DONE' THEN 1 ELSE 0 END) as count,
+      SUM(CASE WHEN r."paymentStatus" = 'NOT_DONE' THEN 1 ELSE 0 END) as unpaid_count,
+      SUM(CASE WHEN r."paymentStatus" = 'PARTIAL' THEN 1 ELSE 0 END) as partial_count
+    FROM "MembershipRenewal" r
+    JOIN "Member" m ON m."id" = r."memberId"
+    WHERE m."deletedAt" IS NULL
+      AND m."adminUserId" = ${adminUserId}
+      AND r."periodStart" >= ${trendStart}
+      AND r."periodStart" < ${trendEnd}
+    GROUP BY TO_CHAR(r."periodStart", 'YYYY-MM')
+  `;
+
+  const revenueMap = new Map(revenueTrends.map(t => [t.month_key, t]));
+  const cohortMap = new Map(cohortTrends.map(t => [t.month_key, t]));
   
   const trends: TrendPoint[] = trendMonths.map(month => {
     const key = monthKey(month);
-    const data = trendMap.get(key);
+    const revData = revenueMap.get(key);
+    const cohortData = cohortMap.get(key);
     return {
       monthKey: key,
       month: monthLabel(month),
-      revenue: data ? Math.round(Number(data.revenue) * 100) / 100 : 0,
-      paidMembers: data ? Number(data.count) : 0,
-      unpaidMembers: 0,
+      revenue: revData ? Math.round(Number(revData.revenue) * 100) / 100 : 0,
+      paidMembers: cohortData ? Number(cohortData.count) : 0,
+      unpaidMembers: cohortData ? Number(cohortData.unpaid_count) : 0,
+      partialMembers: cohortData ? Number(cohortData.partial_count) : 0,
     };
   });
 
@@ -199,6 +237,7 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
       planPrice: true,
       membershipStatus: true,
       updatedAt: true,
+      renewals: { select: { id: true, periodStart: true } },
     },
     orderBy: { startDate: "asc" },
   });
@@ -215,12 +254,29 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
   let renewed = 0;
   for (const memberships of byPhone.values()) {
     const sorted = [...memberships].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-    for (let i = 1; i < sorted.length; i += 1) {
-      const prev = sorted[i - 1];
-      const curr = sorted[i];
-      if (prev.endDate > today) continue;
+    for (let i = 0; i < sorted.length; i += 1) {
+      const curr = sorted[i]!;
+      const next = sorted[i + 1];
+
+      // 1) Inline renewals via MembershipRenewal
+      let inlineRenewals = 0;
+      for (const renewal of curr.renewals) {
+        if (renewal.periodStart.getTime() !== curr.startDate.getTime()) {
+          inlineRenewals += 1;
+        }
+      }
+      opportunities += inlineRenewals;
+      renewed += inlineRenewals;
+
+      // 2) Check if the final period of this Member row has ended
+      if (curr.endDate > today) {
+        continue; // Active, no churn opportunity yet
+      }
+
       opportunities += 1;
-      if (curr.startDate <= addDays(prev.endDate, 30)) {
+
+      // 3) Did they renew by creating a NEW Member row (old method)?
+      if (next && next.startDate <= addDays(curr.endDate, 30)) {
         renewed += 1;
       }
     }
@@ -306,6 +362,10 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
     `Forecast: ~${Math.round(nextQuarterCombined)} INR combined over the next 3 months (trend + renewal pipeline).`,
   );
 
+  const successRate = pct(paidMembers, totalMembers);
+  const partialRate = pct(partialMembers, totalMembers);
+  const failureRate = totalMembers > 0 ? Math.max(0, 100 - successRate - partialRate) : 0;
+
   return {
     summary: {
       totalMembers,
@@ -314,6 +374,7 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
       inactiveMembers,
       paidMembers,
       unpaidMembers,
+      partialMembers,
       monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
     },
     retention: {
@@ -321,8 +382,9 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
       churnRate: pct(churned, opportunities),
     },
     payments: {
-      successRate: pct(paidMembers, totalMembers),
-      failureRate: pct(unpaidMembers, totalMembers),
+      successRate,
+      partialRate,
+      failureRate,
     },
     trends,
     revenueForecast: {

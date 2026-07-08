@@ -35,7 +35,7 @@ const ownerSubscriptionPlan = {
 
 const paymentStatus = {
   type: "string",
-  enum: ["DONE", "NOT_DONE"],
+  enum: ["DONE", "PARTIAL", "NOT_DONE"],
 };
 
 const memberSchema = {
@@ -48,6 +48,7 @@ const memberSchema = {
     billingDuration: memberBillingDuration,
     planPrice: { type: "string", description: "Decimal INR string" },
     discountInr: { type: "string" },
+    amountPaid: { type: "string" },
     paymentStatus: paymentStatus,
     memberPhoto: { type: "string", nullable: true },
     upiScreenshot: { type: "string", nullable: true },
@@ -122,6 +123,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
             memberPhoto: { type: "string", nullable: true },
             upiScreenshot: { type: "string", nullable: true },
             discountInr: { type: "string" },
+            amountPaid: { type: "string" },
           },
         },
         DurationPrice: {

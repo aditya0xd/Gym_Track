@@ -21,15 +21,20 @@ const createMemberSchema = z.object({
   memberPhoto: imageDataUrlSchema("Member photo"),
   upiScreenshot: imageDataUrlSchema("UPI screenshot"),
   discountInr: priceInrSchema.optional().transform(v => v ?? undefined),
+  amountPaid: priceInrSchema.optional().transform(v => v ?? undefined),
   startDate: dateSchema,
 }).refine(data => {
-  if (data.paymentStatus === "DONE" && !data.upiScreenshot) {
+  const amountPaid = data.amountPaid === undefined ? 0 : Number(data.amountPaid);
+  if (data.paymentStatus === "PARTIAL" && amountPaid <= 0) {
+    return false;
+  }
+  if ((data.paymentStatus === "DONE" || data.paymentStatus === "PARTIAL" || amountPaid > 0) && !data.upiScreenshot) {
     return false;
   }
   return true;
 }, {
-  message: "UPI screenshot is required when payment is marked done",
-  path: ["upiScreenshot"],
+  message: "Partial payments need an amount paid, and recorded payments need a UPI screenshot",
+  path: ["paymentStatus"],
 });
 
 async function GETHandler(_request: Request, userId: string) {
@@ -39,6 +44,7 @@ async function GETHandler(_request: Request, userId: string) {
       ...m,
       planPrice: m.planPrice.toString(),
       discountInr: m.discountInr.toString(),
+      amountPaid: m.amountPaid.toString(),
       startDate: m.startDate.toISOString().slice(0, 10),
       endDate: m.endDate.toISOString().slice(0, 10),
       pausedAt: m.pausedAt?.toISOString() ?? null,
@@ -82,6 +88,7 @@ async function POSTHandler(request: Request, userId: string) {
       memberPhoto: data.memberPhoto,
       upiScreenshot: data.upiScreenshot,
       discountInr: data.discountInr,
+      amountPaid: data.amountPaid,
     });
 
     return NextResponse.json(
@@ -93,6 +100,7 @@ async function POSTHandler(request: Request, userId: string) {
         billingDuration: member.billingDuration,
         planPrice: member.planPrice.toString(),
         discountInr: member.discountInr.toString(),
+        amountPaid: member.amountPaid.toString(),
         paymentStatus: member.paymentStatus,
         memberPhoto: member.memberPhoto,
         upiScreenshot: member.upiScreenshot,

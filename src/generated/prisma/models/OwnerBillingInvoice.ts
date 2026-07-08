@@ -583,10 +583,6 @@ export type EnumBillingStatusFieldUpdateOperationsInput = {
   set?: $Enums.BillingStatus
 }
 
-export type EnumPaymentProviderFieldUpdateOperationsInput = {
-  set?: $Enums.PaymentProvider
-}
-
 export type OwnerBillingInvoiceCreateWithoutAdminUserInput = {
   id?: string
   plan: $Enums.OwnerSubscriptionPlan

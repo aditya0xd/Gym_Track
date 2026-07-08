@@ -47,6 +47,11 @@ export { Prisma }
  */
 export type Member = Prisma.MemberModel
 /**
+ * Model MembershipRenewal
+ * 
+ */
+export type MembershipRenewal = Prisma.MembershipRenewalModel
+/**
  * Model ReminderLog
  * 
  */

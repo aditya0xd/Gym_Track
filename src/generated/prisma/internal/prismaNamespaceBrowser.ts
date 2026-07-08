@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Member: 'Member',
+  MembershipRenewal: 'MembershipRenewal',
   ReminderLog: 'ReminderLog',
   AdminUser: 'AdminUser',
   SuperAdminUser: 'SuperAdminUser',
@@ -85,6 +86,7 @@ export const MemberScalarFieldEnum = {
   billingDuration: 'billingDuration',
   planPrice: 'planPrice',
   discountInr: 'discountInr',
+  amountPaid: 'amountPaid',
   paymentStatus: 'paymentStatus',
   memberPhoto: 'memberPhoto',
   upiScreenshot: 'upiScreenshot',
@@ -100,6 +102,25 @@ export const MemberScalarFieldEnum = {
 } as const
 
 export type MemberScalarFieldEnum = (typeof MemberScalarFieldEnum)[keyof typeof MemberScalarFieldEnum]
+
+
+export const MembershipRenewalScalarFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  billingDuration: 'billingDuration',
+  planPrice: 'planPrice',
+  discountInr: 'discountInr',
+  amountPaid: 'amountPaid',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  paymentStatus: 'paymentStatus',
+  paymentProvider: 'paymentProvider',
+  upiScreenshot: 'upiScreenshot',
+  paidAt: 'paidAt',
+  createdAt: 'createdAt'
+} as const
+
+export type MembershipRenewalScalarFieldEnum = (typeof MembershipRenewalScalarFieldEnum)[keyof typeof MembershipRenewalScalarFieldEnum]
 
 
 export const ReminderLogScalarFieldEnum = {

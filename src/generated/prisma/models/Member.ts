@@ -29,11 +29,13 @@ export type AggregateMember = {
 export type MemberAvgAggregateOutputType = {
   planPrice: runtime.Decimal | null
   discountInr: runtime.Decimal | null
+  amountPaid: runtime.Decimal | null
 }
 
 export type MemberSumAggregateOutputType = {
   planPrice: runtime.Decimal | null
   discountInr: runtime.Decimal | null
+  amountPaid: runtime.Decimal | null
 }
 
 export type MemberMinAggregateOutputType = {
@@ -44,6 +46,7 @@ export type MemberMinAggregateOutputType = {
   billingDuration: $Enums.MemberBillingDuration | null
   planPrice: runtime.Decimal | null
   discountInr: runtime.Decimal | null
+  amountPaid: runtime.Decimal | null
   paymentStatus: $Enums.PaymentStatus | null
   memberPhoto: string | null
   upiScreenshot: string | null
@@ -66,6 +69,7 @@ export type MemberMaxAggregateOutputType = {
   billingDuration: $Enums.MemberBillingDuration | null
   planPrice: runtime.Decimal | null
   discountInr: runtime.Decimal | null
+  amountPaid: runtime.Decimal | null
   paymentStatus: $Enums.PaymentStatus | null
   memberPhoto: string | null
   upiScreenshot: string | null
@@ -88,6 +92,7 @@ export type MemberCountAggregateOutputType = {
   billingDuration: number
   planPrice: number
   discountInr: number
+  amountPaid: number
   paymentStatus: number
   memberPhoto: number
   upiScreenshot: number
@@ -107,11 +112,13 @@ export type MemberCountAggregateOutputType = {
 export type MemberAvgAggregateInputType = {
   planPrice?: true
   discountInr?: true
+  amountPaid?: true
 }
 
 export type MemberSumAggregateInputType = {
   planPrice?: true
   discountInr?: true
+  amountPaid?: true
 }
 
 export type MemberMinAggregateInputType = {
@@ -122,6 +129,7 @@ export type MemberMinAggregateInputType = {
   billingDuration?: true
   planPrice?: true
   discountInr?: true
+  amountPaid?: true
   paymentStatus?: true
   memberPhoto?: true
   upiScreenshot?: true
@@ -144,6 +152,7 @@ export type MemberMaxAggregateInputType = {
   billingDuration?: true
   planPrice?: true
   discountInr?: true
+  amountPaid?: true
   paymentStatus?: true
   memberPhoto?: true
   upiScreenshot?: true
@@ -166,6 +175,7 @@ export type MemberCountAggregateInputType = {
   billingDuration?: true
   planPrice?: true
   discountInr?: true
+  amountPaid?: true
   paymentStatus?: true
   memberPhoto?: true
   upiScreenshot?: true
@@ -275,6 +285,7 @@ export type MemberGroupByOutputType = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal
   discountInr: runtime.Decimal
+  amountPaid: runtime.Decimal
   paymentStatus: $Enums.PaymentStatus
   memberPhoto: string | null
   upiScreenshot: string | null
@@ -320,6 +331,7 @@ export type MemberWhereInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFilter<"Member"> | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Member"> | $Enums.PaymentStatus
   memberPhoto?: Prisma.StringNullableFilter<"Member"> | string | null
   upiScreenshot?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -334,6 +346,7 @@ export type MemberWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
   reminders?: Prisma.ReminderLogListRelationFilter
+  renewals?: Prisma.MembershipRenewalListRelationFilter
 }
 
 export type MemberOrderByWithRelationInput = {
@@ -344,6 +357,7 @@ export type MemberOrderByWithRelationInput = {
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
   discountInr?: Prisma.SortOrder
+  amountPaid?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -358,6 +372,7 @@ export type MemberOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   adminUser?: Prisma.AdminUserOrderByWithRelationInput
   reminders?: Prisma.ReminderLogOrderByRelationAggregateInput
+  renewals?: Prisma.MembershipRenewalOrderByRelationAggregateInput
 }
 
 export type MemberWhereUniqueInput = Prisma.AtLeast<{
@@ -371,6 +386,7 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   billingDuration?: Prisma.EnumMemberBillingDurationFilter<"Member"> | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Member"> | $Enums.PaymentStatus
   memberPhoto?: Prisma.StringNullableFilter<"Member"> | string | null
   upiScreenshot?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -385,6 +401,7 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   adminUser?: Prisma.XOR<Prisma.AdminUserScalarRelationFilter, Prisma.AdminUserWhereInput>
   reminders?: Prisma.ReminderLogListRelationFilter
+  renewals?: Prisma.MembershipRenewalListRelationFilter
 }, "id" | "email">
 
 export type MemberOrderByWithAggregationInput = {
@@ -395,6 +412,7 @@ export type MemberOrderByWithAggregationInput = {
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
   discountInr?: Prisma.SortOrder
+  amountPaid?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrderInput | Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -425,6 +443,7 @@ export type MemberScalarWhereWithAggregatesInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationWithAggregatesFilter<"Member"> | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalWithAggregatesFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalWithAggregatesFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalWithAggregatesFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusWithAggregatesFilter<"Member"> | $Enums.PaymentStatus
   memberPhoto?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   upiScreenshot?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
@@ -447,6 +466,7 @@ export type MemberCreateInput = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
@@ -460,6 +480,7 @@ export type MemberCreateInput = {
   updatedAt?: Date | string
   adminUser: Prisma.AdminUserCreateNestedOneWithoutMembersInput
   reminders?: Prisma.ReminderLogCreateNestedManyWithoutMemberInput
+  renewals?: Prisma.MembershipRenewalCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateInput = {
@@ -470,6 +491,7 @@ export type MemberUncheckedCreateInput = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
@@ -483,6 +505,7 @@ export type MemberUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   reminders?: Prisma.ReminderLogUncheckedCreateNestedManyWithoutMemberInput
+  renewals?: Prisma.MembershipRenewalUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUpdateInput = {
@@ -493,6 +516,7 @@ export type MemberUpdateInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -506,6 +530,7 @@ export type MemberUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   adminUser?: Prisma.AdminUserUpdateOneRequiredWithoutMembersNestedInput
   reminders?: Prisma.ReminderLogUpdateManyWithoutMemberNestedInput
+  renewals?: Prisma.MembershipRenewalUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateInput = {
@@ -516,6 +541,7 @@ export type MemberUncheckedUpdateInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -529,6 +555,7 @@ export type MemberUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reminders?: Prisma.ReminderLogUncheckedUpdateManyWithoutMemberNestedInput
+  renewals?: Prisma.MembershipRenewalUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateManyInput = {
@@ -539,6 +566,7 @@ export type MemberCreateManyInput = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
@@ -561,6 +589,7 @@ export type MemberUpdateManyMutationInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -582,6 +611,7 @@ export type MemberUncheckedUpdateManyInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -604,6 +634,7 @@ export type MemberCountOrderByAggregateInput = {
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
   discountInr?: Prisma.SortOrder
+  amountPaid?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrder
@@ -621,6 +652,7 @@ export type MemberCountOrderByAggregateInput = {
 export type MemberAvgOrderByAggregateInput = {
   planPrice?: Prisma.SortOrder
   discountInr?: Prisma.SortOrder
+  amountPaid?: Prisma.SortOrder
 }
 
 export type MemberMaxOrderByAggregateInput = {
@@ -631,6 +663,7 @@ export type MemberMaxOrderByAggregateInput = {
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
   discountInr?: Prisma.SortOrder
+  amountPaid?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrder
@@ -653,6 +686,7 @@ export type MemberMinOrderByAggregateInput = {
   billingDuration?: Prisma.SortOrder
   planPrice?: Prisma.SortOrder
   discountInr?: Prisma.SortOrder
+  amountPaid?: Prisma.SortOrder
   paymentStatus?: Prisma.SortOrder
   memberPhoto?: Prisma.SortOrder
   upiScreenshot?: Prisma.SortOrder
@@ -670,6 +704,7 @@ export type MemberMinOrderByAggregateInput = {
 export type MemberSumOrderByAggregateInput = {
   planPrice?: Prisma.SortOrder
   discountInr?: Prisma.SortOrder
+  amountPaid?: Prisma.SortOrder
 }
 
 export type MemberScalarRelationFilter = {
@@ -725,6 +760,20 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type MemberCreateNestedOneWithoutRenewalsInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutRenewalsInput, Prisma.MemberUncheckedCreateWithoutRenewalsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutRenewalsInput
+  connect?: Prisma.MemberWhereUniqueInput
+}
+
+export type MemberUpdateOneRequiredWithoutRenewalsNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberCreateWithoutRenewalsInput, Prisma.MemberUncheckedCreateWithoutRenewalsInput>
+  connectOrCreate?: Prisma.MemberCreateOrConnectWithoutRenewalsInput
+  upsert?: Prisma.MemberUpsertWithoutRenewalsInput
+  connect?: Prisma.MemberWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MemberUpdateToOneWithWhereWithoutRenewalsInput, Prisma.MemberUpdateWithoutRenewalsInput>, Prisma.MemberUncheckedUpdateWithoutRenewalsInput>
 }
 
 export type MemberCreateNestedOneWithoutRemindersInput = {
@@ -783,7 +832,7 @@ export type MemberUncheckedUpdateManyWithoutAdminUserNestedInput = {
   deleteMany?: Prisma.MemberScalarWhereInput | Prisma.MemberScalarWhereInput[]
 }
 
-export type MemberCreateWithoutRemindersInput = {
+export type MemberCreateWithoutRenewalsInput = {
   id?: string
   fullName: string
   email?: string | null
@@ -791,6 +840,7 @@ export type MemberCreateWithoutRemindersInput = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
@@ -803,9 +853,10 @@ export type MemberCreateWithoutRemindersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   adminUser: Prisma.AdminUserCreateNestedOneWithoutMembersInput
+  reminders?: Prisma.ReminderLogCreateNestedManyWithoutMemberInput
 }
 
-export type MemberUncheckedCreateWithoutRemindersInput = {
+export type MemberUncheckedCreateWithoutRenewalsInput = {
   id?: string
   fullName: string
   email?: string | null
@@ -813,6 +864,7 @@ export type MemberUncheckedCreateWithoutRemindersInput = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
@@ -825,6 +877,119 @@ export type MemberUncheckedCreateWithoutRemindersInput = {
   deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  reminders?: Prisma.ReminderLogUncheckedCreateNestedManyWithoutMemberInput
+}
+
+export type MemberCreateOrConnectWithoutRenewalsInput = {
+  where: Prisma.MemberWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberCreateWithoutRenewalsInput, Prisma.MemberUncheckedCreateWithoutRenewalsInput>
+}
+
+export type MemberUpsertWithoutRenewalsInput = {
+  update: Prisma.XOR<Prisma.MemberUpdateWithoutRenewalsInput, Prisma.MemberUncheckedUpdateWithoutRenewalsInput>
+  create: Prisma.XOR<Prisma.MemberCreateWithoutRenewalsInput, Prisma.MemberUncheckedCreateWithoutRenewalsInput>
+  where?: Prisma.MemberWhereInput
+}
+
+export type MemberUpdateToOneWithWhereWithoutRenewalsInput = {
+  where?: Prisma.MemberWhereInput
+  data: Prisma.XOR<Prisma.MemberUpdateWithoutRenewalsInput, Prisma.MemberUncheckedUpdateWithoutRenewalsInput>
+}
+
+export type MemberUpdateWithoutRenewalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
+  planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  adminUser?: Prisma.AdminUserUpdateOneRequiredWithoutMembersNestedInput
+  reminders?: Prisma.ReminderLogUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberUncheckedUpdateWithoutRenewalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
+  planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membershipStatus?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  pausedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  whatsappEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  adminUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminders?: Prisma.ReminderLogUncheckedUpdateManyWithoutMemberNestedInput
+}
+
+export type MemberCreateWithoutRemindersInput = {
+  id?: string
+  fullName: string
+  email?: string | null
+  phone: string
+  billingDuration: $Enums.MemberBillingDuration
+  planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  paymentStatus?: $Enums.PaymentStatus
+  memberPhoto?: string | null
+  upiScreenshot?: string | null
+  startDate: Date | string
+  endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
+  whatsappEnabled?: boolean
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  adminUser: Prisma.AdminUserCreateNestedOneWithoutMembersInput
+  renewals?: Prisma.MembershipRenewalCreateNestedManyWithoutMemberInput
+}
+
+export type MemberUncheckedCreateWithoutRemindersInput = {
+  id?: string
+  fullName: string
+  email?: string | null
+  phone: string
+  billingDuration: $Enums.MemberBillingDuration
+  planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  paymentStatus?: $Enums.PaymentStatus
+  memberPhoto?: string | null
+  upiScreenshot?: string | null
+  startDate: Date | string
+  endDate: Date | string
+  membershipStatus?: $Enums.MembershipStatus
+  pausedAt?: Date | string | null
+  whatsappEnabled?: boolean
+  adminUserId: string
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  renewals?: Prisma.MembershipRenewalUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutRemindersInput = {
@@ -851,6 +1016,7 @@ export type MemberUpdateWithoutRemindersInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -863,6 +1029,7 @@ export type MemberUpdateWithoutRemindersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   adminUser?: Prisma.AdminUserUpdateOneRequiredWithoutMembersNestedInput
+  renewals?: Prisma.MembershipRenewalUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutRemindersInput = {
@@ -873,6 +1040,7 @@ export type MemberUncheckedUpdateWithoutRemindersInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -885,6 +1053,7 @@ export type MemberUncheckedUpdateWithoutRemindersInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  renewals?: Prisma.MembershipRenewalUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberCreateWithoutAdminUserInput = {
@@ -895,6 +1064,7 @@ export type MemberCreateWithoutAdminUserInput = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
@@ -907,6 +1077,7 @@ export type MemberCreateWithoutAdminUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   reminders?: Prisma.ReminderLogCreateNestedManyWithoutMemberInput
+  renewals?: Prisma.MembershipRenewalCreateNestedManyWithoutMemberInput
 }
 
 export type MemberUncheckedCreateWithoutAdminUserInput = {
@@ -917,6 +1088,7 @@ export type MemberUncheckedCreateWithoutAdminUserInput = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
@@ -929,6 +1101,7 @@ export type MemberUncheckedCreateWithoutAdminUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   reminders?: Prisma.ReminderLogUncheckedCreateNestedManyWithoutMemberInput
+  renewals?: Prisma.MembershipRenewalUncheckedCreateNestedManyWithoutMemberInput
 }
 
 export type MemberCreateOrConnectWithoutAdminUserInput = {
@@ -968,6 +1141,7 @@ export type MemberScalarWhereInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFilter<"Member"> | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFilter<"Member"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFilter<"Member"> | $Enums.PaymentStatus
   memberPhoto?: Prisma.StringNullableFilter<"Member"> | string | null
   upiScreenshot?: Prisma.StringNullableFilter<"Member"> | string | null
@@ -990,6 +1164,7 @@ export type MemberCreateManyAdminUserInput = {
   billingDuration: $Enums.MemberBillingDuration
   planPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: $Enums.PaymentStatus
   memberPhoto?: string | null
   upiScreenshot?: string | null
@@ -1011,6 +1186,7 @@ export type MemberUpdateWithoutAdminUserInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1023,6 +1199,7 @@ export type MemberUpdateWithoutAdminUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reminders?: Prisma.ReminderLogUpdateManyWithoutMemberNestedInput
+  renewals?: Prisma.MembershipRenewalUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateWithoutAdminUserInput = {
@@ -1033,6 +1210,7 @@ export type MemberUncheckedUpdateWithoutAdminUserInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1045,6 +1223,7 @@ export type MemberUncheckedUpdateWithoutAdminUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reminders?: Prisma.ReminderLogUncheckedUpdateManyWithoutMemberNestedInput
+  renewals?: Prisma.MembershipRenewalUncheckedUpdateManyWithoutMemberNestedInput
 }
 
 export type MemberUncheckedUpdateManyWithoutAdminUserInput = {
@@ -1055,6 +1234,7 @@ export type MemberUncheckedUpdateManyWithoutAdminUserInput = {
   billingDuration?: Prisma.EnumMemberBillingDurationFieldUpdateOperationsInput | $Enums.MemberBillingDuration
   planPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   discountInr?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  amountPaid?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   memberPhoto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   upiScreenshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1075,10 +1255,12 @@ export type MemberUncheckedUpdateManyWithoutAdminUserInput = {
 
 export type MemberCountOutputType = {
   reminders: number
+  renewals: number
 }
 
 export type MemberCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reminders?: boolean | MemberCountOutputTypeCountRemindersArgs
+  renewals?: boolean | MemberCountOutputTypeCountRenewalsArgs
 }
 
 /**
@@ -1098,6 +1280,13 @@ export type MemberCountOutputTypeCountRemindersArgs<ExtArgs extends runtime.Type
   where?: Prisma.ReminderLogWhereInput
 }
 
+/**
+ * MemberCountOutputType without action
+ */
+export type MemberCountOutputTypeCountRenewalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MembershipRenewalWhereInput
+}
+
 
 export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1107,6 +1296,7 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   billingDuration?: boolean
   planPrice?: boolean
   discountInr?: boolean
+  amountPaid?: boolean
   paymentStatus?: boolean
   memberPhoto?: boolean
   upiScreenshot?: boolean
@@ -1121,6 +1311,7 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   updatedAt?: boolean
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   reminders?: boolean | Prisma.Member$remindersArgs<ExtArgs>
+  renewals?: boolean | Prisma.Member$renewalsArgs<ExtArgs>
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["member"]>
 
@@ -1132,6 +1323,7 @@ export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   billingDuration?: boolean
   planPrice?: boolean
   discountInr?: boolean
+  amountPaid?: boolean
   paymentStatus?: boolean
   memberPhoto?: boolean
   upiScreenshot?: boolean
@@ -1155,6 +1347,7 @@ export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   billingDuration?: boolean
   planPrice?: boolean
   discountInr?: boolean
+  amountPaid?: boolean
   paymentStatus?: boolean
   memberPhoto?: boolean
   upiScreenshot?: boolean
@@ -1178,6 +1371,7 @@ export type MemberSelectScalar = {
   billingDuration?: boolean
   planPrice?: boolean
   discountInr?: boolean
+  amountPaid?: boolean
   paymentStatus?: boolean
   memberPhoto?: boolean
   upiScreenshot?: boolean
@@ -1192,10 +1386,11 @@ export type MemberSelectScalar = {
   updatedAt?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "phone" | "billingDuration" | "planPrice" | "discountInr" | "paymentStatus" | "memberPhoto" | "upiScreenshot" | "startDate" | "endDate" | "membershipStatus" | "pausedAt" | "whatsappEnabled" | "adminUserId" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "phone" | "billingDuration" | "planPrice" | "discountInr" | "amountPaid" | "paymentStatus" | "memberPhoto" | "upiScreenshot" | "startDate" | "endDate" | "membershipStatus" | "pausedAt" | "whatsappEnabled" | "adminUserId" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   adminUser?: boolean | Prisma.AdminUserDefaultArgs<ExtArgs>
   reminders?: boolean | Prisma.Member$remindersArgs<ExtArgs>
+  renewals?: boolean | Prisma.Member$renewalsArgs<ExtArgs>
   _count?: boolean | Prisma.MemberCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1210,6 +1405,7 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   objects: {
     adminUser: Prisma.$AdminUserPayload<ExtArgs>
     reminders: Prisma.$ReminderLogPayload<ExtArgs>[]
+    renewals: Prisma.$MembershipRenewalPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1225,6 +1421,7 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
      * INR bargained off the list price for this duration; 0 if none.
      */
     discountInr: runtime.Decimal
+    amountPaid: runtime.Decimal
     paymentStatus: $Enums.PaymentStatus
     memberPhoto: string | null
     upiScreenshot: string | null
@@ -1636,6 +1833,7 @@ export interface Prisma__MemberClient<T, Null = never, ExtArgs extends runtime.T
   readonly [Symbol.toStringTag]: "PrismaPromise"
   adminUser<T extends Prisma.AdminUserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AdminUserDefaultArgs<ExtArgs>>): Prisma.Prisma__AdminUserClient<runtime.Types.Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   reminders<T extends Prisma.Member$remindersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$remindersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReminderLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  renewals<T extends Prisma.Member$renewalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Member$renewalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MembershipRenewalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1672,6 +1870,7 @@ export interface MemberFieldRefs {
   readonly billingDuration: Prisma.FieldRef<"Member", 'MemberBillingDuration'>
   readonly planPrice: Prisma.FieldRef<"Member", 'Decimal'>
   readonly discountInr: Prisma.FieldRef<"Member", 'Decimal'>
+  readonly amountPaid: Prisma.FieldRef<"Member", 'Decimal'>
   readonly paymentStatus: Prisma.FieldRef<"Member", 'PaymentStatus'>
   readonly memberPhoto: Prisma.FieldRef<"Member", 'String'>
   readonly upiScreenshot: Prisma.FieldRef<"Member", 'String'>
@@ -2106,6 +2305,30 @@ export type Member$remindersArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.ReminderLogScalarFieldEnum | Prisma.ReminderLogScalarFieldEnum[]
+}
+
+/**
+ * Member.renewals
+ */
+export type Member$renewalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MembershipRenewal
+   */
+  select?: Prisma.MembershipRenewalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MembershipRenewal
+   */
+  omit?: Prisma.MembershipRenewalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipRenewalInclude<ExtArgs> | null
+  where?: Prisma.MembershipRenewalWhereInput
+  orderBy?: Prisma.MembershipRenewalOrderByWithRelationInput | Prisma.MembershipRenewalOrderByWithRelationInput[]
+  cursor?: Prisma.MembershipRenewalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MembershipRenewalScalarFieldEnum | Prisma.MembershipRenewalScalarFieldEnum[]
 }
 
 /**

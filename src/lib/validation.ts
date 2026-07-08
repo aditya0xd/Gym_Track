@@ -171,7 +171,7 @@ export const ownerSubscriptionPlanSchema = z.enum(
 );
 
 // Payment status enum
-export const paymentStatusSchema = z.enum(["DONE", "NOT_DONE"] as [PaymentStatus, ...PaymentStatus[]]);
+export const paymentStatusSchema = z.enum(["DONE", "PARTIAL", "NOT_DONE"] as [PaymentStatus, ...PaymentStatus[]]);
 
 // Price in INR (accepts string or number, normalizes to string)
 export const priceInrSchema = z.union([
