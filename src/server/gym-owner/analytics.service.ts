@@ -53,12 +53,18 @@ function monthKey(date: Date): string {
 }
 
 function monthLabel(date: Date): string {
-  return date.toLocaleString("en-IN", { month: "short", year: "2-digit", timeZone: "UTC" });
+  return date.toLocaleString("en-IN", {
+    month: "short",
+    year: "2-digit",
+    timeZone: "UTC",
+  });
 }
 
 function monthStartFromNow(offset: number): Date {
   const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1));
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1),
+  );
 }
 
 function addDays(date: Date, days: number): Date {
@@ -72,7 +78,10 @@ function pct(num: number, den: number): number {
   return Math.round((num / den) * 1000) / 10;
 }
 
-function linearRegression(xs: number[], ys: number[]): { slope: number; intercept: number } {
+function linearRegression(
+  xs: number[],
+  ys: number[],
+): { slope: number; intercept: number } {
   const n = xs.length;
   if (n === 0 || n !== ys.length) {
     return { slope: 0, intercept: 0 };
@@ -92,10 +101,13 @@ function linearRegression(xs: number[], ys: number[]): { slope: number; intercep
 
 function renewalPipelineForMonth(
   members: {
+    id: string;
     endDate: Date;
     planPrice: unknown;
     membershipStatus: string;
   }[],
+  effectiveEndDates: Map<string, Date>,
+  effectivePlanPrices: Map<string, number>,
   monthStart: Date,
   nextMonthStart: Date,
   renewalProbability: number,
@@ -104,29 +116,38 @@ function renewalPipelineForMonth(
     .filter(
       (m) =>
         m.membershipStatus === "ACTIVE" &&
-        m.endDate >= monthStart &&
-        m.endDate < nextMonthStart,
+        effectiveEndDates.get(m.id)! >= monthStart &&
+        effectiveEndDates.get(m.id)! < nextMonthStart,
     )
-    .reduce((s, m) => s + Number(m.planPrice) * renewalProbability, 0);
+    .reduce(
+      (s, m) => s + effectivePlanPrices.get(m.id)! * renewalProbability,
+      0,
+    );
 }
 
-export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnalytics> {
+export async function getOwnerAnalytics(
+  adminUserId: string,
+): Promise<OwnerAnalytics> {
   const now = new Date();
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const today = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
   const currentMonthStart = monthStartFromNow(0);
   const nextMonthStart = monthStartFromNow(1);
 
   // Summary stats using SQL aggregation
-  const summary = await prisma.$queryRaw<Array<{
-    total_members: bigint;
-    active_members: bigint;
-    paused_members: bigint;
-    inactive_members: bigint;
-    paid_members: bigint;
-    unpaid_members: bigint;
-    partial_members: bigint;
-    monthly_revenue: bigint;
-  }>>`
+  const summary = await prisma.$queryRaw<
+    Array<{
+      total_members: bigint;
+      active_members: bigint;
+      paused_members: bigint;
+      inactive_members: bigint;
+      paid_members: bigint;
+      unpaid_members: bigint;
+      partial_members: bigint;
+      monthly_revenue: bigint;
+    }>
+  >`
     SELECT
       COUNT(*) as total_members,
       SUM(CASE WHEN "endDate" >= ${today} AND "membershipStatus" = 'ACTIVE' THEN 1 ELSE 0 END) as active_members,
@@ -170,14 +191,18 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
   const monthlyRevenue = Number(summaryData.monthly_revenue);
 
   // Trends using SQL GROUP BY
-  const trendMonths = Array.from({ length: 6 }, (_, i) => monthStartFromNow(i - 5));
+  const trendMonths = Array.from({ length: 6 }, (_, i) =>
+    monthStartFromNow(i - 5),
+  );
   const trendStart = trendMonths[0]!;
   const trendEnd = monthStartFromNow(1);
-  
-  const revenueTrends = await prisma.$queryRaw<Array<{
-    month_key: string;
-    revenue: bigint;
-  }>>`
+
+  const revenueTrends = await prisma.$queryRaw<
+    Array<{
+      month_key: string;
+      revenue: bigint;
+    }>
+  >`
     SELECT
       TO_CHAR(r."paidAt", 'YYYY-MM') as month_key,
       SUM(r."amountPaid") as revenue
@@ -190,12 +215,14 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
     GROUP BY TO_CHAR(r."paidAt", 'YYYY-MM')
   `;
 
-  const cohortTrends = await prisma.$queryRaw<Array<{
-    month_key: string;
-    count: bigint;
-    unpaid_count: bigint;
-    partial_count: bigint;
-  }>>`
+  const cohortTrends = await prisma.$queryRaw<
+    Array<{
+      month_key: string;
+      count: bigint;
+      unpaid_count: bigint;
+      partial_count: bigint;
+    }>
+  >`
     SELECT
       TO_CHAR(r."periodStart", 'YYYY-MM') as month_key,
       SUM(CASE WHEN r."paymentStatus" = 'DONE' THEN 1 ELSE 0 END) as count,
@@ -210,10 +237,10 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
     GROUP BY TO_CHAR(r."periodStart", 'YYYY-MM')
   `;
 
-  const revenueMap = new Map(revenueTrends.map(t => [t.month_key, t]));
-  const cohortMap = new Map(cohortTrends.map(t => [t.month_key, t]));
-  
-  const trends: TrendPoint[] = trendMonths.map(month => {
+  const revenueMap = new Map(revenueTrends.map((t) => [t.month_key, t]));
+  const cohortMap = new Map(cohortTrends.map((t) => [t.month_key, t]));
+
+  const trends: TrendPoint[] = trendMonths.map((month) => {
     const key = monthKey(month);
     const revData = revenueMap.get(key);
     const cohortData = cohortMap.get(key);
@@ -231,59 +258,129 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
   const members = await prisma.member.findMany({
     where: memberScope(adminUserId),
     select: {
+      id: true,
       phone: true,
       startDate: true,
       endDate: true,
       planPrice: true,
       membershipStatus: true,
       updatedAt: true,
-      renewals: { select: { id: true, periodStart: true } },
+      renewals: {
+        select: {
+          id: true,
+          periodStart: true,
+          periodEnd: true,
+          paidAt: true,
+          paymentStatus: true,
+          planPrice: true,
+        },
+      },
     },
     orderBy: { startDate: "asc" },
   });
 
-  const byPhone = new Map<string, typeof members>();
+  // Compute effective end dates and plan prices for all members (done once for DRY)
+  const effectiveEndDates = new Map<string, Date>();
+  const effectivePlanPrices = new Map<string, number>();
+
+  for (const member of members) {
+    const paidRenewals = member.renewals.filter(
+      (r) => r.paidAt && r.paymentStatus === "DONE",
+    );
+    const latestRenewal =
+      paidRenewals.length > 0
+        ? paidRenewals.sort(
+            (a, b) => b.periodStart.getTime() - a.periodStart.getTime(),
+          )[0]
+        : null;
+    const effectiveEndDate = latestRenewal
+      ? new Date(
+          Math.max(member.endDate.getTime(), latestRenewal.periodEnd.getTime()),
+        )
+      : member.endDate;
+    const effectivePlanPrice = latestRenewal
+      ? Number(latestRenewal.planPrice)
+      : Number(member.planPrice);
+
+    effectiveEndDates.set(member.id, effectiveEndDate);
+    effectivePlanPrices.set(member.id, effectivePlanPrice);
+  }
+
+  // Build timeline of membership periods for each phone number
+  // This unifies inline renewals and legacy new-row renewals into one opportunity model
+  const periodsByPhone = new Map<
+    string,
+    Array<{ start: Date; end: Date; isRenewal: boolean; status: string }>
+  >();
+
   for (const member of members) {
     const key = member.phone.trim();
-    const arr = byPhone.get(key) ?? [];
-    arr.push(member);
-    byPhone.set(key, arr);
+    const periods = periodsByPhone.get(key) ?? [];
+
+    // Add the original member enrollment period (use member.endDate, not effective end date)
+    periods.push({
+      start: member.startDate,
+      end: member.endDate,
+      isRenewal: false,
+      status: member.membershipStatus,
+    });
+
+    // Add all inline renewals as separate periods (only fully paid renewals)
+    for (const renewal of member.renewals) {
+      if (
+        renewal.paidAt &&
+        renewal.paymentStatus === "DONE" &&
+        renewal.periodStart.getTime() !== member.startDate.getTime()
+      ) {
+        periods.push({
+          start: renewal.periodStart,
+          end: renewal.periodEnd,
+          isRenewal: true,
+          status: member.membershipStatus,
+        });
+      }
+    }
+
+    periodsByPhone.set(key, periods);
+  }
+
+  // Sort periods by start date for each phone number
+  for (const periods of periodsByPhone.values()) {
+    periods.sort((a, b) => a.start.getTime() - b.start.getTime());
   }
 
   let opportunities = 0;
   let renewed = 0;
-  for (const memberships of byPhone.values()) {
-    const sorted = [...memberships].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-    for (let i = 0; i < sorted.length; i += 1) {
-      const curr = sorted[i]!;
-      const next = sorted[i + 1];
 
-      // 1) Inline renewals via MembershipRenewal
-      let inlineRenewals = 0;
-      for (const renewal of curr.renewals) {
-        if (renewal.periodStart.getTime() !== curr.startDate.getTime()) {
-          inlineRenewals += 1;
-        }
+  for (const periods of periodsByPhone.values()) {
+    for (let i = 0; i < periods.length; i += 1) {
+      const current = periods[i]!;
+      const next = periods[i + 1];
+
+      // Skip paused members - their clock is frozen, not a churn opportunity
+      if (current.status === "PAUSED") {
+        continue;
       }
-      opportunities += inlineRenewals;
-      renewed += inlineRenewals;
 
-      // 2) Check if the final period of this Member row has ended
-      if (curr.endDate > today) {
-        continue; // Active, no churn opportunity yet
+      // A renewal opportunity exists when a period ends
+      // (unless it's the current active period)
+      if (current.end > today) {
+        continue; // Still active, no churn opportunity yet
       }
 
       opportunities += 1;
 
-      // 3) Did they renew by creating a NEW Member row (old method)?
-      if (next && next.startDate <= addDays(curr.endDate, 30)) {
+      // Check if they renewed: look for a next period starting within 30 days
+      if (next && next.start <= addDays(current.end, 30)) {
         renewed += 1;
       }
     }
   }
   const churned = Math.max(0, opportunities - renewed);
 
-  const trendsSorted = [...trends].sort((a, b) => a.monthKey.localeCompare(b.monthKey));
+  const trendsSorted = [...trends].sort((a, b) =>
+    a.monthKey.localeCompare(b.monthKey),
+  );
   const xs = trendsSorted.map((_, i) => i);
   const ys = trendsSorted.map((t) => t.revenue);
   const { slope, intercept } = linearRegression(xs, ys);
@@ -299,7 +396,14 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
     const trendBased = Math.max(0, intercept + slope * xIndex);
     const renewalPipeline =
       Math.round(
-        renewalPipelineForMonth(members, ms, msNext, renewalProbability) * 100,
+        renewalPipelineForMonth(
+          members,
+          effectiveEndDates,
+          effectivePlanPrices,
+          ms,
+          msNext,
+          renewalProbability,
+        ) * 100,
       ) / 100;
     const combined =
       trendBased > 0 && renewalPipeline > 0
@@ -329,14 +433,14 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
   const staleThreshold = addDays(today, -10);
   const staleActiveCount = members.filter(
     (m) =>
-      m.endDate >= today &&
+      effectiveEndDates.get(m.id)! >= today &&
       m.membershipStatus === "ACTIVE" &&
       m.updatedAt < staleThreshold,
   ).length;
   const expiringSoonCount = members.filter(
     (m) =>
-      m.endDate >= today &&
-      m.endDate <= addDays(today, 7) &&
+      effectiveEndDates.get(m.id)! >= today &&
+      effectiveEndDates.get(m.id)! <= addDays(today, 7) &&
       m.membershipStatus === "ACTIVE",
   ).length;
 
@@ -352,10 +456,14 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
     );
   }
   if (unpaidMembers > 0) {
-    insights.push(`${unpaidMembers} members are marked unpaid. Follow up for payment confirmation.`);
+    insights.push(
+      `${unpaidMembers} members are marked unpaid. Follow up for payment confirmation.`,
+    );
   }
   if (insights.length === 0) {
-    insights.push("Membership health looks stable. Continue weekly reminder and payment follow-up checks.");
+    insights.push(
+      "Membership health looks stable. Continue weekly reminder and payment follow-up checks.",
+    );
   }
 
   insights.push(
@@ -364,7 +472,8 @@ export async function getOwnerAnalytics(adminUserId: string): Promise<OwnerAnaly
 
   const successRate = pct(paidMembers, totalMembers);
   const partialRate = pct(partialMembers, totalMembers);
-  const failureRate = totalMembers > 0 ? Math.max(0, 100 - successRate - partialRate) : 0;
+  const failureRate =
+    totalMembers > 0 ? Math.max(0, 100 - successRate - partialRate) : 0;
 
   return {
     summary: {

@@ -23,6 +23,8 @@ model Member {
   upiScreenshot    String?               @db.Text
   startDate        DateTime              @db.Date
   endDate          DateTime              @db.Date
+  /// When a MembershipRenewal is created, this field is updated to the renewal's periodEnd.
+  /// When status is PAUSED, clock starts for freeze; on resume, endDate is extended by frozen calendar days.
   membershipStatus MembershipStatus      @default(ACTIVE)
   /// When status is PAUSED, clock started for freeze; on resume, endDate is extended by frozen calendar days.
   pausedAt         DateTime?
