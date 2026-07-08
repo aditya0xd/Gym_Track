@@ -80,34 +80,39 @@ export const authOptions: NextAuthOptions = {
 
         if (!email || !password) return null;
 
-        // Superadmin check
-        const superUser = await prisma.superAdminUser.findUnique({
-          where: { email },
-        });
-        if (superUser) {
-          if (!(await compare(password, superUser.passwordHash))) return null;
+        try {
+          // Superadmin check
+          const superUser = await prisma.superAdminUser.findUnique({
+            where: { email },
+          });
+          if (superUser) {
+            if (!(await compare(password, superUser.passwordHash))) return null;
+            return {
+              id: superUser.id,
+              name: superUser.name,
+              email: superUser.email,
+              role: "superadmin" as const,
+              rememberMe,
+            };
+          }
+
+          // Gym owner check
+          const owner = await prisma.adminUser.findFirst({
+            where: { email, deletedAt: null },
+          });
+          if (!owner) return null;
+          if (!(await compare(password, owner.passwordHash))) return null;
           return {
-            id: superUser.id,
-            name: superUser.name,
-            email: superUser.email,
-            role: "superadmin" as const,
+            id: owner.id,
+            name: owner.name,
+            email: owner.email,
+            role: "gym_owner" as const,
             rememberMe,
           };
+        } catch (error) {
+          console.error("Auth authorize error:", error);
+          return null;
         }
-
-        // Gym owner check
-        const owner = await prisma.adminUser.findFirst({
-          where: { email, deletedAt: null },
-        });
-        if (!owner) return null;
-        if (!(await compare(password, owner.passwordHash))) return null;
-        return {
-          id: owner.id,
-          name: owner.name,
-          email: owner.email,
-          role: "gym_owner" as const,
-          rememberMe,
-        };
       },
     }),
   ],

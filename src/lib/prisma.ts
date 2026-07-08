@@ -9,9 +9,20 @@ declare global {
 function getPrisma() {
   if (global.prisma) return global.prisma;
 
-  const databaseUrl = process.env.DATABASE_URL;
+  let databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not set.");
+  }
+
+  // Set SSL mode based on environment
+  // Production requires verify-full for security, development uses disable
+  const isProduction = process.env.NODE_ENV === "production";
+  const sslMode = isProduction ? "verify-full" : "disable";
+  
+  if (!databaseUrl.includes("sslmode=")) {
+    databaseUrl = databaseUrl.includes("?")
+      ? `${databaseUrl}&sslmode=${sslMode}`
+      : `${databaseUrl}?sslmode=${sslMode}`;
   }
 
   const adapter = new PrismaPg({ connectionString: databaseUrl });

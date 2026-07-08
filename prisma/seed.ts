@@ -12,7 +12,7 @@ function d(dateOnly: string) {
   return new Date(`${dateOnly}T00:00:00.000Z`);
 }
 
-// Dates relative to today: 2026-07-05
+// Dates relative to today: 2026-07-08
 const DEMO_PASSWORD_HASH =
   "$2b$12$RdjIdI3NGH1r.e/9Oq2naupYNxIaZ808kW3/mjeflM3/q/GxLsm7m"; // GymPass123!
 
@@ -32,10 +32,7 @@ async function seedDurationPrices(
     string
   >,
 ) {
-  const entries = Object.entries(prices) as [
-    keyof typeof prices,
-    string,
-  ][];
+  const entries = Object.entries(prices) as [keyof typeof prices, string][];
   for (const [duration, priceInr] of entries) {
     await prisma.gymOwnerDurationPrice.upsert({
       where: {
@@ -128,16 +125,19 @@ async function main() {
   });
 
   // ─── Clear members & reminders for a clean re-seed ────────────────────────
-  type MemberSeed = Omit<Prisma.MemberCreateInput, "adminUser"> & { id: string };
+  type MemberSeed = Omit<Prisma.MemberCreateInput, "adminUser"> & {
+    id: string;
+  };
 
   await prisma.reminderLog.deleteMany({});
   await prisma.member.deleteMany({});
 
-  // ─── Owner Members (dates relative to 2026-07-05) ─────────────────────────
+  // ─── Owner Members (dates relative to 2026-07-08) ─────────────────────────
   // Mix of: ACTIVE (future endDate), expiring soon, expired (past endDate), PAUSED
+  // Added members with renewal history for analytics testing
   const ownerMembers: MemberSeed[] = [
     {
-      // Active — annual plan, mid-term
+      // Active — annual plan, mid-term, with inline renewal
       id: "11111111-1111-1111-1111-111111111111",
       fullName: "Aditya Sharma",
       email: "aditya@example.com",
@@ -145,12 +145,12 @@ async function main() {
       billingDuration: "TWELVE_MONTHS",
       planPrice: new Prisma.Decimal("8999.00"),
       startDate: d("2026-01-01"),
-      endDate: d("2026-12-31"),
+      endDate: d("2027-12-31"), // Extended by renewal
       membershipStatus: "ACTIVE",
       whatsappEnabled: true,
     },
     {
-      // Active — 3-month plan, started last month
+      // Active — 3-month plan, started last month, renewed inline
       id: "22222222-2222-2222-2222-222222222222",
       fullName: "Priya Verma",
       email: "priya@example.com",
@@ -158,12 +158,12 @@ async function main() {
       billingDuration: "THREE_MONTHS",
       planPrice: new Prisma.Decimal("2699.00"),
       startDate: d("2026-06-01"),
-      endDate: d("2026-08-31"),
+      endDate: d("2026-10-31"), // Extended by renewal
       membershipStatus: "ACTIVE",
       whatsappEnabled: true,
     },
     {
-      // Active — 6-month plan
+      // Active — 6-month plan, partial payment
       id: "33333333-3333-3333-3333-333333333333",
       fullName: "Rahul Singh",
       email: "rahul@example.com",
@@ -184,7 +184,7 @@ async function main() {
       billingDuration: "ONE_MONTH",
       planPrice: new Prisma.Decimal("999.00"),
       startDate: d("2026-06-08"),
-      endDate: d("2026-07-08"),
+      endDate: d("2026-07-11"),
       membershipStatus: "ACTIVE",
       whatsappEnabled: true,
     },
@@ -196,13 +196,13 @@ async function main() {
       phone: "9990005555",
       billingDuration: "ONE_MONTH",
       planPrice: new Prisma.Decimal("999.00"),
-      startDate: d("2026-06-06"),
-      endDate: d("2026-07-06"),
+      startDate: d("2026-06-09"),
+      endDate: d("2026-07-09"),
       membershipStatus: "ACTIVE",
       whatsappEnabled: true,
     },
     {
-      // Expired — 1 week ago
+      // Expired — 1 week ago, did NOT renew (churn)
       id: "66666666-6666-6666-6666-666666666666",
       fullName: "Kavya Nair",
       email: "kavya.nair@example.com",
@@ -215,7 +215,7 @@ async function main() {
       whatsappEnabled: true,
     },
     {
-      // Expired — 2 weeks ago
+      // Expired 2 weeks ago, DID renew inline (renewal success) - completed renewal opportunity
       id: "77777777-7777-7777-7777-777777777771",
       fullName: "Arjun Patel",
       email: "arjun.patel@example.com",
@@ -223,12 +223,25 @@ async function main() {
       billingDuration: "THREE_MONTHS",
       planPrice: new Prisma.Decimal("2699.00"),
       startDate: d("2026-03-18"),
-      endDate: d("2026-06-17"),
+      endDate: d("2026-06-17"), // Original period ended 3 weeks ago
       membershipStatus: "ACTIVE",
       whatsappEnabled: false,
     },
     {
-      // Active — started this month
+      // Expired 1 week ago, DID renew inline (renewal success) - completed renewal opportunity
+      id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb6",
+      fullName: "Deepa Sharma",
+      email: "deepa.sharma@example.com",
+      phone: "9990014444",
+      billingDuration: "ONE_MONTH",
+      planPrice: new Prisma.Decimal("999.00"),
+      startDate: d("2026-06-01"),
+      endDate: d("2026-06-30"), // Original period ended 1 week ago
+      membershipStatus: "ACTIVE",
+      whatsappEnabled: true,
+    },
+    {
+      // Active — started this month (new member)
       id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1",
       fullName: "Meera Iyer",
       email: "meera.iyer@example.com",
@@ -294,6 +307,33 @@ async function main() {
       membershipStatus: "ACTIVE",
       paymentStatus: "NOT_DONE",
       whatsappEnabled: false,
+    },
+    {
+      // Expired — 3 months ago, did NOT renew (churn)
+      id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5",
+      fullName: "Suresh Kumar",
+      email: "suresh.kumar@example.com",
+      phone: "9990013333",
+      billingDuration: "THREE_MONTHS",
+      planPrice: new Prisma.Decimal("2699.00"),
+      startDate: d("2026-01-15"),
+      endDate: d("2026-04-14"),
+      membershipStatus: "ACTIVE",
+      whatsappEnabled: true,
+    },
+    {
+      // Stale active — no updates in 10+ days
+      id: "cccccccc-cccc-cccc-cccc-ccccccccccc5",
+      fullName: "Rajesh Verma",
+      email: "rajesh.verma@example.com",
+      phone: "9990015555",
+      billingDuration: "ONE_MONTH",
+      planPrice: new Prisma.Decimal("999.00"),
+      startDate: d("2026-06-15"),
+      endDate: d("2026-07-15"),
+      membershipStatus: "ACTIVE",
+      whatsappEnabled: false,
+      updatedAt: d("2026-06-20"), // Stale - no updates in 18 days
     },
   ];
 
@@ -381,6 +421,125 @@ async function main() {
     });
   }
 
+  // ─── Member payment states for analytics visibility ───────────────────────
+  await prisma.member.update({
+    where: { id: "11111111-1111-1111-1111-111111111111" },
+    data: {
+      paymentStatus: "DONE",
+      amountPaid: new Prisma.Decimal("8999.00"),
+    },
+  });
+
+  await prisma.member.update({
+    where: { id: "22222222-2222-2222-2222-222222222222" },
+    data: {
+      paymentStatus: "DONE",
+      amountPaid: new Prisma.Decimal("2699.00"),
+    },
+  });
+
+  await prisma.member.update({
+    where: { id: "33333333-3333-3333-3333-333333333333" },
+    data: {
+      paymentStatus: "PARTIAL",
+      amountPaid: new Prisma.Decimal("2500.00"),
+    },
+  });
+
+  await prisma.member.update({
+    where: { id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5" },
+    data: {
+      paymentStatus: "NOT_DONE",
+      amountPaid: new Prisma.Decimal("0.00"),
+    },
+  });
+
+  // ─── Membership renewals to drive renewal/churn analytics ───────────────
+  // These create realistic renewal scenarios for analytics testing
+  const renewalSeeds = [
+    {
+      memberId: "11111111-1111-1111-1111-111111111111",
+      billingDuration: "TWELVE_MONTHS" as const,
+      planPrice: new Prisma.Decimal("8999.00"),
+      amountPaid: new Prisma.Decimal("8999.00"),
+      periodStart: d("2026-12-31"),
+      periodEnd: d("2027-12-31"),
+      paymentStatus: "DONE" as const,
+      paymentProvider: "MANUAL" as const,
+      paidAt: d("2026-04-15"),
+    },
+    {
+      memberId: "22222222-2222-2222-2222-222222222222",
+      billingDuration: "THREE_MONTHS" as const,
+      planPrice: new Prisma.Decimal("2699.00"),
+      amountPaid: new Prisma.Decimal("2699.00"),
+      periodStart: d("2026-08-01"),
+      periodEnd: d("2026-10-31"),
+      paymentStatus: "DONE" as const,
+      paymentProvider: "MANUAL" as const,
+      paidAt: d("2026-07-01"),
+    },
+    {
+      memberId: "77777777-7777-7777-7777-777777777771",
+      billingDuration: "ONE_MONTH" as const,
+      planPrice: new Prisma.Decimal("999.00"),
+      amountPaid: new Prisma.Decimal("999.00"),
+      periodStart: d("2026-06-20"),
+      periodEnd: d("2026-07-05"), // Renewal period ended 3 days ago (within 30 day window)
+      paymentStatus: "DONE" as const,
+      paymentProvider: "MANUAL" as const,
+      paidAt: d("2026-06-20"),
+    },
+    {
+      memberId: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb6",
+      billingDuration: "ONE_MONTH" as const,
+      planPrice: new Prisma.Decimal("999.00"),
+      amountPaid: new Prisma.Decimal("999.00"),
+      periodStart: d("2026-07-02"),
+      periodEnd: d("2026-07-07"), // Renewal period ended yesterday (within 30 day window)
+      paymentStatus: "DONE" as const,
+      paymentProvider: "MANUAL" as const,
+      paidAt: d("2026-07-02"),
+    },
+    {
+      memberId: "33333333-3333-3333-3333-333333333333",
+      billingDuration: "SIX_MONTHS" as const,
+      planPrice: new Prisma.Decimal("4999.00"),
+      amountPaid: new Prisma.Decimal("2500.00"),
+      periodStart: d("2026-05-01"),
+      periodEnd: d("2026-10-31"),
+      paymentStatus: "PARTIAL" as const,
+      paymentProvider: "MANUAL" as const,
+      paidAt: d("2026-05-01"),
+    },
+    {
+      memberId: "44444444-4444-4444-4444-444444444444",
+      billingDuration: "ONE_MONTH" as const,
+      planPrice: new Prisma.Decimal("999.00"),
+      amountPaid: new Prisma.Decimal("999.00"),
+      periodStart: d("2026-07-11"),
+      periodEnd: d("2026-08-11"),
+      paymentStatus: "DONE" as const,
+      paymentProvider: "MANUAL" as const,
+      paidAt: d("2026-07-05"),
+    },
+    {
+      memberId: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb6",
+      billingDuration: "ONE_MONTH" as const,
+      planPrice: new Prisma.Decimal("999.00"),
+      amountPaid: new Prisma.Decimal("999.00"),
+      periodStart: d("2026-07-01"),
+      periodEnd: d("2026-08-31"),
+      paymentStatus: "DONE" as const,
+      paymentProvider: "MANUAL" as const,
+      paidAt: d("2026-06-28"),
+    },
+  ];
+
+  for (const renewal of renewalSeeds) {
+    await prisma.membershipRenewal.create({ data: renewal });
+  }
+
   // ─── Reminder Logs ──────────────────────────────────────────────────────────
   const reminderLogs: Array<Prisma.ReminderLogCreateInput & { id: string }> = [
     {
@@ -389,7 +548,8 @@ async function main() {
       channel: "WHATSAPP",
       status: "SENT",
       sentAt: new Date("2026-06-28T09:00:00.000Z"),
-      message: "Hi Aditya, your annual membership is active till 31 Dec 2026. Keep it up!",
+      message:
+        "Hi Aditya, your annual membership is active till 31 Dec 2026. Keep it up!",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc2",
@@ -405,7 +565,8 @@ async function main() {
       channel: "WHATSAPP",
       status: "DELIVERED",
       sentAt: new Date("2026-07-03T08:00:00.000Z"),
-      message: "Hi Neha, your membership expires in 5 days on 8 Jul. Renew now to avoid a gap!",
+      message:
+        "Hi Neha, your membership expires in 5 days on 8 Jul. Renew now to avoid a gap!",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc4",
@@ -413,7 +574,8 @@ async function main() {
       channel: "WHATSAPP",
       status: "SENT",
       sentAt: new Date("2026-07-04T07:00:00.000Z"),
-      message: "Hi Vikram, urgent: your membership expires TOMORROW on 6 Jul. Renew today!",
+      message:
+        "Hi Vikram, urgent: your membership expires TOMORROW on 6 Jul. Renew today!",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc5",
@@ -421,7 +583,8 @@ async function main() {
       channel: "SMS",
       status: "SENT",
       sentAt: new Date("2026-06-25T14:00:00.000Z"),
-      message: "Hi Kavya, your membership expired on 27 Jun. Please renew to continue access.",
+      message:
+        "Hi Kavya, your membership expired on 27 Jun. Please renew to continue access.",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc6",
@@ -429,7 +592,8 @@ async function main() {
       channel: "SMS",
       status: "FAILED",
       sentAt: new Date("2026-06-15T11:45:00.000Z"),
-      message: "Hi Arjun, SMS reminder failed — please verify your registered phone number.",
+      message:
+        "Hi Arjun, SMS reminder failed — please verify your registered phone number.",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc7",
@@ -437,7 +601,8 @@ async function main() {
       channel: "WHATSAPP",
       status: "SENT",
       sentAt: new Date("2026-07-01T09:30:00.000Z"),
-      message: "Hi Meera, welcome! Your July membership is active. See you at the gym 💪",
+      message:
+        "Hi Meera, welcome! Your July membership is active. See you at the gym 💪",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc8",
@@ -445,7 +610,8 @@ async function main() {
       channel: "WHATSAPP",
       status: "DELIVERED",
       sentAt: new Date("2026-06-25T10:00:00.000Z"),
-      message: "Hi Sanjay, your membership has been paused. Contact us when you want to resume.",
+      message:
+        "Hi Sanjay, your membership has been paused. Contact us when you want to resume.",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc9",
@@ -453,7 +619,8 @@ async function main() {
       channel: "WHATSAPP",
       status: "DELIVERED",
       sentAt: new Date("2026-07-01T16:00:00.000Z"),
-      message: "Hi Ishaan, welcome for July! Your monthly pass is active. See you soon.",
+      message:
+        "Hi Ishaan, welcome for July! Your monthly pass is active. See you soon.",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccca",
@@ -461,7 +628,8 @@ async function main() {
       channel: "SMS",
       status: "SENT",
       sentAt: new Date("2026-07-03T12:00:00.000Z"),
-      message: "Hi Rohan, your membership expires in 6 days on 9 Jul. Please renew soon.",
+      message:
+        "Hi Rohan, your membership expires in 6 days on 9 Jul. Please renew soon.",
     },
   ];
 
@@ -479,10 +647,12 @@ async function main() {
   console.log("  Owner:     ", OWNER_ADMIN_EMAIL, "| password: GymPass123!");
   console.log("  Manager:   ", MANAGER_ADMIN_EMAIL, "| password: GymPass123!");
   console.log("");
-  console.log("  Owner member breakdown (12 members):");
-  console.log("    • 8 ACTIVE (various plans)");
+  console.log("  Owner member breakdown (15 members):");
+  console.log("    • 10 ACTIVE (various plans)");
   console.log("    • 1 PAUSED (Sanjay Reddy)");
-  console.log("    • 3 expired / expiring soon");
+  console.log("    • 4 expired / expiring soon");
+  console.log("    • 6 membership renewals for analytics testing");
+  console.log("    • 1 stale member (no updates in 10+ days)");
 }
 
 main()
