@@ -80,16 +80,22 @@ Password for all demo users: `GymPass123!`
 ## Screenshots
 
 ### Owner Dashboard
-![Owner Dashboard](https://github.com/user-attachments/assets/eebaf5ad-9797-4560-8675-585830b291cb)
+![Owner Dashboard](https://github.com/user-attachments/assets/62892cd6-c37d-4a1a-96c5-501bcb753533)
 
-### Member Management
-![Member Management](https://github.com/user-attachments/assets/a9d84ef5-4c48-4f5b-b45d-01b4b186771c)
+### Member List
+![Member List](https://github.com/user-attachments/assets/c2684d36-b044-4073-8f21-d52b885a6bee)
+
+### Member Detail Page
+![Member Detail Page](https://github.com/user-attachments/assets/63efa9b3-9a70-4533-8ae9-c772a3c9ecb9)
+
+### Enroll Member 
+![Member Detail Page](https://github.com/user-attachments/assets/dbd67ca6-4615-4885-bb17-d051faf25079)
 
 ### Analytics Dashboard
-![Analytics](https://github.com/user-attachments/assets/0af7da7e-c111-45a6-bf92-bbe52a7fd840)
+![Analytics](https://github.com/user-attachments/assets/b5a42f24-b795-4410-8c68-337a2cd56edb)
 
 ### Billing & Invoices
-![Billing](https://github.com/user-attachments/assets/0e53e068-33af-48b4-900c-f84a4e67c29c)
+![Billing](https://github.com/user-attachments/assets/70f6d12f-f524-49e8-858d-51de5d8a3160)
 
 ### Superadmin Panel
 ![Superadmin](https://github.com/user-attachments/assets/7f2be8bb-06c8-4ded-97ce-99174385697b)
