@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { withGymOwner } from "@/lib/api-auth";
-import { getMemberForOwner } from "@/server/gym-owner/member.service";
+import { parseRequestBody } from "@/lib/validation";
+import { getMemberForOwner, updateMemberForOwner } from "@/server/gym-owner/member.service";
 
 async function GETHandler(_request: Request, userId: string, context?: unknown) {
   const { id } = await (context as { params: Promise<{ id: string }> }).params;
@@ -37,4 +39,44 @@ async function GETHandler(_request: Request, userId: string, context?: unknown) 
   });
 }
 
+const updateMemberSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  email: z.string().email().nullable().optional().or(z.literal("")),
+  phone: z.string().min(10, "Valid phone number required"),
+  whatsappEnabled: z.boolean(),
+  memberPhoto: z.string().nullable().optional(),
+});
+
+async function PATCHHandler(request: Request, userId: string, context?: unknown) {
+  const { id } = await (context as { params: Promise<{ id: string }> }).params;
+  const { data, error } = await parseRequestBody(request, updateMemberSchema);
+  
+  if (error || !data) {
+    return NextResponse.json(error || { message: "Invalid request" }, { status: error?.status ?? 400 });
+  }
+
+  try {
+    const payload: any = {
+      fullName: data.fullName,
+      email: data.email && data.email !== "" ? data.email : null,
+      phone: data.phone,
+      whatsappEnabled: data.whatsappEnabled,
+    };
+    
+    if (data.memberPhoto !== undefined) {
+      payload.memberPhoto = data.memberPhoto;
+    }
+
+    const updatedMember = await updateMemberForOwner(userId, id, payload);
+    
+    return NextResponse.json({ message: "Member updated successfully", member: updatedMember });
+  } catch (e: any) {
+    return NextResponse.json(
+      { message: e.message || "Failed to update member" },
+      { status: e.status || 500 }
+    );
+  }
+}
+
 export const GET = withGymOwner(GETHandler);
+export const PATCH = withGymOwner(PATCHHandler);

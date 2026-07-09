@@ -186,6 +186,14 @@ export type RenewMemberInput = {
   amountPaid?: string;
 };
 
+export type UpdateMemberInput = {
+  fullName: string;
+  email: string | null;
+  phone: string;
+  whatsappEnabled: boolean;
+  memberPhoto?: string | null;
+};
+
 function parseMoney(raw: string | undefined, label: string): Prisma.Decimal {
   const s = raw?.trim() ?? "";
   if (s === "") return new Prisma.Decimal(0);
@@ -486,4 +494,38 @@ export async function resumeMembershipForOwner(adminUserId: string, memberId: st
   });
   await invalidateOwnerMembersListCache(adminUserId);
   return updated;
+}
+
+export async function updateMemberForOwner(
+  adminUserId: string,
+  memberId: string,
+  input: UpdateMemberInput,
+) {
+  const member = await prisma.member.findFirst({
+    where: { id: memberId, ...memberScope(adminUserId) },
+  });
+
+  if (!member) throw new HttpError(404, "Member not found.");
+
+  let updatedMember;
+  try {
+    updatedMember = await prisma.member.update({
+      where: { id: memberId },
+      data: {
+        fullName: input.fullName.trim(),
+        email: input.email?.trim() ? input.email.trim().toLowerCase() : null,
+        phone: input.phone.trim(),
+        whatsappEnabled: input.whatsappEnabled,
+        memberPhoto: input.memberPhoto,
+      },
+    });
+  } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      throw new HttpError(409, "A member with this email already exists.");
+    }
+    throw err;
+  }
+
+  await invalidateOwnerMembersListCache(adminUserId);
+  return updatedMember;
 }

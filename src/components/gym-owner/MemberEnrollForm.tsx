@@ -132,12 +132,6 @@ export function MemberEnrollForm() {
     }
 
     const amountPaidTrim = amountPaidStr.trim();
-    if (paymentStatus !== "NOT_DONE" && !upiScreenshot) {
-      toast.error("Upload UPI screenshot when payment is recorded.");
-      setPending(false);
-      return;
-    }
-
     const discountTrim = discountStr.trim();
     const res = await fetch("/api/owner/members", {
       method: "POST",
@@ -400,7 +394,7 @@ export function MemberEnrollForm() {
 
           <div className="space-y-2">
             <Label className={labelClass}>
-              UPI {paymentStatus !== "NOT_DONE" ? "*" : ""}
+              UPI
             </Label>
             <input
               ref={upiScreenshotInputRef}
@@ -409,7 +403,6 @@ export function MemberEnrollForm() {
               type="file"
               accept={IMAGE_ACCEPT}
               className="sr-only"
-              required={paymentStatus !== "NOT_DONE"}
               onChange={(e) =>
                 setUpiFileName(e.target.files?.[0]?.name ?? null)
               }

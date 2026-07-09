@@ -5,7 +5,7 @@ import { Calendar, ChevronDown, ChevronUp, Search } from "lucide-react";
 
 import { FilterChips } from "@/components/gym-owner/FilterChips";
 import { MemberCard } from "@/components/gym-owner/MemberCard";
-import type { MemberBillingDuration, MembershipStatus } from "@/generated/prisma/client";
+import type { MemberBillingDuration, MembershipStatus, PaymentStatus } from "@/generated/prisma/client";
 
 type MemberItem = {
   id: string;
@@ -18,6 +18,8 @@ type MemberItem = {
   membershipStatus: MembershipStatus;
   memberPhoto: string | null;
   joinedDate?: string;
+  paymentStatus?: PaymentStatus;
+  amountPaid?: string;
 };
 
 type StatusFilter = "ALL" | "EXPIRING_SOON" | "EXPIRED" | "PAUSED";

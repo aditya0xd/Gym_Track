@@ -11,6 +11,7 @@ import {
   Upload,
   X,
   ReceiptText,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
@@ -61,6 +62,7 @@ interface MemberDetail {
   planPrice: string;
   discountInr: string;
   amountPaid: string;
+  paymentStatus: PaymentStatus;
   startDate: string;
   endDate: string;
   membershipStatus: MembershipStatus;
@@ -68,6 +70,7 @@ interface MemberDetail {
   whatsappEnabled: boolean;
   memberPhoto: string | null;
   upiScreenshot: string | null;
+  createdAt: string;
   reminders: ReminderItem[];
   renewals: PaymentHistoryItem[];
 }
@@ -112,6 +115,15 @@ function paymentStatusLabel(status: PaymentStatus) {
   if (status === "DONE") return "Paid";
   if (status === "PARTIAL") return "Partial";
   return "Due";
+}
+
+function formatDate(dateStr: string | null | undefined) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  const day = date.getDate();
+  const month = date.toLocaleString("en-US", { month: "short" });
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
 }
 
 /** SVG arc gauge showing days remaining */
@@ -214,6 +226,11 @@ export function MemberDetailsClient({ id }: { id: string }) {
     useState<PaymentStatus>("NOT_DONE");
   const [renewalAmountPaid, setRenewalAmountPaid] = useState("");
   const [renewalUpiFile, setRenewalUpiFile] = useState<File | null>(null);
+  const [clearDuesDialog, setClearDuesDialog] = useState<{
+    isOpen: boolean;
+    renewalId: string;
+    planPrice: string;
+  }>({ isOpen: false, renewalId: "", planPrice: "" });
 
   useEffect(() => {
     let cancelled = false;
@@ -359,6 +376,36 @@ export function MemberDetailsClient({ id }: { id: string }) {
       toast.error("Network error. Please try again.");
     } finally {
       setSendingType(null);
+    }
+  }
+
+  async function handleClearDues(renewalId: string, planPrice: string) {
+    setClearDuesDialog({ isOpen: true, renewalId, planPrice });
+  }
+
+  async function confirmClearDues() {
+    const { renewalId, planPrice } = clearDuesDialog;
+    setClearDuesDialog({ ...clearDuesDialog, isOpen: false });
+    
+    try {
+      const res = await fetch(
+        `/api/owner/members/${member!.id}/renewals/${renewalId}/clear-dues`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paymentStatus: "DONE" }),
+        },
+      );
+      const data = (await res.json()) as { message?: string };
+      if (!res.ok) {
+        toast.error(data.message ?? "Could not clear dues.");
+        return;
+      }
+      toast.success(data.message ?? "Dues cleared successfully.");
+      refetch();
+      router.refresh();
+    } catch {
+      toast.error("Network error. Please try again.");
     }
   }
 
@@ -562,13 +609,13 @@ export function MemberDetailsClient({ id }: { id: string }) {
                 <p className="text-[11px] text-gray-400">
                   Starts:{" "}
                   <span className="text-gray-200">
-                    {member.startDate.slice(0, 10)}
+                    {formatDate(member.startDate)}
                   </span>
                 </p>
                 <p className="text-[11px] text-gray-400">
                   Ends:{" "}
                   <span className="text-gray-200">
-                    {member.endDate.slice(0, 10)}
+                    {formatDate(member.endDate)}
                   </span>
                 </p>
               </div>
@@ -636,7 +683,7 @@ export function MemberDetailsClient({ id }: { id: string }) {
               {member.reminders.map((r) => (
                 <div key={r.id}>
                   <p className="text-xs text-gray-400">
-                    {r.channel} · {r.sentAt.slice(0, 10)}{" "}
+                    {r.channel} · {formatDate(r.sentAt)}{" "}
                     <span className="rounded bg-[#2a2a2a] px-1.5 py-0.5 text-[10px] uppercase text-gray-300">
                       {r.status}
                     </span>
@@ -684,10 +731,76 @@ export function MemberDetailsClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {member.renewals.length === 0 ? (
+          {!member.paymentStatus && member.renewals.length === 0 ? (
             <p className="text-sm text-gray-500">No payments recorded yet.</p>
           ) : (
             <div className="space-y-3">
+              {/* Initial payment */}
+              {member.paymentStatus && (
+                <div className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-white">
+                        Initial Membership
+                      </p>
+                      <p className="mt-1 text-[11px] text-gray-400">
+                        {formatDate(member.startDate)} to {formatDate(member.endDate)}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${paymentStatusTone(
+                        member.paymentStatus,
+                      )}`}
+                    >
+                      {paymentStatusLabel(member.paymentStatus)}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-gray-400">
+                    <p>
+                      Charged:{" "}
+                      <span className="font-semibold text-gray-200">
+                        {formatInrFromDecimalString(member.planPrice)}
+                      </span>
+                    </p>
+                    <p>
+                      Paid:{" "}
+                      <span className="font-semibold text-gray-200">
+                        {formatInrFromDecimalString(member.amountPaid)}
+                      </span>
+                    </p>
+                    <p>
+                      Due:{" "}
+                      <span className="font-semibold text-gray-200">
+                        {formatInrFromDecimalString(
+                          Math.max(0, Number(member.planPrice) - Number(member.amountPaid)).toFixed(2),
+                        )}
+                      </span>
+                    </p>
+                    <p>
+                      Provider:{" "}
+                      <span className="font-semibold text-gray-200">
+                        {member.upiScreenshot ? "UPI" : "Manual"}
+                      </span>
+                    </p>
+                  </div>
+
+                  <p className="mt-2 text-[10px] uppercase tracking-wider text-gray-500">
+                    Recorded {formatDate(member.createdAt)}
+                  </p>
+
+                  {member.paymentStatus !== "DONE" && (
+                    <button
+                      onClick={() => handleClearDues("initial", member.planPrice)}
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#2a2a2a] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3a3a3a]"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Clear Dues
+                    </button>
+                  )}
+                </div>
+              )}
+
               {member.renewals.map((payment) => {
                 const due = Math.max(
                   0,
@@ -705,7 +818,7 @@ export function MemberDetailsClient({ id }: { id: string }) {
                           {durationLabel(payment.billingDuration)}
                         </p>
                         <p className="mt-1 text-[11px] text-gray-400">
-                          {payment.periodStart} to {payment.periodEnd}
+                          {formatDate(payment.periodStart)} to {formatDate(payment.periodEnd)}
                         </p>
                       </div>
                       <span
@@ -745,9 +858,19 @@ export function MemberDetailsClient({ id }: { id: string }) {
                     </div>
 
                     <p className="mt-2 text-[10px] uppercase tracking-wider text-gray-500">
-                      Recorded {payment.createdAt.slice(0, 10)}
-                      {payment.paidAt ? ` - Paid ${payment.paidAt.slice(0, 10)}` : ""}
+                      Recorded {formatDate(payment.createdAt)}
+                      {payment.paidAt ? ` - Paid ${formatDate(payment.paidAt)}` : ""}
                     </p>
+
+                    {payment.paymentStatus !== "DONE" && (
+                      <button
+                        onClick={() => handleClearDues(payment.id, payment.planPrice)}
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#2a2a2a] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3a3a3a]"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Clear Dues
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -995,6 +1118,36 @@ export function MemberDetailsClient({ id }: { id: string }) {
           </div>
         </div>
       ) : null}
+
+      {/* Clear Dues Confirmation Dialog */}
+      {clearDuesDialog.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-[1.5rem] bg-[#16161a] p-6 text-white shadow-2xl">
+            <h2 className="mb-4 text-xl font-bold">Clear Dues</h2>
+            <p className="mb-6 text-sm text-gray-300">
+              Are you sure you want to clear dues for{" "}
+              <span className="font-semibold text-white">
+                ₹{formatInrFromDecimalString(clearDuesDialog.planPrice)}
+              </span>
+              ? This will mark the payment as complete.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setClearDuesDialog({ ...clearDuesDialog, isOpen: false })}
+                className="flex h-11 flex-1 items-center justify-center rounded-xl border border-white/10 bg-zinc-800 text-sm font-bold transition-colors hover:bg-zinc-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmClearDues}
+                className="flex h-11 flex-1 items-center justify-center rounded-xl bg-[#d4ff00] text-sm font-bold text-black transition-colors hover:bg-[#bce600]"
+              >
+                Clear Dues
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
