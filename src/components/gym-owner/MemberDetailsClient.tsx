@@ -510,94 +510,93 @@ export function MemberDetailsClient({ id }: { id: string }) {
 
   return (
     <>
-      {/* Page title + header card (sticky) */}
-      <div className="sticky top-0 z-40 -mx-4 px-4 bg-background">
-        <div className="pt-2">
-          <div className="mb-4 pt-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
-              Member
-            </p>
-            <h1 className="mt-1 text-3xl font-extrabold text-white">
-              {member.fullName}
-            </h1>
-          </div>
+     <div className="flex h-screen flex-col overflow-hidden bg-[#0a0a0c] px-4 pt-4 text-white">
+  {/* Page title + header card (fixed, non-scrolling) */}
+  <div className="shrink-0 pb-4">
+    <div className="mb-4 pt-2">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+        Member
+      </p>
+      <h1 className="mt-1 text-3xl font-extrabold text-white">
+        {member.fullName}
+      </h1>
+    </div>
 
-          {/* ── Header Card: Avatar + Name + Status + Actions ── */}
-          <div className="rounded-2xl bg-[#1c1c1c] p-4">
-            {/* Avatar row */}
-            <div className="flex items-center gap-4">
-              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-[#2a2a2a]">
-                {member.memberPhoto ? (
-                  <img
-                    src={member.memberPhoto}
-                    alt={member.fullName}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-[#2a2a2a]">
-                    <User className="h-7 w-7 text-gray-500" />
-                  </div>
-                )}
-              </div>
-              <div>
-                <p className="text-base font-bold text-white">
-                  {member.fullName}
-                </p>
-                <span
-                  className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${sc.bg} ${sc.text}`}
-                >
-                  <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
-                  {status}
-                </span>
-              </div>
+    {/* ── Header Card: Avatar + Name + Status + Actions ── */}
+    <div className="rounded-2xl bg-[#1c1c1c] p-4">
+      {/* Avatar row */}
+      <div className="flex items-center gap-4">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-[#2a2a2a]">
+          {member.memberPhoto ? (
+            <img
+              src={member.memberPhoto}
+              alt={member.fullName}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[#2a2a2a]">
+              <User className="h-7 w-7 text-gray-500" />
             </div>
-
-            {/* Divider */}
-            <div className="mt-4 border-t border-[#2a2a2a]" />
-
-            {/* Action buttons — horizontal full-width row */}
-            <div className="mt-4 flex w-full items-center gap-2">
-              <Link
-                href={`/owner/members/${member.id}/edit`}
-                id="member-edit-btn"
-                className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95"
-              >
-                Edit
-              </Link>
-              <button
-                id="member-pause-btn"
-                onClick={() =>
-                  applyMembership(
-                    member.membershipStatus === "PAUSED" ? "resume" : "pause",
-                  )
-                }
-                disabled={
-                  (!canPause && member.membershipStatus !== "PAUSED") ||
-                  pauseLoading
-                }
-                className="flex flex-2 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
-              >
-                {pauseLoading
-                  ? "…"
-                  : member.membershipStatus === "PAUSED"
-                    ? "Resume"
-                    : "Pause/Freeze"}
-              </button>
-              <button
-                id="member-logs-btn"
-                onClick={() => setRenewalOpen(true)}
-                disabled={status !== "Expired"}
-                className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
-              >
-                Renew
-              </button>
-            </div>
-          </div>
+          )}
+        </div>
+        <div>
+          <p className="text-base font-bold text-white">
+            {member.fullName}
+          </p>
+          <span
+            className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${sc.bg} ${sc.text}`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
+            {status}
+          </span>
         </div>
       </div>
 
-      <div className="space-y-3 pb-24">
-        {/* ── Plan + Days Left card ── */}
+      {/* Divider */}
+      <div className="mt-4 border-t border-[#2a2a2a]" />
+
+      {/* Action buttons — horizontal full-width row */}
+      <div className="mt-4 flex w-full items-center gap-2">
+        <Link
+          href={`/owner/members/${member.id}/edit`}
+          id="member-edit-btn"
+          className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95"
+        >
+          Edit
+        </Link>
+        <button
+          id="member-pause-btn"
+          onClick={() =>
+            applyMembership(
+              member.membershipStatus === "PAUSED" ? "resume" : "pause",
+            )
+          }
+          disabled={
+            (!canPause && member.membershipStatus !== "PAUSED") ||
+            pauseLoading
+          }
+          className="flex flex-[2] items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
+        >
+          {pauseLoading
+            ? "…"
+            : member.membershipStatus === "PAUSED"
+              ? "Resume"
+              : "Pause/Freeze"}
+        </button>
+        <button
+          id="member-logs-btn"
+          onClick={() => setRenewalOpen(true)}
+          disabled={status !== "Expired"}
+          className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
+        >
+          Renew
+        </button>
+      </div>
+    </div>
+  </div>
+
+       {/* Scrollable content area below the fixed header */}
+  <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pb-24">
         <div className="rounded-2xl bg-[#1c1c1c] overflow-hidden">
           <div className="grid grid-cols-2 divide-x divide-[#2a2a2a]">
             {/* Plan */}
@@ -1174,6 +1173,7 @@ export function MemberDetailsClient({ id }: { id: string }) {
           </div>
         </div>
       )}
+      </div>
     </>
   );
 }
