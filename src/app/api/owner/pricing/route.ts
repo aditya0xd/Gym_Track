@@ -9,7 +9,6 @@ import {
   listDurationPricesForOwner,
   upsertDurationPricesForOwner,
 } from "@/server/gym-owner/pricing.service";
-import type { MemberBillingDuration } from "@/generated/prisma/client";
 
 const pricingItemSchema = z.object({
   duration: memberBillingDurationSchema,

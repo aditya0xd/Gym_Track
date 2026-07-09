@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,31 +16,31 @@ import type { OwnerSubscriptionPlan, PlanFeatureKey } from "@/generated/prisma/c
 type Matrix = Record<OwnerSubscriptionPlan, Record<PlanFeatureKey, boolean>>;
 
 export function PlanFeaturesAdminPanel() {
-  const [matrix, setMatrix] = useState<Matrix>(() => defaultPlanFeatureMatrix());
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const [draftMatrix, setDraftMatrix] = useState<Matrix | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const { data: loadedMatrix, isLoading } = useQuery({
+    queryKey: ["superadmin-plan-features"],
+    queryFn: async () => {
     const res = await fetch("/api/superadmin/plan-features");
     const data = (await res.json()) as { features?: Matrix; message?: string };
     if (!res.ok || !data.features) {
-      toast.error(data.message ?? "Could not load plan features.");
-      setLoading(false);
-      return;
+      throw new Error(data.message ?? "Could not load plan features.");
     }
-    setMatrix(data.features);
-    setLoading(false);
-  }, []);
+    return data.features;
+    },
+  });
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const matrix = useMemo(
+    () => draftMatrix ?? loadedMatrix ?? defaultPlanFeatureMatrix(),
+    [draftMatrix, loadedMatrix],
+  );
 
   function setCell(plan: OwnerSubscriptionPlan, key: PlanFeatureKey, enabled: boolean) {
-    setMatrix((prev) => ({
-      ...prev,
-      [plan]: { ...prev[plan], [key]: enabled },
+    setDraftMatrix((prev) => ({
+      ...(prev ?? matrix),
+      [plan]: { ...(prev ?? matrix)[plan], [key]: enabled },
     }));
   }
 
@@ -56,12 +57,13 @@ export function PlanFeaturesAdminPanel() {
       setSaving(false);
       return;
     }
-    setMatrix(data.features);
+    setDraftMatrix(null);
+    queryClient.setQueryData(["superadmin-plan-features"], data.features);
     toast.success("Plan features updated.");
     setSaving(false);
   }
 
-  if (loading) {
+  if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading plan features…</p>;
   }
 

@@ -1,16 +1,14 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -27,7 +25,6 @@ export default function LoginForm({ className }: LoginFormProps) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [loginPending, setLoginPending] = useState(false);
   const [signupPending, setSignupPending] = useState(false);
-  const [logoutPending, setLogoutPending] = useState(false);
 
   // After login, navigate to callbackUrl (set by proxy for protected routes)
   // or fall back to "/" which lets the root page handle role-based routing.
@@ -126,11 +123,6 @@ export default function LoginForm({ className }: LoginFormProps) {
     toast.success("Welcome! Your gym owner account is ready.");
     navigateAfterLogin();
     // Note: setSignupPending(false) intentionally omitted — the page is navigating away
-  }
-
-  async function handleLogout() {
-    setLogoutPending(true);
-    await signOut({ callbackUrl: "/login" });
   }
 
   return (

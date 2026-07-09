@@ -20,7 +20,10 @@ import { useRouter } from "next/navigation";
 
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
-import { IMAGE_ACCEPT, IMAGE_PROCESSING_PRESETS } from "@/lib/image-processing/config";
+import {
+  IMAGE_ACCEPT,
+  IMAGE_PROCESSING_PRESETS,
+} from "@/lib/image-processing/config";
 import {
   imageErrorMessage as sharedImageErrorMessage,
   processImage,
@@ -386,7 +389,7 @@ export function MemberDetailsClient({ id }: { id: string }) {
   async function confirmClearDues() {
     const { renewalId, planPrice } = clearDuesDialog;
     setClearDuesDialog({ ...clearDuesDialog, isOpen: false });
-    
+
     try {
       const res = await fetch(
         `/api/owner/members/${member!.id}/renewals/${renewalId}/clear-dues`,
@@ -428,7 +431,9 @@ export function MemberDetailsClient({ id }: { id: string }) {
   const planPrice = formatInrFromDecimalString(member.planPrice);
   const amountPaid = formatInrFromDecimalString(member.amountPaid);
   const balanceDue = formatInrFromDecimalString(
-    Math.max(0, Number(member.planPrice) - Number(member.amountPaid)).toFixed(2),
+    Math.max(0, Number(member.planPrice) - Number(member.amountPaid)).toFixed(
+      2,
+    ),
   );
   async function renewMembership() {
     if (!member) return;
@@ -437,7 +442,9 @@ export function MemberDetailsClient({ id }: { id: string }) {
       return;
     }
     if (!renewalPrice) {
-      toast.error("Set this duration's INR price under Pricing before renewing.");
+      toast.error(
+        "Set this duration's INR price under Pricing before renewing.",
+      );
       return;
     }
     if (!renewalPeriodStart) {
@@ -474,7 +481,8 @@ export function MemberDetailsClient({ id }: { id: string }) {
           billingDuration: renewalDuration,
           periodStart: renewalPeriodStart,
           paymentStatus: renewalPaymentStatus,
-          discountInr: renewalDiscount.trim() === "" ? undefined : renewalDiscount.trim(),
+          discountInr:
+            renewalDiscount.trim() === "" ? undefined : renewalDiscount.trim(),
           amountPaid: amountPaid === "" ? undefined : amountPaid,
           upiScreenshot,
         }),
@@ -502,89 +510,93 @@ export function MemberDetailsClient({ id }: { id: string }) {
 
   return (
     <>
-      {/* Page title */}
-      <div className="mb-4 pt-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
-          Member
-        </p>
-        <h1 className="mt-1 text-3xl font-extrabold text-white">
-          {member.fullName}
-        </h1>
+      {/* Page title + header card (sticky) */}
+      <div className="sticky top-0 z-40 -mx-4 px-4 bg-background">
+        <div className="pt-2">
+          <div className="mb-4 pt-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+              Member
+            </p>
+            <h1 className="mt-1 text-3xl font-extrabold text-white">
+              {member.fullName}
+            </h1>
+          </div>
+
+          {/* ── Header Card: Avatar + Name + Status + Actions ── */}
+          <div className="rounded-2xl bg-[#1c1c1c] p-4">
+            {/* Avatar row */}
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-[#2a2a2a]">
+                {member.memberPhoto ? (
+                  <img
+                    src={member.memberPhoto}
+                    alt={member.fullName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[#2a2a2a]">
+                    <User className="h-7 w-7 text-gray-500" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <p className="text-base font-bold text-white">
+                  {member.fullName}
+                </p>
+                <span
+                  className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${sc.bg} ${sc.text}`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
+                  {status}
+                </span>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="mt-4 border-t border-[#2a2a2a]" />
+
+            {/* Action buttons — horizontal full-width row */}
+            <div className="mt-4 flex w-full items-center gap-2">
+              <Link
+                href={`/owner/members/${member.id}/edit`}
+                id="member-edit-btn"
+                className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95"
+              >
+                Edit
+              </Link>
+              <button
+                id="member-pause-btn"
+                onClick={() =>
+                  applyMembership(
+                    member.membershipStatus === "PAUSED" ? "resume" : "pause",
+                  )
+                }
+                disabled={
+                  (!canPause && member.membershipStatus !== "PAUSED") ||
+                  pauseLoading
+                }
+                className="flex flex-2 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
+              >
+                {pauseLoading
+                  ? "…"
+                  : member.membershipStatus === "PAUSED"
+                    ? "Resume"
+                    : "Pause/Freeze"}
+              </button>
+              <button
+                id="member-logs-btn"
+                onClick={() => setRenewalOpen(true)}
+                disabled={status !== "Expired"}
+                className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
+              >
+                Renew
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3 pb-24">
-        {/* ── Header Card: Avatar + Name + Status + Actions ── */}
-        <div className="rounded-2xl bg-[#1c1c1c] p-4">
-          {/* Avatar row */}
-          <div className="flex items-center gap-4">
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-[#2a2a2a]">
-              {member.memberPhoto ? (
-                <img
-                  src={member.memberPhoto}
-                  alt={member.fullName}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[#2a2a2a]">
-                  <User className="h-7 w-7 text-gray-500" />
-                </div>
-              )}
-            </div>
-            <div>
-              <p className="text-base font-bold text-white">
-                {member.fullName}
-              </p>
-              <span
-                className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${sc.bg} ${sc.text}`}
-              >
-                <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
-                {status}
-              </span>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="mt-4 border-t border-[#2a2a2a]" />
-
-          {/* Action buttons — horizontal full-width row */}
-          <div className="mt-4 flex w-full items-center gap-2">
-            <Link
-              href={`/owner/members/${member.id}/edit`}
-              id="member-edit-btn"
-              className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95"
-            >
-              Edit
-            </Link>
-            <button
-              id="member-pause-btn"
-              onClick={() =>
-                applyMembership(
-                  member.membershipStatus === "PAUSED" ? "resume" : "pause",
-                )
-              }
-              disabled={
-                (!canPause && member.membershipStatus !== "PAUSED") ||
-                pauseLoading
-              }
-              className="flex flex-2 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
-            >
-              {pauseLoading
-                ? "…"
-                : member.membershipStatus === "PAUSED"
-                  ? "Resume"
-                  : "Pause/Freeze"}
-            </button>
-            <button
-              id="member-logs-btn"
-              onClick={() => setRenewalOpen(true)}
-              disabled={status !== "Expired"}
-              className="flex flex-1 items-center justify-center rounded-full bg-[#d4ff00] py-2.5 text-xs font-extrabold uppercase tracking-wider text-black transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-40"
-            >
-              Renew
-            </button>
-          </div>
-        </div>
-
         {/* ── Plan + Days Left card ── */}
         <div className="rounded-2xl bg-[#1c1c1c] overflow-hidden">
           <div className="grid grid-cols-2 divide-x divide-[#2a2a2a]">
@@ -669,8 +681,6 @@ export function MemberDetailsClient({ id }: { id: string }) {
           </div>
         </div>
 
-   
-
         {/* Member Logs */}
         <div className="rounded-2xl bg-[#1c1c1c] p-4">
           <p className="mb-3 text-[11px] font-extrabold uppercase tracking-widest text-white">
@@ -720,7 +730,7 @@ export function MemberDetailsClient({ id }: { id: string }) {
           </div>
         </div>
 
-             {/* Payment History */}
+        {/* Payment History */}
         <div className="rounded-2xl bg-[#1c1c1c] p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-[11px] font-extrabold uppercase tracking-widest text-white">
@@ -744,7 +754,8 @@ export function MemberDetailsClient({ id }: { id: string }) {
                         Initial Membership
                       </p>
                       <p className="mt-1 text-[11px] text-gray-400">
-                        {formatDate(member.startDate)} to {formatDate(member.endDate)}
+                        {formatDate(member.startDate)} to{" "}
+                        {formatDate(member.endDate)}
                       </p>
                     </div>
                     <span
@@ -773,7 +784,11 @@ export function MemberDetailsClient({ id }: { id: string }) {
                       Due:{" "}
                       <span className="font-semibold text-gray-200">
                         {formatInrFromDecimalString(
-                          Math.max(0, Number(member.planPrice) - Number(member.amountPaid)).toFixed(2),
+                          Math.max(
+                            0,
+                            Number(member.planPrice) -
+                              Number(member.amountPaid),
+                          ).toFixed(2),
                         )}
                       </span>
                     </p>
@@ -791,7 +806,9 @@ export function MemberDetailsClient({ id }: { id: string }) {
 
                   {member.paymentStatus !== "DONE" && (
                     <button
-                      onClick={() => handleClearDues("initial", member.planPrice)}
+                      onClick={() =>
+                        handleClearDues("initial", member.planPrice)
+                      }
                       className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#2a2a2a] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3a3a3a]"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
@@ -818,7 +835,8 @@ export function MemberDetailsClient({ id }: { id: string }) {
                           {durationLabel(payment.billingDuration)}
                         </p>
                         <p className="mt-1 text-[11px] text-gray-400">
-                          {formatDate(payment.periodStart)} to {formatDate(payment.periodEnd)}
+                          {formatDate(payment.periodStart)} to{" "}
+                          {formatDate(payment.periodEnd)}
                         </p>
                       </div>
                       <span
@@ -859,12 +877,16 @@ export function MemberDetailsClient({ id }: { id: string }) {
 
                     <p className="mt-2 text-[10px] uppercase tracking-wider text-gray-500">
                       Recorded {formatDate(payment.createdAt)}
-                      {payment.paidAt ? ` - Paid ${formatDate(payment.paidAt)}` : ""}
+                      {payment.paidAt
+                        ? ` - Paid ${formatDate(payment.paidAt)}`
+                        : ""}
                     </p>
 
                     {payment.paymentStatus !== "DONE" && (
                       <button
-                        onClick={() => handleClearDues(payment.id, payment.planPrice)}
+                        onClick={() =>
+                          handleClearDues(payment.id, payment.planPrice)
+                        }
                         className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#2a2a2a] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3a3a3a]"
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" />
@@ -976,7 +998,9 @@ export function MemberDetailsClient({ id }: { id: string }) {
                           {durationLabel(option.value)}
                         </span>
                         <span className="mt-1 block text-sm font-black text-[#d4ff00]">
-                          {price ? formatInrFromDecimalString(price) : "No price"}
+                          {price
+                            ? formatInrFromDecimalString(price)
+                            : "No price"}
                         </span>
                       </button>
                     );
@@ -1133,7 +1157,9 @@ export function MemberDetailsClient({ id }: { id: string }) {
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => setClearDuesDialog({ ...clearDuesDialog, isOpen: false })}
+                onClick={() =>
+                  setClearDuesDialog({ ...clearDuesDialog, isOpen: false })
+                }
                 className="flex h-11 flex-1 items-center justify-center rounded-xl border border-white/10 bg-zinc-800 text-sm font-bold transition-colors hover:bg-zinc-700"
               >
                 Cancel

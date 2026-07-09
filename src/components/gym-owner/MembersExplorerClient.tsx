@@ -53,16 +53,18 @@ export function MembersExplorerClient() {
   }
 
   return (
-    <>
-      <PageHeader
-        subtitle="MANAGE"
-        title="MEMBERS"
-        count={members?.length}
-      />
+    <div className="flex h-full flex-col">
+      <div className="shrink-0">
+        <PageHeader
+          subtitle="MANAGE"
+          title="MEMBERS"
+          count={members?.length}
+        />
+      </div>
       <MembersExplorerPanel
         members={members ?? []}
         initialStatusFilter={initialFilter}
       />
-    </>
+    </div>
   );
 }

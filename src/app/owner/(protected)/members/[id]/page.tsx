@@ -29,7 +29,9 @@ export default async function OwnerMemberDetailPage({
         fallback={
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading member details...</p>
+            <p className="text-sm text-muted-foreground">
+              Loading member details...
+            </p>
           </div>
         }
       >

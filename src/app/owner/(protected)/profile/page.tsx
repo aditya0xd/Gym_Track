@@ -1,11 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import {
-  Building2,
   Users,
-  Bell,
-  AlarmClock,
   Globe,
   HelpCircle,
   Info,
@@ -69,23 +67,25 @@ export default async function OwnerProfilePage() {
   const gymName = "GymTrack Pro";
 
   return (
-    <div className="min-h-screen bg-[#0a0a0c] px-4 pt-4 pb-24 text-white font-sans">
-      <div className="mb-6 pt-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
-          ACCOUNT
-        </p>
-        <h1 className="mt-1 text-3xl font-extrabold">Profile</h1>
-      </div>
-
-      <div className="space-y-4">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#0a0a0c] px-4 pt-4 text-white font-sans">
+      <div className="shrink-0 space-y-4 pb-4">
+        <div className="pt-2">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+            ACCOUNT
+          </p>
+          <h1 className="mt-1 text-3xl font-extrabold">Profile</h1>
+        </div>
         {/* Profile Card */}
         <div className="flex items-center gap-4 rounded-[1.5rem] bg-[#16161a] p-5">
           <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[#d4ff00] bg-zinc-800 text-lg font-bold">
             {profilePhoto ? (
-              <img
+              <Image
                 src={profilePhoto}
                 alt="Profile"
-                className="h-full w-full object-cover"
+                fill
+                sizes="64px"
+                unoptimized
+                className="object-cover"
               />
             ) : (
               ownerName.substring(0, 2).toUpperCase()
@@ -112,7 +112,9 @@ export default async function OwnerProfilePage() {
             </button>
           </EditProfileDialog>
         </div>
+      </div>
 
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pb-24">
         {/* Stats Row */}
         <div className="flex divide-x divide-white/5 rounded-[1.5rem] bg-[#16161a] py-5">
           <div className="flex flex-1 flex-col items-center justify-center">
@@ -200,8 +202,6 @@ export default async function OwnerProfilePage() {
             </div>
             <ChevronRight className="h-4 w-4 text-zinc-600" />
           </Link>
-
-          <div className="mx-4 my-1 h-px bg-white/5" />
 
           {/* Menu Item: Notifications */}
           {/* <div className="flex items-center gap-4 rounded-2xl p-3">
@@ -295,8 +295,6 @@ export default async function OwnerProfilePage() {
             </div>
             <ChevronRight className="h-4 w-4 text-zinc-600" />
           </Link>
-
-          <div className="mx-4 my-1 h-px bg-white/5" />
 
           <div className="mx-4 my-1 h-px bg-white/5" />
 

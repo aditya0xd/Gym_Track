@@ -11,6 +11,7 @@ const VALID_DURATIONS = [
   "TWELVE_MONTHS",
 ] as const;
 type BillingDuration = (typeof VALID_DURATIONS)[number];
+type OwnerMembersCsvRouteContext = { params: Promise<{ id: string }> };
 
 function parseCSV(text: string): Record<string, string>[] {
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
@@ -35,7 +36,7 @@ async function POSTHandler(
   _userId: string,
   context: unknown,
 ) {
-  const { id: ownerId } = (context as { params: { id: string } }).params;
+  const { id: ownerId } = await (context as OwnerMembersCsvRouteContext).params;
 
   const owner = await prisma.adminUser.findUnique({
     where: { id: ownerId, deletedAt: null },
@@ -132,9 +133,10 @@ async function POSTHandler(
         },
       });
       created++;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "unknown";
       errors.push(
-        `Row ${rowNum}: Database error — ${err?.message ?? "unknown"}`,
+        `Row ${rowNum}: Database error - ${message}`,
       );
     }
   }

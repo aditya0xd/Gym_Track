@@ -50,10 +50,6 @@ export function OwnerMainNav() {
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
   return (
     <header className="border-b border-border bg-card/80 shadow-sm backdrop-blur-sm">
       <div className="mx-auto min-w-0 max-w-6xl px-4 py-3">

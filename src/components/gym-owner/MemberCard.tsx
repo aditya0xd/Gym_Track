@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { User, Calendar, CreditCard, Clock } from "lucide-react";
 
 import { formatInrFromDecimalString } from "@/lib/format/inr";
@@ -76,10 +77,8 @@ function paymentStatusInfo(paymentStatus?: PaymentStatus, amountPaid?: string, p
 export function MemberCard({
   id,
   fullName,
-  phone,
   billingDuration,
   planPrice,
-  discountInr,
   endDate,
   membershipStatus,
   memberPhoto,
@@ -104,12 +103,15 @@ export function MemberCard({
       href={`/owner/members/${id}`}
       className="flex items-center gap-3 rounded-xl bg-gray-800/50 p-4 backdrop-blur-sm hover:bg-gray-800/70 transition-colors"
     >
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-700">
+      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-700">
         {memberPhoto ? (
-          <img
+          <Image
             src={memberPhoto}
             alt={fullName}
-            className="h-full w-full object-cover"
+            fill
+            sizes="56px"
+            unoptimized
+            className="object-cover"
           />
         ) : (
           <User className="h-7 w-7 text-gray-400" />
