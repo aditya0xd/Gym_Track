@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { OwnerSubscriptionPlan } from "@/generated/prisma/client";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -35,25 +36,19 @@ function fromDatetimeLocalValue(v: string): string | null {
 }
 
 export function GymOwnersAdminPanel() {
-  const [rows, setRows] = useState<GymOwnerRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["superadmin-gym-owners"],
+    queryFn: async () => {
     const res = await fetch("/api/superadmin/gym-owners");
     if (!res.ok) {
-      toast.error("Could not load gym owners.");
-      setLoading(false);
-      return;
+      throw new Error("Could not load gym owners.");
     }
     const data = (await res.json()) as { gymOwners: GymOwnerRow[] };
-    setRows(data.gymOwners ?? []);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+    return data.gymOwners ?? [];
+    },
+  });
 
   async function saveRow(id: string, plan: OwnerSubscriptionPlan, trialLocal: string) {
     const trialEndsAt = fromDatetimeLocalValue(trialLocal);
@@ -71,10 +66,10 @@ export function GymOwnersAdminPanel() {
       return;
     }
     toast.success("Gym owner updated.");
-    await load();
+    await queryClient.invalidateQueries({ queryKey: ["superadmin-gym-owners"] });
   }
 
-  if (loading) {
+  if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading gym owners…</p>;
   }
 
@@ -127,20 +122,22 @@ function GymOwnerEditableRow({
   row: GymOwnerRow;
   onSave: (plan: OwnerSubscriptionPlan, trialLocal: string) => void | Promise<void>;
 }) {
-  const [plan, setPlan] = useState<OwnerSubscriptionPlan>(row.subscriptionPlan);
-  const [trialLocal, setTrialLocal] = useState(() =>
-    toDatetimeLocalValue(row.trialEndsAt),
-  );
+  const [draft, setDraft] = useState<{
+    rowId: string;
+    plan: OwnerSubscriptionPlan;
+    trialLocal: string;
+  } | null>(null);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    setPlan(row.subscriptionPlan);
-    setTrialLocal(toDatetimeLocalValue(row.trialEndsAt));
-  }, [row.id, row.subscriptionPlan, row.trialEndsAt]);
+  const plan = draft?.rowId === row.id ? draft.plan : row.subscriptionPlan;
+  const trialLocal =
+    draft?.rowId === row.id
+      ? draft.trialLocal
+      : toDatetimeLocalValue(row.trialEndsAt);
 
   async function handleApply() {
     setSaving(true);
     await onSave(plan, trialLocal);
+    setDraft(null);
     setSaving(false);
   }
 
@@ -156,7 +153,13 @@ function GymOwnerEditableRow({
       <td className="px-3 py-2.5 sm:px-4 sm:py-3">
         <select
           value={plan}
-          onChange={(e) => setPlan(e.target.value as OwnerSubscriptionPlan)}
+          onChange={(e) =>
+            setDraft({
+              rowId: row.id,
+              plan: e.target.value as OwnerSubscriptionPlan,
+              trialLocal,
+            })
+          }
           className="w-full max-w-[140px] min-h-10 rounded-md border border-input bg-background px-2 py-2 text-sm text-foreground shadow-sm sm:min-h-0 sm:py-1.5"
         >
           {OWNER_SUBSCRIPTION_PLAN_OPTIONS.map((o) => (
@@ -170,7 +173,13 @@ function GymOwnerEditableRow({
         <input
           type="datetime-local"
           value={trialLocal}
-          onChange={(e) => setTrialLocal(e.target.value)}
+          onChange={(e) =>
+            setDraft({
+              rowId: row.id,
+              plan,
+              trialLocal: e.target.value,
+            })
+          }
           className="min-h-10 w-full min-w-[200px] rounded-md border border-input bg-background px-2 py-2 text-sm text-foreground shadow-sm sm:min-h-0 sm:py-1.5"
         />
       </td>

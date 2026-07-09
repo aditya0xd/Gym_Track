@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { withSuperAdmin } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 
-async function GETHandler(_request: Request, _userId: string) {
+async function GETHandler() {
   const invoices = await prisma.ownerBillingInvoice.findMany({
     where: { deletedAt: null },
     include: {

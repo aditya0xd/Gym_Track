@@ -42,10 +42,6 @@ export function SuperAdminMainNav({ email }: { email: string }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
   return (
     <header className="border-b border-border bg-foreground text-background shadow-sm">
       <div className="mx-auto min-w-0 max-w-6xl px-4 py-3">

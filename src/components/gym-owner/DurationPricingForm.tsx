@@ -32,7 +32,6 @@ async function fetchPricing(): Promise<{ prices: PriceRow[] }> {
 
 export function DurationPricingForm() {
   const queryClient = useQueryClient();
-  const [rows, setRows] = useState<PriceRow[]>([]);
   const [editingDuration, setEditingDuration] = useState<MemberBillingDuration | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -41,13 +40,7 @@ export function DurationPricingForm() {
     queryKey: ["pricing"],
     queryFn: fetchPricing,
   });
-
-  // Keep local editing state in sync when query data is loaded/updated
-  useEffect(() => {
-    if (data?.prices) {
-      setRows(data.prices);
-    }
-  }, [data]);
+  const rows = data?.prices ?? [];
 
   // Display error toast if query fails
   useEffect(() => {
@@ -74,7 +67,6 @@ export function DurationPricingForm() {
     },
     onSuccess: (responseData) => {
       if (responseData.prices) {
-        setRows(responseData.prices);
         queryClient.setQueryData(["pricing"], responseData);
       } else {
         queryClient.invalidateQueries({ queryKey: ["pricing"] });
@@ -100,13 +92,14 @@ export function DurationPricingForm() {
 
   function saveEdit(duration: MemberBillingDuration) {
     const newPrice = editValue || "0";
-    // Optimistically update local state immediately so UI reflects the change
-    setRows((prev) =>
-      prev.map((r) => r.duration === duration ? { ...r, priceInr: newPrice } : r)
+    // Optimistically update cached query data so the UI reflects the change.
+    const updatedRows = rows.map((r) =>
+      r.duration === duration ? { ...r, priceInr: newPrice } : r,
     );
-    const allPrices = rows.map((r) => ({
+    queryClient.setQueryData(["pricing"], { prices: updatedRows });
+    const allPrices = updatedRows.map((r) => ({
       duration: r.duration,
-      priceInr: r.duration === duration ? newPrice : (r.priceInr ?? "0"),
+      priceInr: r.priceInr ?? "0",
     }));
     mutation.mutate(allPrices);
   }

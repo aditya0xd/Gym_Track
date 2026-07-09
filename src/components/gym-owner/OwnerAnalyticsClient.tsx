@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -16,8 +16,27 @@ async function fetchAnalytics(): Promise<OwnerAnalytics> {
   return res.json();
 }
 
+export function OwnerAnalyticsRefreshButton() {
+  const queryClient = useQueryClient();
+  const isFetching = useIsFetching({ queryKey: ["owner-analytics"] }) > 0;
+
+  return (
+    <Button
+      type="button"
+      onClick={() => queryClient.invalidateQueries({ queryKey: ["owner-analytics"] })}
+      variant="outline"
+      size="sm"
+      disabled={isFetching}
+      className="gap-2"
+    >
+      <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+      {isFetching ? "Refreshing..." : "Refresh"}
+    </Button>
+  );
+}
+
 export function OwnerAnalyticsClient() {
-  const { data, isLoading, error, refetch, isFetching } = useQuery<OwnerAnalytics, Error>({
+  const { data, isLoading, error, refetch } = useQuery<OwnerAnalytics, Error>({
     queryKey: ["owner-analytics"],
     queryFn: fetchAnalytics,
     staleTime: 5 * 60 * 1000, // 5 minutes — analytics don't change every second
@@ -49,19 +68,7 @@ export function OwnerAnalyticsClient() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button
-          onClick={handleRefresh}
-          variant="outline"
-          size="sm"
-          disabled={isFetching}
-          className="gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-          {isFetching ? 'Refreshing...' : 'Refresh'}
-        </Button>
-      </div>
+    <div>
       <OwnerAnalyticsDashboard data={data!} />
     </div>
   );

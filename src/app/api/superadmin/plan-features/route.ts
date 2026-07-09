@@ -23,12 +23,12 @@ const planFeaturesSchema = z.object(
   )
 );
 
-async function GETHandler(_request: Request, _userId: string) {
+async function GETHandler() {
   const features = await getMergedPlanFeatures();
   return NextResponse.json({ features });
 }
 
-async function PUTHandler(request: Request, _userId: string) {
+async function PUTHandler(request: Request) {
   const { data, error } = await parseRequestBody(request, planFeaturesSchema);
   if (error || !data) {
     return NextResponse.json(

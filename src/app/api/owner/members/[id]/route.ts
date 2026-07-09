@@ -3,10 +3,16 @@ import { z } from "zod";
 
 import { withGymOwner } from "@/lib/api-auth";
 import { parseRequestBody } from "@/lib/validation";
-import { getMemberForOwner, updateMemberForOwner } from "@/server/gym-owner/member.service";
+import {
+  getMemberForOwner,
+  updateMemberForOwner,
+  type UpdateMemberInput,
+} from "@/server/gym-owner/member.service";
+
+type MemberRouteContext = { params: Promise<{ id: string }> };
 
 async function GETHandler(_request: Request, userId: string, context?: unknown) {
-  const { id } = await (context as { params: Promise<{ id: string }> }).params;
+  const { id } = await (context as MemberRouteContext).params;
   const member = await getMemberForOwner(userId, id);
   if (!member) {
     return NextResponse.json({ error: "Member not found" }, { status: 404 });
@@ -48,7 +54,7 @@ const updateMemberSchema = z.object({
 });
 
 async function PATCHHandler(request: Request, userId: string, context?: unknown) {
-  const { id } = await (context as { params: Promise<{ id: string }> }).params;
+  const { id } = await (context as MemberRouteContext).params;
   const { data, error } = await parseRequestBody(request, updateMemberSchema);
   
   if (error || !data) {
@@ -56,7 +62,7 @@ async function PATCHHandler(request: Request, userId: string, context?: unknown)
   }
 
   try {
-    const payload: any = {
+    const payload: UpdateMemberInput = {
       fullName: data.fullName,
       email: data.email && data.email !== "" ? data.email : null,
       phone: data.phone,
@@ -70,10 +76,19 @@ async function PATCHHandler(request: Request, userId: string, context?: unknown)
     const updatedMember = await updateMemberForOwner(userId, id, payload);
     
     return NextResponse.json({ message: "Member updated successfully", member: updatedMember });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Failed to update member";
+    const status =
+      typeof e === "object" &&
+      e !== null &&
+      "status" in e &&
+      typeof e.status === "number"
+        ? e.status
+        : 500;
+
     return NextResponse.json(
-      { message: e.message || "Failed to update member" },
-      { status: e.status || 500 }
+      { message },
+      { status }
     );
   }
 }

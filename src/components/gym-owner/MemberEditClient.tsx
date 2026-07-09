@@ -24,6 +24,14 @@ function openImagePicker(
   input.click();
 }
 
+type UpdateMemberPayload = {
+  fullName: string;
+  email: string | null;
+  phone: string;
+  whatsappEnabled: boolean;
+  memberPhoto?: string | null;
+};
+
 export function MemberEditClient({ id }: { id: string }) {
   const router = useRouter();
   const memberPhotoInputRef = useRef<HTMLInputElement>(null);
@@ -68,7 +76,7 @@ export function MemberEditClient({ id }: { id: string }) {
       }
     }
 
-    const payload: any = {
+    const payload: UpdateMemberPayload = {
       fullName,
       email: emailRaw === "" ? null : emailRaw,
       phone,

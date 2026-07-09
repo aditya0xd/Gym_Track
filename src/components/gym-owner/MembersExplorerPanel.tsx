@@ -76,51 +76,53 @@ export function MembersExplorerPanel({
   }, [members, query, statusFilter, planFilter]);
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search members..."
-          className="w-full rounded-xl bg-gray-800/50 py-3 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 backdrop-blur-sm"
-        />
-      </div>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="shrink-0 space-y-4 pb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search members..."
+            className="w-full rounded-xl bg-gray-800/50 py-3 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 backdrop-blur-sm"
+          />
+        </div>
 
-      <FilterChips
-        options={[
-          { id: "ALL", label: "All" },
-          { id: "EXPIRING_SOON", label: "Expiring soon" },
-          { id: "EXPIRED", label: "Expired" },
-          { id: "PAUSED", label: "Paused" },
-        ]}
-        selectedValue={statusFilter}
-        onSelect={(value) => setStatusFilter(value as StatusFilter)}
-      />
-
-      <button
-        type="button"
-        onClick={() => setShowPlanFilters(!showPlanFilters)}
-        className="mt-3 flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors"
-      >
-        <span>Filter by plan</span>
-        {showPlanFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </button>
-
-      {showPlanFilters && (
         <FilterChips
           options={[
-            { id: "ALL", label: "All plans", icon: Calendar },
-            { id: "QUARTERLY", label: "Quarterly", icon: Calendar },
-            { id: "MONTHLY", label: "Monthly", icon: Calendar },
-            { id: "ANNUALLY", label: "Annually", icon: Calendar },
+            { id: "ALL", label: "All" },
+            { id: "EXPIRING_SOON", label: "Expiring soon" },
+            { id: "EXPIRED", label: "Expired" },
+            { id: "PAUSED", label: "Paused" },
           ]}
-          selectedValue={planFilter}
-          onSelect={(value) => setPlanFilter(value as PlanFilter)}
+          selectedValue={statusFilter}
+          onSelect={(value) => setStatusFilter(value as StatusFilter)}
         />
-      )}
 
-      <div className="space-y-3">
+        <button
+          type="button"
+          onClick={() => setShowPlanFilters(!showPlanFilters)}
+          className="mt-3 flex items-center gap-2 text-xs text-gray-400 transition-colors hover:text-white"
+        >
+          <span>Filter by plan</span>
+          {showPlanFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </button>
+
+        {showPlanFilters && (
+          <FilterChips
+            options={[
+              { id: "ALL", label: "All plans", icon: Calendar },
+              { id: "QUARTERLY", label: "Quarterly", icon: Calendar },
+              { id: "MONTHLY", label: "Monthly", icon: Calendar },
+              { id: "ANNUALLY", label: "Annually", icon: Calendar },
+            ]}
+            selectedValue={planFilter}
+            onSelect={(value) => setPlanFilter(value as PlanFilter)}
+          />
+        )}
+      </div>
+
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pb-24">
         {filtered.map((m) => (
           <MemberCard key={m.id} {...m} />
         ))}

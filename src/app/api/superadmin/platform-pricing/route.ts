@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { withSuperAdmin } from "@/lib/api-auth";
 import { parseRequestBody, ownerSubscriptionPlanSchema } from "@/lib/validation";
 import { getPlatformPlanPriceMap, upsertPlatformPlanPrice } from "@/server/platform-pricing.service";
@@ -14,12 +13,12 @@ const platformPricingSchema = z.record(
   message: "Provide at least one plan price",
 });
 
-async function GETHandler(_request: Request, _userId: string) {
+async function GETHandler() {
   const prices = await getPlatformPlanPriceMap();
   return NextResponse.json({ prices });
 }
 
-async function PUTHandler(request: Request, _userId: string) {
+async function PUTHandler(request: Request) {
   const { data, error } = await parseRequestBody(request, platformPricingSchema);
   if (error || !data) {
     return NextResponse.json(error || { message: "Invalid request" }, { status: 400 });

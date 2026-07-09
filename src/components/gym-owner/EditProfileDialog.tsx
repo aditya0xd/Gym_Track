@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
@@ -192,10 +193,13 @@ export function EditProfileDialog({
                   <div className="flex flex-col items-center gap-4">
                     <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-[#d4ff00] bg-zinc-800">
                       {profilePhoto ? (
-                        <img
+                        <Image
                           src={profilePhoto}
                           alt="Profile"
-                          className="h-full w-full object-cover"
+                          fill
+                          sizes="96px"
+                          unoptimized
+                          className="object-cover"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">

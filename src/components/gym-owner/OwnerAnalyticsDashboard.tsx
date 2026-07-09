@@ -27,6 +27,20 @@ import {
 import type { OwnerAnalytics } from "@/server/gym-owner/analytics.service";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 
+function retentionLabel(props: unknown) {
+  if (
+    typeof props !== "object" ||
+    props === null ||
+    !("value" in props) ||
+    !("name" in props)
+  ) {
+    return "";
+  }
+
+  const value = Number(props.value);
+  return value > 0 ? `${String(props.name)}: ${value}` : "";
+}
+
 function StatCard({
   label,
   value,
@@ -275,9 +289,7 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                   outerRadius={60}
                   innerRadius={35}
                   paddingAngle={2}
-                  label={(props: any) =>
-                    props.value > 0 ? `${props.name}: ${props.value}` : ""
-                  }
+                  label={retentionLabel}
                   labelLine={false}
                 >
                   <Cell fill="#10b981" stroke="white" strokeWidth={2} />
@@ -371,7 +383,7 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
                     borderRadius: "8px",
                     fontSize: "12px",
                   }}
-                  formatter={(value: any, name: any) => [
+                  formatter={(value: unknown, name: unknown) => [
                     `${String(value)} members`,
                     String(name ?? ""),
                   ]}

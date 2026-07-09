@@ -10,7 +10,8 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 export function PwaInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [showIosHint, setShowIosHint] = useState(false);
 
@@ -35,7 +36,8 @@ export function PwaInstallPrompt() {
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-    return () => window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    return () =>
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
   }, [isStandalone]);
 
   if (dismissed || isStandalone) return null;
@@ -52,7 +54,9 @@ export function PwaInstallPrompt() {
     <div className="fixed inset-x-0 bottom-3 z-50 mx-auto w-[calc(100%-1rem)] max-w-md rounded-lg border border-border bg-card p-3 shadow-lg">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-foreground">Install GymTrack Pro</p>
+          <p className="text-sm font-medium text-foreground">
+            Install GymTrack Pro
+          </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {deferredPrompt
               ? "Add this app to your home screen for a full-screen mobile experience."

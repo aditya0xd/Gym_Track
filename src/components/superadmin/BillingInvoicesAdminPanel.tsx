@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { BillingStatus, OwnerSubscriptionPlan } from "@/generated/prisma/client";
 import { toast } from "sonner";
-import { CheckCircle, XCircle, Download } from "lucide-react";
+import { CheckCircle, Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { OWNER_SUBSCRIPTION_PLAN_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 
 type InvoiceRow = {
@@ -23,26 +23,20 @@ type InvoiceRow = {
 };
 
 export function BillingInvoicesAdminPanel() {
-  const [rows, setRows] = useState<InvoiceRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<"ALL" | BillingStatus>("ALL");
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["superadmin-billing-invoices"],
+    queryFn: async () => {
     const res = await fetch("/api/superadmin/billing");
     if (!res.ok) {
-      toast.error("Could not load billing invoices.");
-      setLoading(false);
-      return;
+      throw new Error("Could not load billing invoices.");
     }
     const data = (await res.json()) as { invoices: InvoiceRow[] };
-    setRows(data.invoices ?? []);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+    return data.invoices ?? [];
+    },
+  });
 
   async function approveInvoice(invoiceId: string) {
     const res = await fetch(`/api/superadmin/billing/${invoiceId}/approve`, {
@@ -54,12 +48,12 @@ export function BillingInvoicesAdminPanel() {
       return;
     }
     toast.success("Invoice approved and plan updated.");
-    await load();
+    await queryClient.invalidateQueries({ queryKey: ["superadmin-billing-invoices"] });
   }
 
   const filteredRows = filter === "ALL" ? rows : rows.filter((r) => r.status === filter);
 
-  if (loading) {
+  if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading billing invoices…</p>;
   }
 

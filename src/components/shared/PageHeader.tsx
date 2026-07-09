@@ -19,6 +19,7 @@ export function PageHeader({ subtitle, title, description, actions, count }: Pag
             {count}
           </span>
         )}
+        {actions}
       </div>
       {description ? (
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>

@@ -19,8 +19,11 @@ export async function POST(request: Request) {
           { status: 400 },
         );
       }
-    } catch (err: any) {
-      if (err.message === "RAZORPAY_WEBHOOK_SECRET is missing.") {
+    } catch (err: unknown) {
+      if (
+        err instanceof Error &&
+        err.message === "RAZORPAY_WEBHOOK_SECRET is missing."
+      ) {
         console.error("Razorpay Webhook Secret not configured.");
         return NextResponse.json(
           { error: "Webhook not configured" },

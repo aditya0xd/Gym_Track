@@ -3,6 +3,7 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { CreditCard, Download, MoreVertical, Trash2, Crown, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import type {
@@ -38,10 +39,9 @@ type ManagePlanData = {
 };
 
 export function ManagePlanPanel() {
-  const [data, setData] = useState<ManagePlanData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [selectedPlan, setSelectedPlan] =
-    useState<OwnerSubscriptionPlan>("TRIAL");
+    useState<OwnerSubscriptionPlan | null>(null);
   const [invoiceFilter, setInvoiceFilter] = useState<"ALL" | BillingStatus>(
     "ALL",
   );
@@ -61,32 +61,36 @@ export function ManagePlanPanel() {
     };
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["manage-plan"],
+    queryFn: async () => {
     const res = await fetch("/api/owner/manage-plan");
     const json = (await res.json()) as ManagePlanData | { message?: string };
     if (!res.ok) {
-      toast.error(
-        (json as { message?: string }).message ??
-          "Could not load billing info.",
+      throw new Error(
+        (json as { message?: string }).message ?? "Could not load billing info.",
       );
-      setLoading(false);
-      return;
     }
-    const payload = json as ManagePlanData;
-    setData(payload);
-    setSelectedPlan(payload.currentPlan);
-    setLoading(false);
-  }, []);
+    return json as ManagePlanData;
+    },
+  });
+
+  const load = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["manage-plan"] });
+  }, [queryClient]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (error) {
+      toast.error(error.message);
+    }
+  }, [error]);
+
+  const activeSelectedPlan = selectedPlan ?? data?.currentPlan ?? "TRIAL";
 
   const selectedPlanPrice = useMemo(() => {
     if (!data) return "0.00";
-    return data.planPrices[selectedPlan];
-  }, [data, selectedPlan]);
+    return data.planPrices[activeSelectedPlan];
+  }, [activeSelectedPlan, data]);
 
   const filteredInvoices = useMemo(() => {
     if (!data) return [];
@@ -96,7 +100,7 @@ export function ManagePlanPanel() {
 
   async function handleChangePlan() {
     if (!data) return;
-    if (selectedPlan === data.currentPlan) {
+    if (activeSelectedPlan === data.currentPlan) {
       toast.info("You are already on this plan.");
       return;
     }
@@ -104,7 +108,7 @@ export function ManagePlanPanel() {
     const res = await fetch("/api/owner/manage-plan", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subscriptionPlan: selectedPlan }),
+      body: JSON.stringify({ subscriptionPlan: activeSelectedPlan }),
     });
     const json = (await res.json()) as { message?: string };
     if (!res.ok) {
@@ -227,7 +231,7 @@ export function ManagePlanPanel() {
     instance.open();
   }
 
-  if (loading || !data) {
+  if (isLoading || !data) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-8">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -269,7 +273,7 @@ export function ManagePlanPanel() {
               {formatInrFromDecimalString(selectedPlanPrice)}
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              {selectedPlan === data.currentPlan ? "Current plan" : "New plan"}
+              {activeSelectedPlan === data.currentPlan ? "Current plan" : "New plan"}
             </p>
           </div>
         </div>
@@ -284,7 +288,7 @@ export function ManagePlanPanel() {
             </label>
             <select
               id="ownerPlan"
-              value={selectedPlan}
+              value={activeSelectedPlan}
               onChange={(e) =>
                 setSelectedPlan(e.target.value as OwnerSubscriptionPlan)
               }
@@ -299,7 +303,7 @@ export function ManagePlanPanel() {
           </div>
           <Button
             type="button"
-            disabled={savingPlan || selectedPlan === data.currentPlan}
+            disabled={savingPlan || activeSelectedPlan === data.currentPlan}
             onClick={handleChangePlan}
             className="w-full sm:w-auto bg-[#d4ff00] text-black hover:bg-[#c2e600] font-semibold"
           >

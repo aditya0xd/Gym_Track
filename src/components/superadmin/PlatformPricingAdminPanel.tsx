@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,31 +12,33 @@ type PlanPrices = {
   PRO: string;
 };
 
+const DEFAULT_PRICES: PlanPrices = {
+  TRIAL: "0.00",
+  STARTER: "1499.00",
+  PRO: "2999.00",
+};
+
 export function PlatformPricingAdminPanel() {
-  const [prices, setPrices] = useState<PlanPrices>({
-    TRIAL: "0.00",
-    STARTER: "1499.00",
-    PRO: "2999.00",
-  });
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const [draftPrices, setDraftPrices] = useState<PlanPrices | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const { data: loadedPrices, isLoading } = useQuery({
+    queryKey: ["superadmin-platform-pricing"],
+    queryFn: async () => {
     const res = await fetch("/api/superadmin/platform-pricing");
     const data = (await res.json()) as { prices?: PlanPrices; message?: string };
     if (!res.ok || !data.prices) {
-      toast.error(data.message ?? "Could not load platform pricing.");
-      setLoading(false);
-      return;
+      throw new Error(data.message ?? "Could not load platform pricing.");
     }
-    setPrices(data.prices);
-    setLoading(false);
-  }, []);
+    return data.prices;
+    },
+  });
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const prices = useMemo(
+    () => draftPrices ?? loadedPrices ?? DEFAULT_PRICES,
+    [draftPrices, loadedPrices],
+  );
 
   async function onSave() {
     setSaving(true);
@@ -50,12 +53,13 @@ export function PlatformPricingAdminPanel() {
       setSaving(false);
       return;
     }
-    setPrices(data.prices);
+    setDraftPrices(null);
+    queryClient.setQueryData(["superadmin-platform-pricing"], data.prices);
     toast.success("Platform plan prices updated.");
     setSaving(false);
   }
 
-  if (loading) {
+  if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading platform pricing…</p>;
   }
 
@@ -73,8 +77,8 @@ export function PlatformPricingAdminPanel() {
               type="text"
               value={prices[plan]}
               onChange={(e) =>
-                setPrices((prev) => ({
-                  ...prev,
+                setDraftPrices((prev) => ({
+                  ...(prev ?? prices),
                   [plan]: e.target.value.replace(/[^\d.]/g, ""),
                 }))
               }

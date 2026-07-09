@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { withSuperAdmin } from "@/lib/api-auth";
 import { listGymOwnersWithStats } from "@/server/superadmin/gym-owner.service";
 
-async function GETHandler(_request: Request, _userId: string) {
+async function GETHandler() {
   const rows = await listGymOwnersWithStats();
   return NextResponse.json({
     gymOwners: rows.map((g) => ({

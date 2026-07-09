@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { Suspense } from "react";
@@ -6,7 +5,6 @@ import { Loader2 } from "lucide-react";
 
 import { MembersExplorerClient } from "@/components/gym-owner/MembersExplorerClient";
 import { PageShell } from "@/components/shared/PageShell";
-import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {
@@ -20,7 +18,7 @@ export default async function OwnerMembersPage() {
   }
 
   return (
-    <PageShell className="pb-20 md:pb-6">
+    <PageShell className="h-screen overflow-hidden">
       <Suspense
         fallback={
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-8">
