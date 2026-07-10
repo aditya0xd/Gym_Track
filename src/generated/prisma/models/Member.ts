@@ -1427,6 +1427,10 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     upiScreenshot: string | null
     startDate: Date
     endDate: Date
+    /**
+     * When a MembershipRenewal is created, this field is updated to the renewal's periodEnd.
+     * When status is PAUSED, clock starts for freeze; on resume, endDate is extended by frozen calendar days.
+     */
     membershipStatus: $Enums.MembershipStatus
     /**
      * When status is PAUSED, clock started for freeze; on resume, endDate is extended by frozen calendar days.
