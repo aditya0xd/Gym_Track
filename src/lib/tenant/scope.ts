@@ -14,6 +14,10 @@ export function ownerDurationPriceScope(adminUserId: string) {
   return { adminUserId, deletedAt: null } as const;
 }
 
+export function ownerMembershipPlanScope(adminUserId: string) {
+  return { adminUserId, deletedAt: null } as const;
+}
+
 export function activeOwnerWhere(adminUserId: string) {
   return { id: adminUserId, deletedAt: null } as const;
 }

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-import { DurationPricingForm } from "@/components/gym-owner/DurationPricingForm";
+import { MembershipPlansManager } from "@/components/gym-owner/MembershipPlansManager";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { PageShell } from "@/components/shared/PageShell";
 import { authOptions } from "@/lib/auth";
@@ -25,7 +25,7 @@ export default async function OwnerPricingPage() {
           <PageHeader
             subtitle="Membership"
             title="Pricing Plans"
-            description="Manage the plans your gym offers"
+            description="Create named plans with benefits and duration pricing"
           />
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto pb-24">
@@ -37,7 +37,7 @@ export default async function OwnerPricingPage() {
           </div>
         }
           >
-            <DurationPricingForm />
+            <MembershipPlansManager />
           </Suspense>
         </div>
       </div>

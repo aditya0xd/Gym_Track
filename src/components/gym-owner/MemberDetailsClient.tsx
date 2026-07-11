@@ -21,6 +21,12 @@ import { useRouter } from "next/navigation";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 import {
+  durationLabel,
+  priceForDuration,
+  pricedDurations,
+  type MembershipPlanDto,
+} from "@/lib/membership-plans/client";
+import {
   IMAGE_ACCEPT,
   IMAGE_PROCESSING_PRESETS,
 } from "@/lib/image-processing/config";
@@ -44,6 +50,7 @@ interface ReminderItem {
 
 interface PaymentHistoryItem {
   id: string;
+  membershipPlanName: string | null;
   billingDuration: MemberBillingDuration;
   planPrice: string;
   discountInr: string;
@@ -61,6 +68,8 @@ interface MemberDetail {
   fullName: string;
   email: string | null;
   phone: string;
+  membershipPlanId: string | null;
+  membershipPlanName: string | null;
   billingDuration: MemberBillingDuration;
   planPrice: string;
   discountInr: string;
@@ -76,15 +85,6 @@ interface MemberDetail {
   createdAt: string;
   reminders: ReminderItem[];
   renewals: PaymentHistoryItem[];
-}
-
-type PriceHint = { duration: MemberBillingDuration; priceInr: string | null };
-
-function durationLabel(value: string) {
-  return (
-    MEMBER_BILLING_DURATION_OPTIONS.find((o) => o.value === value)?.label ??
-    value
-  );
 }
 
 function daysLeft(endDateStr: string) {
@@ -218,7 +218,8 @@ export function MemberDetailsClient({ id }: { id: string }) {
     "MEMBERSHIP_EXPIRY" | "PAYMENT_DUE" | null
   >(null);
   const [pauseLoading, setPauseLoading] = useState(false);
-  const [priceHints, setPriceHints] = useState<PriceHint[]>([]);
+  const [plans, setPlans] = useState<MembershipPlanDto[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [renewalOpen, setRenewalOpen] = useState(false);
   const [renewing, setRenewing] = useState(false);
   const [renewalDuration, setRenewalDuration] =
@@ -238,15 +239,24 @@ export function MemberDetailsClient({ id }: { id: string }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await fetch("/api/owner/pricing");
+      const res = await fetch("/api/owner/membership-plans");
       if (!res.ok) return;
-      const data = (await res.json()) as { prices: PriceHint[] };
-      if (!cancelled) setPriceHints(data.prices ?? []);
+      const data = (await res.json()) as { plans: MembershipPlanDto[] };
+      const loaded = data.plans ?? [];
+      if (!cancelled) {
+        setPlans(loaded);
+        const currentPlanExists = member ? loaded.some((p) => p.id === member.membershipPlanId) : false;
+        if (currentPlanExists && member) {
+          setSelectedPlanId(member.membershipPlanId);
+        } else if (loaded[0]) {
+          setSelectedPlanId(loaded[0].id);
+        }
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [member?.membershipPlanId]);
 
   const today = useMemo(() => {
     const now = new Date();
@@ -254,8 +264,30 @@ export function MemberDetailsClient({ id }: { id: string }) {
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
     );
   }, []);
-  const renewalPrice =
-    priceHints.find((h) => h.duration === renewalDuration)?.priceInr ?? null;
+
+  const selectedPlan = useMemo(
+    () => plans.find((p) => p.id === selectedPlanId) ?? null,
+    [plans, selectedPlanId],
+  );
+
+  const availableDurations = useMemo(
+    () => (selectedPlan ? pricedDurations(selectedPlan) : []),
+    [selectedPlan],
+  );
+
+  useEffect(() => {
+    if (!selectedPlan) return;
+    const hasCurrent = availableDurations.some((d) => d.duration === renewalDuration);
+    if (!hasCurrent && availableDurations[0]) {
+      setRenewalDuration(availableDurations[0].duration);
+    }
+  }, [selectedPlan, availableDurations, renewalDuration]);
+
+  const renewalPrice = useMemo(() => {
+    if (!selectedPlan) return null;
+    return priceForDuration(selectedPlan, renewalDuration);
+  }, [selectedPlan, renewalDuration]);
+
   const renewalFinalAmount = useMemo(() => {
     if (!renewalPrice) return null;
     const list = Number(renewalPrice);
@@ -427,7 +459,9 @@ export function MemberDetailsClient({ id }: { id: string }) {
   };
   const sc = statusStyles[status] ?? statusStyles["Active"];
 
-  const planLabel = durationLabel(member.billingDuration);
+  const planLabel = member.membershipPlanName
+    ? `${member.membershipPlanName} · ${durationLabel(member.billingDuration)}`
+    : durationLabel(member.billingDuration);
   const planPrice = formatInrFromDecimalString(member.planPrice);
   const amountPaid = formatInrFromDecimalString(member.amountPaid);
   const balanceDue = formatInrFromDecimalString(
@@ -439,6 +473,10 @@ export function MemberDetailsClient({ id }: { id: string }) {
     if (!member) return;
     if (status !== "Expired") {
       toast.error("Only expired memberships can be renewed from here.");
+      return;
+    }
+    if (!selectedPlanId) {
+      toast.error("Select a membership plan.");
       return;
     }
     if (!renewalPrice) {
@@ -478,6 +516,7 @@ export function MemberDetailsClient({ id }: { id: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          membershipPlanId: selectedPlanId,
           billingDuration: renewalDuration,
           periodStart: renewalPeriodStart,
           paymentStatus: renewalPaymentStatus,
@@ -831,7 +870,9 @@ export function MemberDetailsClient({ id }: { id: string }) {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-white">
-                          {durationLabel(payment.billingDuration)}
+                          {payment.membershipPlanName
+                            ? `${payment.membershipPlanName} · ${durationLabel(payment.billingDuration)}`
+                            : durationLabel(payment.billingDuration)}
                         </p>
                         <p className="mt-1 text-[11px] text-gray-400">
                           {formatDate(payment.periodStart)} to{" "}
@@ -976,17 +1017,31 @@ export function MemberDetailsClient({ id }: { id: string }) {
                 <label className="ml-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   Plan
                 </label>
+                <select
+                  value={selectedPlanId ?? ""}
+                  onChange={(e) => setSelectedPlanId(e.target.value)}
+                  className="flex h-12 w-full rounded-xl border-0 bg-[#27272a] px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]"
+                >
+                  {plans.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.category ? `(${p.category})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="ml-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                  Duration
+                </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {MEMBER_BILLING_DURATION_OPTIONS.map((option) => {
-                    const selected = renewalDuration === option.value;
-                    const price =
-                      priceHints.find((h) => h.duration === option.value)
-                        ?.priceInr ?? null;
+                  {availableDurations.map(({ duration: d, priceInr }) => {
+                    const selected = renewalDuration === d;
                     return (
                       <button
-                        key={option.value}
+                        key={d}
                         type="button"
-                        onClick={() => setRenewalDuration(option.value)}
+                        onClick={() => setRenewalDuration(d)}
                         className={`rounded-xl border-2 p-3 text-left transition-colors ${
                           selected
                             ? "border-[#d4ff00] bg-[#d4ff00]/10"
@@ -994,17 +1049,22 @@ export function MemberDetailsClient({ id }: { id: string }) {
                         }`}
                       >
                         <span className="block text-xs font-bold text-white">
-                          {durationLabel(option.value)}
+                          {durationLabel(d)}
                         </span>
                         <span className="mt-1 block text-sm font-black text-[#d4ff00]">
-                          {price
-                            ? formatInrFromDecimalString(price)
+                          {priceInr
+                            ? formatInrFromDecimalString(priceInr)
                             : "No price"}
                         </span>
                       </button>
                     );
                   })}
                 </div>
+                {selectedPlan && availableDurations.length === 0 && (
+                  <p className="text-xs font-medium text-red-400">
+                    This plan has no pricing configured. Add pricing first.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

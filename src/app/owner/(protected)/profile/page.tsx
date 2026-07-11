@@ -60,8 +60,8 @@ export default async function OwnerProfilePage() {
     },
   });
 
-  const plansCount = await prisma.gymOwnerDurationPrice.count({
-    where: { adminUserId: ownerId },
+  const plansCount = await prisma.gymMembershipPlan.count({
+    where: { adminUserId: ownerId, deletedAt: null },
   });
 
   const gymName = "GymTrack Pro";

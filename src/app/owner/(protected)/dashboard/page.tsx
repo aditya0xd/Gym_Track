@@ -304,7 +304,7 @@ export default async function OwnerDashboardPage() {
                         {m.fullName}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {durationLabel(m.billingDuration)} ·{" "}
+                        {m.membershipPlanName ? `${m.membershipPlanName} · ` : ""}{durationLabel(m.billingDuration)} ·{" "}
                         {formatInrFromDecimalString(m.planPrice.toString())}
                         {Number(m.discountInr) > 0 ? (
                           <span className="text-muted-foreground/90">

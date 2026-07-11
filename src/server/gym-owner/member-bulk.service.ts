@@ -4,6 +4,7 @@ import { normalizeHeaderKey, parseCsv, rowToCsvLine } from "@/lib/csv/simple-csv
 import { HttpError } from "@/lib/http/errors";
 
 import { createMemberForOwner, listMembersForOwner } from "./member.service";
+import { resolvePlanByNameForOwner } from "./membership-plan.service";
 
 const IMPORT_MAX_ROWS = 500;
 
@@ -11,6 +12,7 @@ const EXPORT_HEADERS = [
   "fullName",
   "email",
   "phone",
+  "membershipPlanName",
   "billingDuration",
   "startDate",
   "endDate",
@@ -23,6 +25,7 @@ const TEMPLATE_HEADERS = [
   "fullName",
   "email",
   "phone",
+  "membershipPlanName",
   "billingDuration",
   "startDate",
   "paymentStatus",
@@ -72,6 +75,7 @@ export async function buildMembersExportCsv(adminUserId: string): Promise<string
         m.fullName,
         m.email ?? "",
         m.phone,
+        m.membershipPlanName ?? "",
         m.billingDuration,
         m.startDate.toISOString().slice(0, 10),
         m.endDate.toISOString().slice(0, 10),
@@ -110,7 +114,7 @@ export async function importMembersFromCsv(
     if (h && !colIndex.has(h)) colIndex.set(h, i);
   });
 
-  const required = ["fullname", "phone", "billingduration", "startdate"];
+  const required = ["fullname", "phone", "membershipplanname", "billingduration", "startdate"];
   for (const key of required) {
     if (!colIndex.has(key)) {
       throw new HttpError(
@@ -143,6 +147,7 @@ export async function importMembersFromCsv(
     const emailRaw = get("email");
     const email = emailRaw === "" ? null : emailRaw.toLowerCase();
     const durationRaw = get("billingduration");
+    const planNameRaw = get("membershipplanname");
     const startRaw = get("startdate");
     const payRaw = get("paymentstatus") || "NOT_DONE";
     const waRaw = get("whatsappenabled") || "true";
@@ -153,6 +158,10 @@ export async function importMembersFromCsv(
     }
     if (!phone) {
       errors.push({ rowNumber, message: "phone is required." });
+      continue;
+    }
+    if (!planNameRaw) {
+      errors.push({ rowNumber, message: "membershipPlanName is required." });
       continue;
     }
     if (!isDuration(durationRaw)) {
@@ -193,10 +202,12 @@ export async function importMembersFromCsv(
     }
 
     try {
+      const plan = await resolvePlanByNameForOwner(adminUserId, planNameRaw);
       await createMemberForOwner(adminUserId, {
         fullName,
         email,
         phone,
+        membershipPlanId: plan.id,
         billingDuration: durationRaw,
         startDate,
         paymentStatus: "NOT_DONE",

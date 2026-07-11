@@ -81,8 +81,8 @@ export function MemberBulkPanel() {
       <div className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-base font-semibold text-foreground">Export</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {/*Download all members as CSV (UTF-8). Includes end date and membership status for your
-          records. Re-import uses the template columns only. */}
+          Download all members as CSV (UTF-8). Includes end date and membership status for your
+          records. Re-import uses the template columns only.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
@@ -97,14 +97,13 @@ export function MemberBulkPanel() {
 
       <div className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-base font-semibold text-foreground">Import</h2>
-        {/*   <p className="mt-1 text-sm text-muted-foreground">
-          Use the template for column names. Required: fullName, phone,
+        <p className="mt-1 text-sm text-muted-foreground">
+          Use the template for column names. Required: fullName, phone, membershipPlanName,
           billingDuration ( ONE_MONTH, THREE_MONTHS, SIX_MONTHS, TWELVE_MONTHS),
           startDate (YYYY-MM-DD). Optional: email, paymentStatus (NOT_DONE or
           DONE — DONE rows are skipped for import because UPI proof is
-          required), whatsappEnabled (true/false). Each duration must have a
-          price under Pricing. Maximum 500 rows per file.
-        </p>*/}
+          required), whatsappEnabled (true/false). The named plan must exist under Pricing. Maximum 500 rows per file.
+        </p>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <Button
             type="button"

@@ -12,6 +12,9 @@ model Member {
   fullName         String
   email            String?               @unique
   phone            String
+  membershipPlanId String?
+  /// Snapshot of plan name at enrollment — survives rename or soft-delete.
+  membershipPlanName String?
   billingDuration  MemberBillingDuration
   /// List price for this duration minus `discountInr` (amount actually charged / recorded).
   planPrice        Decimal               @db.Decimal(10, 2)
@@ -34,19 +37,23 @@ model Member {
   createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
   adminUser        AdminUser             @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  membershipPlan   GymMembershipPlan?    @relation(fields: [membershipPlanId], references: [id], onDelete: SetNull)
   reminders        ReminderLog[]
   renewals         MembershipRenewal[]
 
   @@index([adminUserId])
+  @@index([membershipPlanId])
   @@index([adminUserId, membershipStatus])
   @@index([adminUserId, deletedAt])
 }
 
 model MembershipRenewal {
-  id              String                @id @default(uuid())
-  memberId        String
-  member          Member                @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  billingDuration MemberBillingDuration
+  id                 String                @id @default(uuid())
+  memberId           String
+  member             Member                @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  membershipPlanId   String?
+  membershipPlanName String?
+  billingDuration    MemberBillingDuration
   planPrice       Decimal               @db.Decimal(10, 2)
   discountInr     Decimal               @default(0) @db.Decimal(10, 2)
   amountPaid      Decimal               @default(0) @db.Decimal(10, 2)
@@ -90,6 +97,7 @@ model AdminUser {
   updatedAt        DateTime                @updatedAt
   members          Member[]
   durationPrices   GymOwnerDurationPrice[]
+  membershipPlans  GymMembershipPlan[]
   billingInvoices  OwnerBillingInvoice[]
 
   @@index([deletedAt])
@@ -105,7 +113,56 @@ model SuperAdminUser {
   updatedAt    DateTime @updatedAt
 }
 
-/// INR list prices per duration — set by each gym owner
+/// Owner-defined membership product (e.g. "Strength", "Couple").
+model GymMembershipPlan {
+  id          String    @id @default(uuid())
+  adminUserId String
+  name        String
+  category    String?
+  description String?   @db.Text
+  sortOrder   Int       @default(0)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  adminUser AdminUser                        @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  benefits  GymMembershipPlanBenefit[]
+  prices    GymMembershipPlanDurationPrice[]
+  members   Member[]
+
+  @@index([adminUserId, deletedAt])
+  @@index([adminUserId, category])
+}
+
+model GymMembershipPlanBenefit {
+  id        String    @id @default(uuid())
+  planId    String
+  label     String
+  sortOrder Int       @default(0)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  plan GymMembershipPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId, deletedAt])
+}
+
+model GymMembershipPlanDurationPrice {
+  id        String                @id @default(uuid())
+  planId    String
+  duration  MemberBillingDuration
+  priceInr  Decimal               @db.Decimal(10, 2)
+  deletedAt DateTime?
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  plan GymMembershipPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, duration])
+  @@index([planId, deletedAt])
+}
+
+/// INR list prices per duration — set by each gym owner (legacy; migrated to GymMembershipPlan)
 model GymOwnerDurationPrice {
   id          String                @id @default(uuid())
   adminUserId String

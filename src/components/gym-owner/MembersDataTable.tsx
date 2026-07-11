@@ -9,6 +9,7 @@ export type MemberRow = {
   email: string | null;
   phone: string;
   billingDuration: MemberBillingDuration;
+  membershipPlanName?: string | null;
   planPrice: string;
   discountInr: string;
   startDate: string;
@@ -54,7 +55,9 @@ export function MembersDataTable({ members }: { members: MemberRow[] }) {
                   <div className="text-xs text-muted-foreground">{m.phone}</div>
                 </td>
                 <td className="px-3 py-2.5 text-foreground sm:px-4 sm:py-3">
-                  {durationLabel(m.billingDuration)}{" "}
+                  <div className="font-medium text-foreground">
+                    {m.membershipPlanName ? `${m.membershipPlanName} · ` : ""}{durationLabel(m.billingDuration)}
+                  </div>
                   <span className="text-xs text-muted-foreground">
                     ({m.whatsappEnabled ? "WhatsApp" : "SMS"})
                   </span>
