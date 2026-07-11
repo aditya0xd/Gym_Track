@@ -40,9 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/app/generated/prisma
-
-/app/generated/prisma
+# Prisma client — generated locally via `npm install` (postinstall)
+/src/generated/prisma/
 
 # Playwright
 node_modules/
