@@ -173,7 +173,10 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
         </div>
         <div className="h-[250px] sm:h-[320px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={revenueForecastChart}>
+            <AreaChart
+              data={revenueForecastChart}
+              margin={{ top: 10, right: 40, left: 0, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -336,7 +339,10 @@ export function OwnerAnalyticsDashboard({ data }: { data: OwnerAnalytics }) {
           </div>
           <div className="mt-4 h-[180px] sm:h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.trends}>
+              <BarChart
+                data={data.trends}
+                margin={{ top: 10, right: 40, left: 0, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="paidGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#10b981" />
