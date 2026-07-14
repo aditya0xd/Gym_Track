@@ -16,6 +16,10 @@ export default async function OwnerProtectedLayout({
     redirect("/login");
   }
 
+  if (!session.user.onboardingComplete) {
+    redirect("/owner/onboarding");
+  }
+
   return (
     <div className="min-h-full bg-background text-foreground">
       <div className="hidden md:block">

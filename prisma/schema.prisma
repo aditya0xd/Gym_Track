@@ -8,38 +8,38 @@ datasource db {
 }
 
 model Member {
-  id               String                @id @default(uuid())
-  fullName         String
-  email            String?               @unique
-  phone            String
-  membershipPlanId String?
+  id                 String                @id @default(uuid())
+  fullName           String
+  email              String?               @unique
+  phone              String
+  membershipPlanId   String?
   /// Snapshot of plan name at enrollment — survives rename or soft-delete.
   membershipPlanName String?
-  billingDuration  MemberBillingDuration
+  billingDuration    MemberBillingDuration
   /// List price for this duration minus `discountInr` (amount actually charged / recorded).
-  planPrice        Decimal               @db.Decimal(10, 2)
+  planPrice          Decimal               @db.Decimal(10, 2)
   /// INR bargained off the list price for this duration; 0 if none.
-  discountInr      Decimal               @default(0) @db.Decimal(10, 2)
-  amountPaid       Decimal               @default(0) @db.Decimal(10, 2)
-  paymentStatus    PaymentStatus         @default(NOT_DONE)
-  memberPhoto      String?               @db.Text
-  upiScreenshot    String?               @db.Text
-  startDate        DateTime              @db.Date
-  endDate          DateTime              @db.Date
+  discountInr        Decimal               @default(0) @db.Decimal(10, 2)
+  amountPaid         Decimal               @default(0) @db.Decimal(10, 2)
+  paymentStatus      PaymentStatus         @default(NOT_DONE)
+  memberPhoto        String?               @db.Text
+  upiScreenshot      String?               @db.Text
+  startDate          DateTime              @db.Date
+  endDate            DateTime              @db.Date
   /// When a MembershipRenewal is created, this field is updated to the renewal's periodEnd.
   /// When status is PAUSED, clock starts for freeze; on resume, endDate is extended by frozen calendar days.
-  membershipStatus MembershipStatus      @default(ACTIVE)
+  membershipStatus   MembershipStatus      @default(ACTIVE)
   /// When status is PAUSED, clock started for freeze; on resume, endDate is extended by frozen calendar days.
-  pausedAt         DateTime?
-  whatsappEnabled  Boolean               @default(true)
-  adminUserId      String
-  deletedAt        DateTime?
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
-  adminUser        AdminUser             @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
-  membershipPlan   GymMembershipPlan?    @relation(fields: [membershipPlanId], references: [id], onDelete: SetNull)
-  reminders        ReminderLog[]
-  renewals         MembershipRenewal[]
+  pausedAt           DateTime?
+  whatsappEnabled    Boolean               @default(true)
+  adminUserId        String
+  deletedAt          DateTime?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  adminUser          AdminUser             @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  membershipPlan     GymMembershipPlan?    @relation(fields: [membershipPlanId], references: [id], onDelete: SetNull)
+  reminders          ReminderLog[]
+  renewals           MembershipRenewal[]
 
   @@index([adminUserId])
   @@index([membershipPlanId])
@@ -54,16 +54,16 @@ model MembershipRenewal {
   membershipPlanId   String?
   membershipPlanName String?
   billingDuration    MemberBillingDuration
-  planPrice       Decimal               @db.Decimal(10, 2)
-  discountInr     Decimal               @default(0) @db.Decimal(10, 2)
-  amountPaid      Decimal               @default(0) @db.Decimal(10, 2)
-  periodStart     DateTime              @db.Date
-  periodEnd       DateTime              @db.Date
-  paymentStatus   PaymentStatus         @default(NOT_DONE)
-  paymentProvider PaymentProvider       @default(MANUAL)
-  upiScreenshot   String?               @db.Text
-  paidAt          DateTime?
-  createdAt       DateTime              @default(now())
+  planPrice          Decimal               @db.Decimal(10, 2)
+  discountInr        Decimal               @default(0) @db.Decimal(10, 2)
+  amountPaid         Decimal               @default(0) @db.Decimal(10, 2)
+  periodStart        DateTime              @db.Date
+  periodEnd          DateTime              @db.Date
+  paymentStatus      PaymentStatus         @default(NOT_DONE)
+  paymentProvider    PaymentProvider       @default(MANUAL)
+  upiScreenshot      String?               @db.Text
+  paidAt             DateTime?
+  createdAt          DateTime              @default(now())
 
   @@index([memberId, createdAt])
 }
@@ -85,20 +85,22 @@ model ReminderLog {
 
 /// Gym owner (tenant)
 model AdminUser {
-  id               String                  @id @default(uuid())
-  name             String
-  email            String                  @unique
-  passwordHash     String
-  profilePhoto     String?                 @db.Text
-  subscriptionPlan OwnerSubscriptionPlan   @default(TRIAL)
-  trialEndsAt      DateTime?
-  deletedAt        DateTime?
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
-  members          Member[]
-  durationPrices   GymOwnerDurationPrice[]
-  membershipPlans  GymMembershipPlan[]
-  billingInvoices  OwnerBillingInvoice[]
+  id                 String                  @id @default(uuid())
+  name               String
+  email              String                  @unique
+  passwordHash       String
+  profilePhoto       String?                 @db.Text
+  gymName            String?
+  onboardingComplete Boolean                 @default(false)
+  subscriptionPlan   OwnerSubscriptionPlan   @default(TRIAL)
+  trialEndsAt        DateTime?
+  deletedAt          DateTime?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  members            Member[]
+  durationPrices     GymOwnerDurationPrice[]
+  membershipPlans    GymMembershipPlan[]
+  billingInvoices    OwnerBillingInvoice[]
 
   @@index([deletedAt])
 }

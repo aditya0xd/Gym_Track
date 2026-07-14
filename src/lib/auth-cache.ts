@@ -7,6 +7,8 @@ export interface CachedOwner {
   subscriptionPlan: string;
   trialEndsAt: string | null;
   accountInvalid: boolean;
+  gymName: string | null;
+  onboardingComplete: boolean;
 }
 
 export async function getCachedOwner(

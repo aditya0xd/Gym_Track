@@ -494,7 +494,7 @@ export function MembershipPlansManager() {
               </button>
             </div>
 
-            {plan.name === "Standard" ? (
+            {plan.name === "Standard Plan" ? (
               <div className="absolute -top-2.5 left-5 flex items-center gap-1 rounded-full bg-[#d4ff00] px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-black shadow-sm">
                 <Zap className="h-2.5 w-2.5 fill-black stroke-0" />
                 Default

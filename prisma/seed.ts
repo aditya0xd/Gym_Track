@@ -79,6 +79,8 @@ async function main() {
       passwordHash: DEMO_PASSWORD_HASH,
       subscriptionPlan: "PRO",
       trialEndsAt: trialFar,
+      gymName: "Ravi's Gym",
+      onboardingComplete: true,
     },
     update: {
       name: "Ravi Mehta",
@@ -86,6 +88,8 @@ async function main() {
       passwordHash: DEMO_PASSWORD_HASH,
       subscriptionPlan: "PRO",
       trialEndsAt: trialFar,
+      gymName: "Ravi's Gym",
+      onboardingComplete: true,
     },
   });
 
@@ -99,6 +103,8 @@ async function main() {
       passwordHash: DEMO_PASSWORD_HASH,
       subscriptionPlan: "STARTER",
       trialEndsAt: trialFar,
+      gymName: "Ananya's Gym",
+      onboardingComplete: true,
     },
     update: {
       name: "Ananya Desai",
@@ -106,6 +112,8 @@ async function main() {
       passwordHash: DEMO_PASSWORD_HASH,
       subscriptionPlan: "STARTER",
       trialEndsAt: trialFar,
+      gymName: "Ananya's Gym",
+      onboardingComplete: true,
     },
   });
 
