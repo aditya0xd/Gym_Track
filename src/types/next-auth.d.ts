@@ -12,6 +12,8 @@ declare module "next-auth" {
       accountInvalid?: boolean;
       subscriptionPlan?: OwnerSubscriptionPlan;
       trialEndsAt?: string | null;
+      gymName?: string | null;
+      onboardingComplete?: boolean;
     };
   }
 
@@ -28,5 +30,7 @@ declare module "next-auth/jwt" {
     accountInvalid?: boolean;
     subscriptionPlan?: string;
     trialEndsAt?: string | null;
+    gymName?: string | null;
+    onboardingComplete?: boolean;
   }
 }

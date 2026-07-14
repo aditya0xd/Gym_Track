@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 
-import { seedDefaultDurationPricesForOwner } from "@/lib/auth/default-owner-pricing";
 import { prisma } from "@/lib/prisma";
 import { parseRequestBody, emailSchema } from "@/lib/validation";
 import { rateLimit } from "@/lib/rate-limit";
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
   const trialEndsAt = new Date();
   trialEndsAt.setUTCDate(trialEndsAt.getUTCDate() + 14);
 
-  const user = await prisma.adminUser.create({
+  await prisma.adminUser.create({
     data: {
       name,
       email,
@@ -60,7 +59,8 @@ export async function POST(request: Request) {
     },
   });
 
-  await seedDefaultDurationPricesForOwner(user.id);
+  // No default plan seeded here — onboarding handles first-plan creation
+  // with the owner's actual gym name and pricing.
 
   return NextResponse.json({ message: "Account created successfully." }, { status: 201 });
 }

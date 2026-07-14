@@ -253,9 +253,9 @@ export default async function OwnerProfilePage() {
 
           <div className="mx-4 my-1 h-px bg-white/5" />
 
-          {/* Menu Item: Help & Support */}
+          {/* Menu Item: Settings */}
           <Link
-            href="/owner/profile"
+            href="/owner/settings"
             className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
@@ -268,8 +268,9 @@ export default async function OwnerProfilePage() {
           </Link>
 
           <div className="mx-4 my-1 h-px bg-white/5" />
+          {/* Menu Item: Help & Support */}
           <Link
-            href="/owner/profile"
+            href="/owner/profile/help"
             className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
@@ -297,7 +298,6 @@ export default async function OwnerProfilePage() {
             <ChevronRight className="h-4 w-4 text-zinc-600" />
           </Link>
 
-          <div className="mx-4 my-1 h-px bg-white/5" />
 
         </div>
 

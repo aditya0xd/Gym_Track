@@ -143,11 +143,13 @@ export const authOptions: NextAuthOptions = {
           token.accountInvalid = cached.accountInvalid;
           token.subscriptionPlan = cached.subscriptionPlan;
           token.trialEndsAt = cached.trialEndsAt;
+          token.gymName = cached.gymName;
+          token.onboardingComplete = cached.onboardingComplete;
         } else {
           // Cache miss: hit DB and repopulate Redis
           const owner = await prisma.adminUser.findFirst({
             where: { id: ownerId, deletedAt: null },
-            select: { subscriptionPlan: true, trialEndsAt: true },
+            select: { subscriptionPlan: true, trialEndsAt: true, gymName: true, onboardingComplete: true },
           });
 
           const data: CachedOwner = owner
@@ -155,11 +157,15 @@ export const authOptions: NextAuthOptions = {
                 accountInvalid: false,
                 subscriptionPlan: owner.subscriptionPlan,
                 trialEndsAt: owner.trialEndsAt?.toISOString() ?? null,
+                gymName: owner.gymName,
+                onboardingComplete: owner.onboardingComplete,
               }
             : {
                 accountInvalid: true,
                 subscriptionPlan: "TRIAL",
                 trialEndsAt: null,
+                gymName: null,
+                onboardingComplete: false,
               };
 
           await setCachedOwner(ownerId, data);
@@ -167,6 +173,8 @@ export const authOptions: NextAuthOptions = {
           token.accountInvalid = data.accountInvalid;
           token.subscriptionPlan = data.subscriptionPlan;
           token.trialEndsAt = data.trialEndsAt;
+          token.gymName = data.gymName;
+          token.onboardingComplete = data.onboardingComplete;
         }
       } else {
         token.accountInvalid = false;
@@ -191,6 +199,8 @@ export const authOptions: NextAuthOptions = {
             typeof token.trialEndsAt === "string" || token.trialEndsAt === null
               ? (token.trialEndsAt as string | null)
               : null;
+          session.user.gymName = typeof token.gymName === "string" ? token.gymName : null;
+          session.user.onboardingComplete = typeof token.onboardingComplete === "boolean" ? token.onboardingComplete : false;
         }
       }
 
