@@ -21,7 +21,7 @@ export default async function OwnerProtectedLayout({
       <div className="hidden md:block">
         <OwnerMainNav />
       </div>
-      <div className="pb-16 md:pb-0 overflow-y-auto">{children}</div>
+      <div className="pb-16 md:pb-0 overflow-hidden">{children}</div>
       <OwnerBottomNav />
     </div>
   );

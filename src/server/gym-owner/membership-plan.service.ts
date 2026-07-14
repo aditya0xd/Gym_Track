@@ -207,7 +207,6 @@ export async function createMembershipPlanForOwner(
   const planId = randomUUID();
   const benefitRows = input.benefits.map((label, index) => ({
     id: randomUUID(),
-    planId,
     label: label.trim(),
     sortOrder: index,
   }));

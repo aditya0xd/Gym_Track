@@ -60,6 +60,16 @@ function formFromPlan(plan: MembershipPlanDto): PlanFormState {
   };
 }
 
+async function safeJson(res: Response): Promise<{ message?: string; [key: string]: unknown }> {
+  const text = await res.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text) as { message?: string; [key: string]: unknown };
+  } catch {
+    return {};
+  }
+}
+
 async function fetchPlans(): Promise<{ plans: MembershipPlanDto[] }> {
   const res = await fetch("/api/owner/membership-plans");
   if (!res.ok) {
@@ -239,8 +249,8 @@ export function MembershipPlansManager() {
           body: JSON.stringify(payload),
         },
       );
-      const body = (await res.json()) as { message?: string };
-      if (!res.ok) throw new Error(body.message ?? "Could not save plan.");
+      const body = await safeJson(res);
+      if (!res.ok) throw new Error(body.message ?? `Server error ${res.status}. Could not save plan.`);
       return body;
     },
     onSuccess: () => {
@@ -258,8 +268,8 @@ export function MembershipPlansManager() {
       const res = await fetch(`/api/owner/membership-plans/${planId}`, {
         method: "DELETE",
       });
-      const body = (await res.json()) as { message?: string };
-      if (!res.ok) throw new Error(body.message ?? "Could not delete plan.");
+      const body = await safeJson(res);
+      if (!res.ok) throw new Error(body.message ?? `Server error ${res.status}. Could not delete plan.`);
     },
     onSuccess: () => {
       toast.success("Plan deleted.");
@@ -299,18 +309,20 @@ export function MembershipPlansManager() {
 
   return (
     <div className="space-y-4 pb-8">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
+      <div className="mb-2 flex items-center justify-between gap-4">
+        <p className="text-sm font-medium text-muted-foreground">
           {plans.length} active plan{plans.length === 1 ? "" : "s"}
         </p>
         {mode === null ? (
           <button
             type="button"
             onClick={startCreate}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#d4ff00] px-4 py-2.5 text-[11px] font-black uppercase tracking-widest text-black transition-transform hover:scale-[1.01] active:scale-[0.99]"
+            className="group flex items-center gap-2.5 rounded-full bg-foreground py-1.5 pl-1.5 pr-4 text-xs font-bold text-background transition-all hover:bg-foreground/90 hover:shadow-lg active:scale-95"
           >
-            <Plus className="h-4 w-4 stroke-[3]" />
-            New plan
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d4ff00] text-black transition-transform group-hover:scale-105">
+              <Plus className="h-4 w-4 stroke-[3]" />
+            </div>
+            Create Plan
           </button>
         ) : null}
       </div>
@@ -377,107 +389,114 @@ export function MembershipPlansManager() {
         return (
           <div
             key={plan.id}
-            className="relative rounded-2xl border border-border bg-card transition-colors"
+            className="relative rounded-2xl border border-border bg-card p-5 transition-colors hover:border-[#d4ff00]/30"
           >
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-xl font-black text-foreground">{plan.name}</p>
-                    {plan.category ? (
-                      <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        {plan.category}
-                      </span>
-                    ) : null}
-                  </div>
-                  {plan.description ? (
-                    <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
-                  ) : null}
-                  {plan.activeMemberCount > 0 ? (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {plan.activeMemberCount} member
-                      {plan.activeMemberCount === 1 ? "" : "s"} on this plan
-                    </p>
+            {/* Header section: Name, Category, Members */}
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="mb-1 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-foreground">{plan.name}</h3>
+                  {plan.category ? (
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                      {plan.category}
+                    </span>
                   ) : null}
                 </div>
-                {highlight?.priceInr ? (
-                  <div className="shrink-0 text-right">
-                    <p className="text-3xl font-black text-[#d4ff00]">
-                      {formatInrFromDecimalString(highlight.priceInr)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      from {durationLabel(highlight.duration)}
-                    </p>
-                  </div>
+                {plan.description ? (
+                  <p className="line-clamp-2 text-sm text-muted-foreground">{plan.description}</p>
                 ) : null}
               </div>
 
-              {plan.benefits.length > 0 ? (
-                <ul className="mt-4 space-y-2">
-                  {plan.benefits.map((b) => (
-                    <li
-                      key={b.id}
-                      className="flex items-center gap-2 text-sm text-muted-foreground"
-                    >
-                      <Check className="h-3.5 w-3.5 shrink-0 text-[#d4ff00]" />
-                      {b.label}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-
-              {activePrices.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {activePrices.map((p) => (
-                    <span
-                      key={p.duration}
-                      className="rounded-lg bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
-                    >
-                      {durationLabel(p.duration)}:{" "}
-                      {formatInrFromDecimalString(p.priceInr!)}
-                    </span>
-                  ))}
+              {plan.activeMemberCount > 0 ? (
+                <div className="flex shrink-0 flex-col items-end">
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Active Members
+                  </span>
+                  <span className="text-lg font-black text-foreground">
+                    {plan.activeMemberCount}
+                  </span>
                 </div>
-              ) : (
-                <p className="mt-4 text-xs text-red-400">No prices set yet.</p>
-              )}
-
-              <div className="mt-5 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => startEdit(plan)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-muted py-2.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  disabled={deleteMutation.isPending || plan.activeMemberCount > 0}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        `Delete "${plan.name}"? This cannot be undone for new enrollments.`,
-                      )
-                    ) {
-                      deleteMutation.mutate(plan.id);
-                    }
-                  }}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-colors hover:text-red-400 disabled:opacity-40"
-                  title={
-                    plan.activeMemberCount > 0
-                      ? "Cannot delete while members are on this plan"
-                      : "Delete plan"
-                  }
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+              ) : null}
             </div>
 
-            {plan.name === "Standard" && highlight ? (
-              <div className="absolute -top-3 right-4 flex items-center gap-1 rounded-full bg-[#d4ff00] px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-black">
-                <Zap className="h-3 w-3 fill-black stroke-0" />
+            {/* Prices section */}
+            {activePrices.length > 0 ? (
+              <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {activePrices.map((p) => (
+                  <div
+                    key={p.duration}
+                    className="rounded-xl border border-border/50 bg-muted/30 p-2.5 text-center"
+                  >
+                    <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                      {durationLabel(p.duration)}
+                    </p>
+                    <p className="text-sm font-bold text-foreground">
+                      {formatInrFromDecimalString(p.priceInr!)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mb-4 text-xs text-red-400">No prices set yet.</p>
+            )}
+
+            {/* Benefits section */}
+            {plan.benefits.length > 0 ? (
+              <div className="mb-5 flex flex-wrap gap-1.5">
+                {plan.benefits.map((b) => (
+                  <span
+                    key={b.id}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-1 text-xs text-muted-foreground"
+                  >
+                    <Check className="h-3 w-3 text-[#d4ff00]" />
+                    {b.label}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+
+            {/* Actions */}
+            <div className="flex gap-2 border-t border-border/50 pt-4">
+              <button
+                type="button"
+                onClick={() => startEdit(plan)}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-muted/50 py-2.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Edit Plan
+              </button>
+              <button
+                type="button"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  if (plan.activeMemberCount > 0) {
+                    toast.error(
+                      `Cannot delete "${plan.name}" while ${plan.activeMemberCount} member(s) are still assigned to it.`,
+                    );
+                    return;
+                  }
+                  if (
+                    window.confirm(
+                      `Delete "${plan.name}"? This cannot be undone for new enrollments.`,
+                    )
+                  ) {
+                    deleteMutation.mutate(plan.id);
+                  }
+                }}
+                className={`flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-xl transition-colors self-center ${
+                  plan.activeMemberCount > 0
+                    ? "bg-muted/30 text-muted-foreground/30 hover:text-red-400/50"
+                    : "bg-muted/50 text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
+                } disabled:opacity-40`}
+                title="Delete plan"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+
+            {plan.name === "Standard" ? (
+              <div className="absolute -top-2.5 left-5 flex items-center gap-1 rounded-full bg-[#d4ff00] px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-black shadow-sm">
+                <Zap className="h-2.5 w-2.5 fill-black stroke-0" />
                 Default
               </div>
             ) : null}
