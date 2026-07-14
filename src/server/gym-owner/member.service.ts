@@ -16,7 +16,8 @@ import {
 } from "@/lib/cache/owner-members-list";
 import { HttpError } from "@/lib/http/errors";
 import { prisma } from "@/lib/prisma";
-import { memberScope, ownerDurationPriceScope } from "@/lib/tenant/scope";
+import { memberScope } from "@/lib/tenant/scope";
+import { getPlanPriceForEnrollment } from "@/server/gym-owner/membership-plan.service";
 
 const memberListSelect = {
   id: true,
@@ -24,6 +25,8 @@ const memberListSelect = {
   email: true,
   phone: true,
   billingDuration: true,
+  membershipPlanId: true,
+  membershipPlanName: true,
   planPrice: true,
   discountInr: true,
   amountPaid: true,
@@ -42,6 +45,8 @@ type OwnerMemberListItem = {
   email: string | null;
   phone: string;
   billingDuration: MemberBillingDuration;
+  membershipPlanId: string | null;
+  membershipPlanName: string | null;
   planPrice: Prisma.Decimal;
   discountInr: Prisma.Decimal;
   amountPaid: Prisma.Decimal;
@@ -115,6 +120,8 @@ export async function getMemberForOwner(adminUserId: string, memberId: string) {
       fullName: true,
       email: true,
       phone: true,
+      membershipPlanId: true,
+      membershipPlanName: true,
       billingDuration: true,
       planPrice: true,
       discountInr: true,
@@ -145,6 +152,8 @@ export async function getMemberForOwner(adminUserId: string, memberId: string) {
         take: 25,
         select: {
           id: true,
+          membershipPlanId: true,
+          membershipPlanName: true,
           billingDuration: true,
           planPrice: true,
           discountInr: true,
@@ -166,6 +175,7 @@ export type CreateMemberInput = {
   email: string | null;
   phone: string;
   billingDuration: MemberBillingDuration;
+  membershipPlanId: string;
   startDate: Date;
   whatsappEnabled: boolean;
   paymentStatus: PaymentStatus;
@@ -178,6 +188,7 @@ export type CreateMemberInput = {
 };
 
 export type RenewMemberInput = {
+  membershipPlanId: string;
   billingDuration: MemberBillingDuration;
   periodStart: Date;
   paymentStatus: PaymentStatus;
@@ -214,19 +225,11 @@ export async function createMemberForOwner(
   adminUserId: string,
   input: CreateMemberInput,
 ) {
-  const priceRow = await prisma.gymOwnerDurationPrice.findFirst({
-    where: {
-      ...ownerDurationPriceScope(adminUserId),
-      duration: input.billingDuration,
-    },
-  });
-
-  if (!priceRow) {
-    throw new HttpError(
-      400,
-      "No INR price configured for this duration. Add it under Pricing first.",
-    );
-  }
+  const { planId, planName, listPrice } = await getPlanPriceForEnrollment(
+    adminUserId,
+    input.membershipPlanId,
+    input.billingDuration,
+  );
 
   const start = new Date(
     Date.UTC(
@@ -238,7 +241,6 @@ export async function createMemberForOwner(
 
   const endDate = membershipEndDateInclusive(start, input.billingDuration);
 
-  const listPrice = new Prisma.Decimal(priceRow.priceInr.toString());
   const discountInr = parseMoney(input.discountInr, "Discount");
   if (discountInr.gt(listPrice)) {
     throw new HttpError(
@@ -272,6 +274,8 @@ export async function createMemberForOwner(
           fullName: input.fullName.trim(),
           email: input.email?.trim() ? input.email.trim().toLowerCase() : null,
           phone: input.phone.trim(),
+          membershipPlanId: planId,
+          membershipPlanName: planName,
           billingDuration: input.billingDuration,
           planPrice,
           discountInr,
@@ -282,13 +286,15 @@ export async function createMemberForOwner(
           startDate: start,
           endDate: endDate,
           whatsappEnabled: input.whatsappEnabled,
-          adminUser: { connect: { id: adminUserId } },
+          adminUserId,
         },
       });
 
       await tx.membershipRenewal.create({
         data: {
           memberId: createdMember.id,
+          membershipPlanId: planId,
+          membershipPlanName: planName,
           billingDuration: input.billingDuration,
           planPrice,
           discountInr,
@@ -334,18 +340,11 @@ export async function renewMemberForOwner(
     throw new HttpError(400, "Resume the paused membership before renewing.");
   }
 
-  const priceRow = await prisma.gymOwnerDurationPrice.findFirst({
-    where: {
-      ...ownerDurationPriceScope(adminUserId),
-      duration: input.billingDuration,
-    },
-  });
-  if (!priceRow) {
-    throw new HttpError(
-      400,
-      "No INR price configured for this duration. Add it under Pricing first.",
-    );
-  }
+  const { planId, planName, listPrice } = await getPlanPriceForEnrollment(
+    adminUserId,
+    input.membershipPlanId,
+    input.billingDuration,
+  );
 
   const periodStart = utcDayStart(input.periodStart);
   if (periodStart <= member.endDate) {
@@ -356,7 +355,6 @@ export async function renewMemberForOwner(
   }
 
   const periodEnd = membershipEndDateInclusive(periodStart, input.billingDuration);
-  const listPrice = new Prisma.Decimal(priceRow.priceInr.toString());
   const discountInr = parseMoney(input.discountInr, "Discount");
   if (discountInr.gt(listPrice)) {
     throw new HttpError(
@@ -387,6 +385,8 @@ export async function renewMemberForOwner(
     const renewal = await tx.membershipRenewal.create({
       data: {
         memberId,
+        membershipPlanId: planId,
+        membershipPlanName: planName,
         billingDuration: input.billingDuration,
         planPrice,
         discountInr,
@@ -404,6 +404,8 @@ export async function renewMemberForOwner(
       where: { id: memberId },
       data: {
         billingDuration: input.billingDuration,
+        membershipPlanId: planId,
+        membershipPlanName: planName,
         planPrice,
         discountInr,
         amountPaid: requestedAmountPaid,
@@ -416,6 +418,8 @@ export async function renewMemberForOwner(
       },
       select: {
         id: true,
+        membershipPlanId: true,
+        membershipPlanName: true,
         billingDuration: true,
         planPrice: true,
         discountInr: true,

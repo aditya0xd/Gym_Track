@@ -12,6 +12,7 @@ type MemberItem = {
   fullName: string;
   phone: string;
   billingDuration: MemberBillingDuration;
+  membershipPlanName?: string | null;
   planPrice: string;
   discountInr: string;
   endDate: string;

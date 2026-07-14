@@ -81,7 +81,7 @@ export default async function OwnerDashboardPage() {
   });
 
   return (
-    <PageShell className="h-dvh overflow-hidden">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background px-4 pt-4">
       <div className="flex h-full min-h-0 flex-col overflow-hidden">
         <div className="shrink-0 space-y-4 pb-4">
           <div className="flex items-start justify-between gap-3 pt-2">
@@ -304,7 +304,7 @@ export default async function OwnerDashboardPage() {
                         {m.fullName}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {durationLabel(m.billingDuration)} ·{" "}
+                        {m.membershipPlanName ? `${m.membershipPlanName} · ` : ""}{durationLabel(m.billingDuration)} ·{" "}
                         {formatInrFromDecimalString(m.planPrice.toString())}
                         {Number(m.discountInr) > 0 ? (
                           <span className="text-muted-foreground/90">
@@ -343,6 +343,6 @@ export default async function OwnerDashboardPage() {
           </div>
         </div>
       </div>
-    </PageShell>
+    </div>
   );
 }

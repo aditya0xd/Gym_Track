@@ -17,6 +17,7 @@ const MAX_RENEWAL_BODY_BYTES = 8 * 1024 * 1024;
 
 const renewalSchema = z
   .object({
+    membershipPlanId: z.string().uuid("Select a membership plan"),
     billingDuration: memberBillingDurationSchema,
     periodStart: dateSchema,
     paymentStatus: paymentStatusSchema.default("NOT_DONE"),
@@ -68,6 +69,7 @@ async function POSTHandler(request: Request, userId: string, context?: unknown) 
 
   try {
     const result = await renewMemberForOwner(userId, id, {
+      membershipPlanId: data.membershipPlanId,
       billingDuration: data.billingDuration,
       periodStart,
       paymentStatus: data.paymentStatus,
@@ -80,6 +82,8 @@ async function POSTHandler(request: Request, userId: string, context?: unknown) 
       message: "Membership renewed.",
       renewal: {
         id: result.renewal.id,
+        membershipPlanId: result.renewal.membershipPlanId,
+        membershipPlanName: result.renewal.membershipPlanName,
         billingDuration: result.renewal.billingDuration,
         planPrice: result.renewal.planPrice.toString(),
         discountInr: result.renewal.discountInr.toString(),
@@ -90,6 +94,8 @@ async function POSTHandler(request: Request, userId: string, context?: unknown) 
       },
       member: {
         id: result.member.id,
+        membershipPlanId: result.member.membershipPlanId,
+        membershipPlanName: result.member.membershipPlanName,
         billingDuration: result.member.billingDuration,
         planPrice: result.member.planPrice.toString(),
         discountInr: result.member.discountInr.toString(),

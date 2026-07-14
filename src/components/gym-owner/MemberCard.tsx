@@ -16,6 +16,7 @@ type MemberCardProps = {
   fullName: string;
   phone: string;
   billingDuration: MemberBillingDuration;
+  membershipPlanName?: string | null;
   planPrice: string;
   discountInr: string;
   endDate: string;
@@ -78,6 +79,7 @@ export function MemberCard({
   id,
   fullName,
   billingDuration,
+  membershipPlanName,
   planPrice,
   endDate,
   membershipStatus,
@@ -123,7 +125,10 @@ export function MemberCard({
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            <span>{durationText(billingDuration)}</span>
+            <span>
+              {membershipPlanName ? `${membershipPlanName} · ` : ""}
+              {durationText(billingDuration)}
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <CreditCard className="h-3 w-3" />

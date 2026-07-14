@@ -8,6 +8,14 @@ import { Loader2, Pencil, Check, X, Zap } from "lucide-react";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
 import type { MemberBillingDuration } from "@/generated/prisma/client";
+import { MembershipPlansManager } from "./MembershipPlansManager";
+
+/**
+ * @deprecated Use `MembershipPlansManager` instead.
+ */
+export function DurationPricingForm() {
+  return <MembershipPlansManager />;
+}
 
 type PriceRow = { duration: MemberBillingDuration; priceInr: string | null };
 
@@ -30,7 +38,7 @@ async function fetchPricing(): Promise<{ prices: PriceRow[] }> {
   return res.json();
 }
 
-export function DurationPricingForm() {
+function PricingFormLegacy() {
   const queryClient = useQueryClient();
   const [editingDuration, setEditingDuration] = useState<MemberBillingDuration | null>(null);
   const [editValue, setEditValue] = useState("");

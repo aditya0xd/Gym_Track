@@ -18,7 +18,7 @@ export default async function OwnerMembersPage() {
   }
 
   return (
-    <PageShell className="h-screen overflow-hidden">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background px-4 pt-4">
       <Suspense
         fallback={
           <div className="flex min-h-[300px] flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-8">
@@ -29,6 +29,6 @@ export default async function OwnerMembersPage() {
       >
         <MembersExplorerClient />
       </Suspense>
-    </PageShell>
+    </div>
   );
 }

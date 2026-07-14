@@ -19,6 +19,7 @@ import {
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { EditProfileDialog } from "@/components/gym-owner/EditProfileDialog";
+import { SignOutButton } from "@/components/gym-owner/SignOutButton";
 
 export const metadata = {
   title: "Profile | GymTrack Pro",
@@ -60,8 +61,8 @@ export default async function OwnerProfilePage() {
     },
   });
 
-  const plansCount = await prisma.gymOwnerDurationPrice.count({
-    where: { adminUserId: ownerId },
+  const plansCount = await prisma.gymMembershipPlan.count({
+    where: { adminUserId: ownerId, deletedAt: null },
   });
 
   const gymName = "GymTrack Pro";
@@ -298,20 +299,10 @@ export default async function OwnerProfilePage() {
 
           <div className="mx-4 my-1 h-px bg-white/5" />
 
-          {/* Menu Item: Log out */}
-          <Link
-            href="/api/auth/signout"
-            className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-red-500/5"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
-              <LogOut className="h-5 w-5" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-bold text-red-500">Log out</p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-zinc-600" />
-          </Link>
         </div>
+
+        {/* Log out Button */}
+        <SignOutButton />
       </div>
     </div>
   );

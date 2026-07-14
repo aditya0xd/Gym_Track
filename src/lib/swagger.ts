@@ -133,6 +133,59 @@ const swaggerOptions: swaggerJsdoc.Options = {
             priceInr: { type: "string" },
           },
         },
+        MembershipPlanPriceRow: {
+          type: "object",
+          properties: {
+            duration: memberBillingDuration,
+            priceInr: { type: "string", nullable: true },
+          }
+        },
+        MembershipPlan: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+            name: { type: "string" },
+            category: { type: "string", nullable: true },
+            description: { type: "string", nullable: true },
+            sortOrder: { type: "integer" },
+            benefits: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string", format: "uuid" },
+                  label: { type: "string" },
+                  sortOrder: { type: "integer" }
+                }
+              }
+            },
+            prices: {
+              type: "array",
+              items: { $ref: "#/components/schemas/MembershipPlanPriceRow" }
+            },
+            activeMemberCount: { type: "integer" }
+          }
+        },
+        MembershipPlanCreateRequest: {
+          type: "object",
+          required: ["name", "benefits", "prices"],
+          properties: {
+            name: { type: "string" },
+            category: { type: "string", nullable: true },
+            description: { type: "string", nullable: true },
+            benefits: { type: "array", items: { type: "string" } },
+            prices: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  duration: memberBillingDuration,
+                  priceInr: { type: "string" }
+                }
+              }
+            }
+          }
+        },
         OwnerInvoice: {
           type: "object",
           properties: {
@@ -442,6 +495,108 @@ const swaggerOptions: swaggerJsdoc.Options = {
           responses: {
             "200": { description: "Updated prices" },
             "400": { description: "Validation error", content: { "application/json": { schema: errorMessage } } },
+            "401": unauthorized,
+            "403": { description: "Plan feature not available" },
+          },
+        },
+      },
+      "/api/owner/membership-plans": {
+        get: {
+          tags: ["Gym Owner — Plan"],
+          summary: "List custom membership plans",
+          description: "Requires CUSTOM_MEMBERSHIP_PRICING plan feature.",
+          security: [{ sessionCookie: [] }],
+          responses: {
+            "200": {
+              description: "Membership plans",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      plans: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/MembershipPlan" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "401": unauthorized,
+            "403": { description: "Plan feature not available" },
+          },
+        },
+        post: {
+          tags: ["Gym Owner — Plan"],
+          summary: "Create a new membership plan",
+          description: "Requires CUSTOM_MEMBERSHIP_PRICING plan feature.",
+          security: [{ sessionCookie: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MembershipPlanCreateRequest" },
+              },
+            },
+          },
+          responses: {
+            "201": { description: "Plan created", content: { "application/json": { schema: { type: "object", properties: { plan: { $ref: "#/components/schemas/MembershipPlan" } } } } } },
+            "400": { description: "Validation error", content: { "application/json": { schema: errorMessage } } },
+            "401": unauthorized,
+            "403": { description: "Plan feature not available" },
+          },
+        },
+      },
+      "/api/owner/membership-plans/{id}": {
+        get: {
+          tags: ["Gym Owner — Plan"],
+          summary: "Get a specific membership plan",
+          description: "Requires CUSTOM_MEMBERSHIP_PRICING plan feature.",
+          security: [{ sessionCookie: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: {
+            "200": { description: "Membership plan", content: { "application/json": { schema: { type: "object", properties: { plan: { $ref: "#/components/schemas/MembershipPlan" } } } } } },
+            "401": unauthorized,
+            "403": { description: "Plan feature not available" },
+          },
+        },
+        patch: {
+          tags: ["Gym Owner — Plan"],
+          summary: "Update a membership plan",
+          description: "Requires CUSTOM_MEMBERSHIP_PRICING plan feature.",
+          security: [{ sessionCookie: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MembershipPlanCreateRequest" },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Plan updated", content: { "application/json": { schema: { type: "object", properties: { plan: { $ref: "#/components/schemas/MembershipPlan" } } } } } },
+            "400": { description: "Validation error", content: { "application/json": { schema: errorMessage } } },
+            "401": unauthorized,
+            "403": { description: "Plan feature not available" },
+          },
+        },
+        delete: {
+          tags: ["Gym Owner — Plan"],
+          summary: "Soft delete a membership plan",
+          description: "Requires CUSTOM_MEMBERSHIP_PRICING plan feature. Fails if members are active on it.",
+          security: [{ sessionCookie: [] }],
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          ],
+          responses: {
+            "200": { description: "Plan deleted", content: { "application/json": { schema: { type: "object", properties: { message: { type: "string" } } } } } },
+            "400": { description: "Cannot delete plan with active members", content: { "application/json": { schema: errorMessage } } },
             "401": unauthorized,
             "403": { description: "Plan feature not available" },
           },

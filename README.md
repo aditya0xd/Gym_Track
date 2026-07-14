@@ -141,6 +141,7 @@ I designed and implemented the full product from scratch: multi-tenant authentic
 |---|---|
 | Authentication | Credentials login, JWT sessions, remember me, separate role models |
 | Members | Enrollment, member details, status filters (active, expiring, expired) |
+| Membership Plans | Owners can create named plans (e.g. Strength, Couple) with dynamic benefits and custom duration pricing |
 | Billing | Duration pricing (1/3/6/12 months), invoices, Razorpay checkout, PDF receipts |
 | Reminders | SMS and WhatsApp renewal reminders via Twilio, delivery logging |
 | Analytics | Retention, churn, payment tracking, revenue-at-risk, revenue-lost visibility |
@@ -279,6 +280,7 @@ The schema models a multi-tenant SaaS gym-management domain:
 | `AdminUser` | Gym owner tenant account |
 | `SuperAdminUser` | Platform operator account |
 | `Member` | Gym member linked to an owner |
+| `GymMembershipPlan` | Custom named plans with specific benefits and pricing |
 | `ReminderLog` | Outbound reminder delivery history |
 | `GymOwnerDurationPrice` | Owner-defined pricing per billing duration |
 | `PlatformPlanPrice` | Platform-level pricing for owner subscription plans |

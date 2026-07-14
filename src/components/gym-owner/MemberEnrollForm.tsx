@@ -4,10 +4,15 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { X, ArrowRight } from "lucide-react";
+import { Check, X, ArrowRight } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";
+import {
+  durationLabel,
+  priceForDuration,
+  pricedDurations,
+  type MembershipPlanDto,
+} from "@/lib/membership-plans/client";
 import {
   IMAGE_ACCEPT,
   IMAGE_PROCESSING_PRESETS,
@@ -20,8 +25,6 @@ import type {
   MemberBillingDuration,
   PaymentStatus,
 } from "@/generated/prisma/client";
-
-type PriceHint = { duration: MemberBillingDuration; priceInr: string | null };
 
 function openImagePicker(
   input: HTMLInputElement | null,
@@ -45,7 +48,8 @@ export function MemberEnrollForm() {
     null,
   );
   const [upiFileName, setUpiFileName] = useState<string | null>(null);
-  const [hints, setHints] = useState<PriceHint[]>([]);
+  const [plans, setPlans] = useState<MembershipPlanDto[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [duration, setDuration] = useState<MemberBillingDuration>("ONE_MONTH");
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("NOT_DONE");
   const [discountStr, setDiscountStr] = useState("");
@@ -55,26 +59,53 @@ export function MemberEnrollForm() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await fetch("/api/owner/pricing");
+      const res = await fetch("/api/owner/membership-plans");
       if (!res.ok) {
         if (!cancelled) {
           toast.error(
-            "Could not load your pricing. Try again or open Pricing.",
+            "Could not load membership plans. Try again or open Pricing.",
           );
         }
         return;
       }
-      const data = (await res.json()) as { prices: PriceHint[] };
-      if (!cancelled) setHints(data.prices ?? []);
+      const data = (await res.json()) as { plans: MembershipPlanDto[] };
+      const loaded = data.plans ?? [];
+      if (!cancelled) {
+        setPlans(loaded);
+        if (loaded[0]) {
+          setSelectedPlanId(loaded[0].id);
+          const firstDuration = pricedDurations(loaded[0])[0]?.duration;
+          if (firstDuration) setDuration(firstDuration);
+        }
+      }
     })();
     return () => {
       cancelled = true;
     };
   }, []);
 
+  const selectedPlan = useMemo(
+    () => plans.find((p) => p.id === selectedPlanId) ?? null,
+    [plans, selectedPlanId],
+  );
+
+  const availableDurations = useMemo(
+    () => (selectedPlan ? pricedDurations(selectedPlan) : []),
+    [selectedPlan],
+  );
+
+  useEffect(() => {
+    if (!selectedPlan) return;
+    const hasCurrent = availableDurations.some((d) => d.duration === duration);
+    if (!hasCurrent && availableDurations[0]) {
+      setDuration(availableDurations[0].duration);
+    }
+  }, [selectedPlan, availableDurations, duration]);
+
   const hintPrice = useMemo(() => {
-    return hints.find((h) => h.duration === duration)?.priceInr ?? null;
-  }, [hints, duration]);
+    if (!selectedPlan) return null;
+    return priceForDuration(selectedPlan, duration);
+  }, [selectedPlan, duration]);
 
   function calculateChargedPreview(discountValue: string) {
     if (!hintPrice) return null;
@@ -89,6 +120,10 @@ export function MemberEnrollForm() {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!selectedPlanId) {
+      toast.error("Select a membership plan.");
+      return;
+    }
     setPending(true);
 
     const fd = new FormData(e.currentTarget);
@@ -140,6 +175,7 @@ export function MemberEnrollForm() {
         fullName,
         email: emailRaw === "" ? null : emailRaw,
         phone,
+        membershipPlanId: selectedPlanId,
         billingDuration: duration,
         startDate,
         whatsappEnabled,
@@ -230,21 +266,69 @@ export function MemberEnrollForm() {
         </div>
 
         <div className="space-y-3 pt-2">
-          <Label className={labelClass}>Choose Plan</Label>
+          <Label className={labelClass}>Membership plan</Label>
+          {plans.length === 0 ? (
+            <p className="text-xs font-medium text-red-400">
+              Create a plan under Pricing before enrolling members.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {plans.map((plan) => {
+                const isSelected = selectedPlanId === plan.id;
+                return (
+                  <button
+                    key={plan.id}
+                    type="button"
+                    onClick={() => setSelectedPlanId(plan.id)}
+                    className={`w-full rounded-xl border-2 p-4 text-left transition-colors ${
+                      isSelected
+                        ? "border-[#d4ff00] bg-zinc-800/40"
+                        : "border-transparent bg-[#27272a] hover:bg-zinc-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`text-sm font-bold ${isSelected ? "text-[#d4ff00]" : "text-white"}`}
+                      >
+                        {plan.name}
+                      </span>
+                      {plan.category ? (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                          {plan.category}
+                        </span>
+                      ) : null}
+                    </div>
+                    {plan.benefits.length > 0 ? (
+                      <ul className="mt-2 space-y-1">
+                        {plan.benefits.slice(0, 3).map((b) => (
+                          <li
+                            key={b.id}
+                            className="flex items-center gap-1.5 text-xs text-zinc-400"
+                          >
+                            <Check className="h-3 w-3 shrink-0 text-[#d4ff00]" />
+                            {b.label}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-3 pt-2">
+          <Label className={labelClass}>Duration</Label>
           <input type="hidden" name="billingDuration" value={duration} />
           <div className="grid grid-cols-2 gap-3">
-            {MEMBER_BILLING_DURATION_OPTIONS.map((o) => {
-              const isSelected = duration === o.value;
-              const p = hints.find((h) => h.duration === o.value)?.priceInr;
-              let labelTrimmed = o.label;
-              if (labelTrimmed.toLowerCase() === "12 months")
-                labelTrimmed = "1 Year";
-
+            {availableDurations.map(({ duration: d, priceInr }) => {
+              const isSelected = duration === d;
               return (
                 <button
-                  key={o.value}
+                  key={d}
                   type="button"
-                  onClick={() => setDuration(o.value)}
+                  onClick={() => setDuration(d)}
                   className={`flex flex-col items-start rounded-xl border-2 p-4 transition-colors ${
                     isSelected
                       ? "border-[#d4ff00] bg-zinc-800/40"
@@ -254,20 +338,20 @@ export function MemberEnrollForm() {
                   <span
                     className={`text-[11px] font-bold capitalize ${isSelected ? "text-[#d4ff00]" : "text-zinc-300"}`}
                   >
-                    {labelTrimmed}
+                    {durationLabel(d)}
                   </span>
                   <span
                     className={`mt-1 text-2xl font-black ${isSelected ? "text-[#d4ff00]" : "text-white"}`}
                   >
-                    {p ? formatInrFromDecimalString(p) : "—"}
+                    {priceInr ? formatInrFromDecimalString(priceInr) : "—"}
                   </span>
                 </button>
               );
             })}
           </div>
-          {!hintPrice && (
+          {selectedPlan && availableDurations.length === 0 && (
             <p className="text-xs font-medium text-red-400">
-              Set this duration&apos;s INR price under Pricing before enrolling.
+              This plan has no duration prices. Add pricing under Pricing.
             </p>
           )}
         </div>
@@ -393,9 +477,7 @@ export function MemberEnrollForm() {
           </div>
 
           <div className="space-y-2">
-            <Label className={labelClass}>
-              UPI
-            </Label>
+            <Label className={labelClass}>UPI</Label>
             <input
               ref={upiScreenshotInputRef}
               id="upiScreenshot"
@@ -444,7 +526,7 @@ export function MemberEnrollForm() {
         <div className="pt-4">
           <button
             type="submit"
-            disabled={pending}
+            disabled={pending || !selectedPlanId || !hintPrice}
             className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#d4ff00] text-[13px] font-extrabold uppercase tracking-widest text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
           >
             {pending ? "Saving…" : "Enroll Member"}

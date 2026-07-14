@@ -27,70 +27,68 @@ export default async function OwnerAnalyticsPage() {
   const hasAnalytics = await hasGymOwnerPlanFeature(session, "ANALYTICS");
 
   return (
-    <PageShell className="h-screen overflow-hidden">
-      <div className="flex h-full flex-col">
-        <div className="shrink-0">
-          <PageHeader
-            title="Analytics"
-            description="Retention, churn, payment and revenue intelligence for your gym."
-            actions={
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                {hasAnalytics ? <OwnerAnalyticsRefreshButton /> : null}
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background px-4 pt-4">
+      <div className="shrink-0 pb-4">
+        <PageHeader
+          title="Analytics"
+          description="Retention, churn, payment and revenue intelligence for your gym."
+          actions={
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {hasAnalytics ? <OwnerAnalyticsRefreshButton /> : null}
+            </div>
+          }
+        />
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto pb-24">
+        {hasAnalytics ? (
+          <Suspense
+            fallback={
+              <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-8">
+                <BarChart3 className="h-8 w-8 text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Loading analytics...
+                </p>
               </div>
             }
-          />
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto pb-24">
-          {hasAnalytics ? (
-            <Suspense
-              fallback={
-                <div className="flex min-h-100 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-8">
-                  <BarChart3 className="h-8 w-8 text-primary" />
-                  <p className="text-sm text-muted-foreground">
-                    Loading analytics...
+          >
+            <OwnerAnalyticsClient />
+          </Suspense>
+        ) : (
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-[#d4ff00]/15 p-2 text-[#d4ff00]">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Analytics is not available on your current plan
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Upgrade to unlock retention, churn, payment, and revenue
+                    insights for your gym.
                   </p>
                 </div>
-              }
-            >
-              <OwnerAnalyticsClient />
-            </Suspense>
-          ) : (
-            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="rounded-full bg-[#d4ff00]/15 p-2 text-[#d4ff00]">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Analytics is not available on your current plan
-                    </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Upgrade to unlock retention, churn, payment, and revenue
-                      insights for your gym.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button asChild>
-                      <Link href="/owner/manage-plan">Manage plan</Link>
-                    </Button>
-                    <Button variant="outline" asChild>
-                      <Link
-                        href="/owner/dashboard"
-                        className="inline-flex items-center gap-2"
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to dashboard
-                      </Link>
-                    </Button>
-                  </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild>
+                    <Link href="/owner/manage-plan">Manage plan</Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link
+                      href="/owner/dashboard"
+                      className="inline-flex items-center gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Back to dashboard
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </PageShell>
+    </div>
   );
 }

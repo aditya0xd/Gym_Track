@@ -185,3 +185,10 @@ export const optionalStringToNullSchema = z.string()
   .transform(val => val === "" ? null : val)
   .nullable()
   .optional();
+
+// Membership Plan schemas
+export const membershipPlanIdSchema = z.string().uuid();
+export const planBenefitsSchema = z.array(z.string().min(1).max(200)).min(1).max(20);
+export const planNameSchema = z.string().min(1).max(80);
+export const planCategorySchema = z.string().max(40).optional();
+

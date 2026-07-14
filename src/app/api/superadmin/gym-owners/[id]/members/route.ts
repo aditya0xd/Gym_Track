@@ -23,6 +23,7 @@ async function GETHandler(
       phone: true,
       email: true,
       billingDuration: true,
+      membershipPlanName: true,
       planPrice: true,
       discountInr: true,
       startDate: true,
