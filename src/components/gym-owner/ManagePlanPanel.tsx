@@ -335,26 +335,113 @@ export function ManagePlanPanel() {
             </select>
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[500px] text-xs sm:text-sm">
+        {/* Mobile View (Cards) */}
+        <div className="grid gap-3 md:hidden p-3 sm:p-4">
+          {filteredInvoices.map((inv) => {
+            const statusConfig = {
+              PENDING: {
+                icon: Clock,
+                label: "Pending",
+                className: "border-amber-500/20 bg-amber-500/10 text-amber-500",
+              },
+              PAID: {
+                icon: CheckCircle,
+                label: "Paid",
+                className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+              },
+              FAILED: {
+                icon: AlertCircle,
+                label: "Failed",
+                className: "border-red-500/20 bg-red-500/10 text-red-500",
+              },
+            };
+            const config = statusConfig[inv.status];
+            const StatusIcon = config.icon;
+
+            return (
+              <div key={inv.id} className="relative overflow-hidden rounded-xl border border-[#d4ff00]/10 bg-gradient-to-br from-card/80 to-card/30 backdrop-blur p-4 shadow-sm transition-all hover:border-[#d4ff00]/30 hover:shadow-md">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Plan</p>
+                    <h4 className="text-sm font-bold text-foreground">{inv.plan}</h4>
+                  </div>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${config.className}`}>
+                    <StatusIcon className="h-3 w-3" />
+                    {config.label}
+                  </span>
+                </div>
+                
+                <div className="flex items-end justify-between mb-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Amount</p>
+                    <p className="text-2xl font-black text-foreground">{formatInrFromDecimalString(inv.amountInr)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Date</p>
+                    <p className="text-xs font-medium text-muted-foreground">{inv.createdAt.slice(0, 10)}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-3 border-t border-border/50">
+                  {inv.status === "PENDING" && (
+                    <>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="flex-1 bg-[#d4ff00]/10 text-[#d4ff00] hover:bg-[#d4ff00]/20 font-semibold text-xs border border-[#d4ff00]/20"
+                        disabled={payingId === inv.id}
+                        onClick={() => void handlePayNow(inv.id)}
+                      >
+                        <CreditCard className="size-3.5 mr-1.5" />
+                        Pay
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10 border border-transparent shrink-0"
+                        disabled={deletingId === inv.id || payingId === inv.id}
+                        onClick={() => void handleDeleteInvoice(inv.id)}
+                        aria-label="Delete invoice"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="flex-1 text-xs font-semibold bg-muted/50 hover:bg-muted text-foreground"
+                    asChild
+                  >
+                    <a href={`/api/owner/billing/${inv.id}/receipt`} download>
+                      <Download className="size-3.5 mr-1.5" />
+                      Receipt
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+          {filteredInvoices.length === 0 && (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              No invoices for selected filter.
+            </div>
+          )}
+        </div>
+
+        {/* Desktop View (Table) */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full min-w-[600px] text-sm">
             <thead className="border-b border-border bg-muted/50 text-left text-muted-foreground">
               <tr>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">
-                  Date
-                </th>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">
-                  Plan
-                </th>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">
-                  Amount
-                </th>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3">
-                  Status
-                </th>
-                <th className="px-3 py-2.5 font-medium sm:px-4 sm:py-3 hidden md:table-cell">Due</th>
-                <th className="px-3 py-2.5 sm:px-4 sm:py-3 text-right">
-                  Action
-                </th>
+                <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Plan</th>
+                <th className="px-4 py-3 font-medium">Amount</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Due</th>
+                <th className="px-4 py-3 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -381,23 +468,17 @@ export function ManagePlanPanel() {
 
                 return (
                   <tr key={inv.id} className="bg-card hover:bg-muted/30 transition-colors">
-                    <td className="px-3 py-2.5 sm:px-4 sm:py-3">
-                      {inv.createdAt.slice(0, 10)}
-                    </td>
-                    <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-medium">{inv.plan}</td>
-                    <td className="px-3 py-2.5 sm:px-4 sm:py-3 font-semibold">
-                      {formatInrFromDecimalString(inv.amountInr)}
-                    </td>
-                    <td className="px-3 py-2.5 sm:px-4 sm:py-3">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] sm:text-xs font-bold uppercase tracking-wider ${config.className}`}>
+                    <td className="px-4 py-3">{inv.createdAt.slice(0, 10)}</td>
+                    <td className="px-4 py-3 font-medium">{inv.plan}</td>
+                    <td className="px-4 py-3 font-semibold">{formatInrFromDecimalString(inv.amountInr)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${config.className}`}>
                         <StatusIcon className="h-3 w-3" />
                         {config.label}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 sm:px-4 sm:py-3 hidden md:table-cell text-muted-foreground">
-                      {inv.dueDate}
-                    </td>
-                    <td className="px-3 py-2.5 sm:px-4 sm:py-3 text-right">
+                    <td className="px-4 py-3 text-muted-foreground">{inv.dueDate}</td>
+                    <td className="px-4 py-3 text-right">
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger asChild>
                           <Button
@@ -471,7 +552,7 @@ export function ManagePlanPanel() {
               {filteredInvoices.length === 0 && (
                 <tr>
                   <td
-                    className="px-3 py-8 text-center text-muted-foreground sm:px-4"
+                    className="px-4 py-8 text-center text-muted-foreground"
                     colSpan={6}
                   >
                     No invoices for selected filter.

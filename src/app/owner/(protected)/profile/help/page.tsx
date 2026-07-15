@@ -49,9 +49,9 @@ export default function OwnerHelpPage() {
             New to GymTrack? Watch our quick onboarding video or read the step&#8209;by&#8209;step guide to set up
             your gym, create membership plans, and start accepting members.
           </p>
-          <Link href="/owner/onboarding" className="inline-flex items-center gap-1 mt-2 text-[#87c038] hover:underline">
-            Go to Onboarding <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
+          <div className="inline-flex items-center gap-1 mt-2 text-[#87c038] hover:underline">
+            Go to Video Tutorial <ExternalLink className="h-3.5 w-3.5" />
+          </div>
         </div>
 
         {/* Quick Links */}
@@ -72,13 +72,13 @@ export default function OwnerHelpPage() {
               <CreditCard className="h-5 w-5 text-[#d4ff00]" />
               <span className="text-xs text-gray-300 text-center">Plans</span>
             </Link>
-            <Link
+            {/* <Link
               href="/owner/settings"
               className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-[#292929] border border-[#3a3a3a] hover:border-[#d4ff00] transition-colors"
             >
               <Settings className="h-5 w-5 text-[#d4ff00]" />
               <span className="text-xs text-gray-300 text-center">Settings</span>
-            </Link>
+            </Link> */}
           </div>
         </div>
 
@@ -116,13 +116,22 @@ export default function OwnerHelpPage() {
           <p className="text-sm text-gray-400 mb-3">
             Need personalized assistance? Our team aims to reply within 24 hours.
           </p>
-          <Link
-            href="mailto:adityayadav168@gmail.com"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#d4ff00] text-[#1e1e1e] text-sm font-medium hover:bg-[#b0e000] transition-colors"
-          >
-            <Mail className="h-4 w-4" />
-            Email Support
-          </Link>
+          <div className="space-y-2">
+            <Link
+              href="mailto:adityayadav168@gmail.com"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#d4ff00] text-[#1e1e1e] text-sm font-medium hover:bg-[#b0e000] transition-colors w-full justify-center"
+            >
+              <Mail className="h-4 w-4" />
+              Email Support
+            </Link>
+            <Link
+              href="tel:8953317722"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#292929] border border-[#3a3a3a] text-white text-sm font-medium hover:border-[#d4ff00] transition-colors w-full justify-center"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Call: 8953317722
+            </Link>
+          </div>
         </div>
       </section>
 

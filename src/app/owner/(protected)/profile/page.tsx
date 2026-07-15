@@ -6,7 +6,6 @@ import {
   Users,
   Globe,
   HelpCircle,
-  Info,
   LogOut,
   ExternalLink,
   ShieldCheck,
@@ -18,7 +17,6 @@ import {
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { EditProfileDialog } from "@/components/gym-owner/EditProfileDialog";
 import { SignOutButton } from "@/components/gym-owner/SignOutButton";
 
 export const metadata = {
@@ -102,16 +100,6 @@ export default async function OwnerProfilePage() {
               </span>
             </div>
           </div>
-
-          <EditProfileDialog
-            initialName={ownerName}
-            initialEmail={ownerEmail}
-            initialProfilePhoto={profilePhoto}
-          >
-            <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-zinc-400 transition-colors hover:text-white">
-              <ExternalLink className="h-4 w-4" />
-            </button>
-          </EditProfileDialog>
         </div>
       </div>
 
@@ -255,7 +243,7 @@ export default async function OwnerProfilePage() {
 
           {/* Menu Item: Settings */}
           <Link
-            href="/owner/settings"
+            href="/owner/profile/settings"
             className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
@@ -286,11 +274,11 @@ export default async function OwnerProfilePage() {
 
           {/* Menu Item: About GymTrack Pro */}
           <Link
-            href="/owner/profile"
+            href="/owner/profile/about"
             className="flex items-center gap-4 rounded-2xl p-3 transition-colors hover:bg-white/5"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00]">
-              <Info className="h-5 w-5" />
+              <HelpCircle className="h-5 w-5" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-bold">About GymTrack Pro</p>
