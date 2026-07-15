@@ -202,24 +202,24 @@ export function MemberEnrollForm() {
   const today = new Date().toISOString().slice(0, 10);
 
   const inputClass =
-    "flex h-14 w-full rounded-xl border-0 bg-[#27272a] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]";
+    "flex h-14 w-full rounded-xl border border-border bg-muted px-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary";
   const labelClass =
-    "text-[10px] font-bold uppercase tracking-wider text-zinc-400 ml-1";
+    "text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1";
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-md rounded-t-[32px] md:rounded-[32px] bg-[#18181b] p-6 -mx-4 sm:mx-0 shadow-2xl">
+    <div className="mx-auto w-full min-w-0 max-w-md rounded-t-[32px] md:rounded-[32px] bg-card border border-border p-6 -mx-4 sm:mx-0 shadow-2xl">
       <div className="flex items-start justify-between pb-6">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
             New Member
           </p>
-          <h1 className="mt-1 text-3xl font-extrabold text-white">
+          <h1 className="mt-1 text-3xl font-extrabold text-foreground">
             Enroll Member
           </h1>
         </div>
         <Link
           href="/owner/dashboard"
-          className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-white"
+          className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4 stroke-[3]" />
         </Link>
@@ -282,13 +282,13 @@ export function MemberEnrollForm() {
                     onClick={() => setSelectedPlanId(plan.id)}
                     className={`w-full rounded-xl border-2 p-4 text-left transition-colors ${
                       isSelected
-                        ? "border-[#d4ff00] bg-zinc-800/40"
-                        : "border-transparent bg-[#27272a] hover:bg-zinc-700"
+                        ? "border-primary bg-primary/10"
+                        : "border-transparent bg-muted hover:bg-muted/80"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
-                        className={`text-sm font-bold ${isSelected ? "text-[#d4ff00]" : "text-white"}`}
+                        className={`text-sm font-bold ${isSelected ? "text-primary" : "text-foreground"}`}
                       >
                         {plan.name}
                       </span>
@@ -305,7 +305,7 @@ export function MemberEnrollForm() {
                             key={b.id}
                             className="flex items-center gap-1.5 text-xs text-zinc-400"
                           >
-                            <Check className="h-3 w-3 shrink-0 text-[#d4ff00]" />
+                            <Check className="h-3 w-3 shrink-0 text-primary" />
                             {b.label}
                           </li>
                         ))}
@@ -331,17 +331,17 @@ export function MemberEnrollForm() {
                   onClick={() => setDuration(d)}
                   className={`flex flex-col items-start rounded-xl border-2 p-4 transition-colors ${
                     isSelected
-                      ? "border-[#d4ff00] bg-zinc-800/40"
-                      : "border-transparent bg-[#27272a] hover:bg-zinc-700"
+                      ? "border-primary bg-primary/10"
+                      : "border-transparent bg-muted hover:bg-muted/80"
                   }`}
                 >
                   <span
-                    className={`text-[11px] font-bold capitalize ${isSelected ? "text-[#d4ff00]" : "text-zinc-300"}`}
+                    className={`text-[11px] font-bold capitalize ${isSelected ? "text-primary" : "text-muted-foreground"}`}
                   >
                     {durationLabel(d)}
                   </span>
                   <span
-                    className={`mt-1 text-2xl font-black ${isSelected ? "text-[#d4ff00]" : "text-white"}`}
+                    className={`mt-1 text-2xl font-black ${isSelected ? "text-primary" : "text-foreground"}`}
                   >
                     {priceInr ? formatInrFromDecimalString(priceInr) : "—"}
                   </span>
@@ -377,7 +377,7 @@ export function MemberEnrollForm() {
             className={inputClass}
           />
           {hintPrice && chargedPreview !== null && discountStr ? (
-            <p className="text-xs font-medium text-[#d4ff00] ml-1">
+            <p className="text-xs font-medium text-primary ml-1">
               Final Amount: {formatInrFromDecimalString(chargedPreview)}
             </p>
           ) : null}
@@ -468,7 +468,7 @@ export function MemberEnrollForm() {
                   "environment",
                 )
               }
-              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${memberPhotoFileName ? "border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]" : "border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500"} transition-colors`}
+              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${memberPhotoFileName ? "border-primary bg-primary/5 text-primary" : "border-border bg-muted text-muted-foreground hover:border-border/80"} transition-colors`}
             >
               <span className="text-xs font-bold uppercase tracking-wider">
                 {memberPhotoFileName ? "Photo Selected" : "Take Photo"}
@@ -498,7 +498,7 @@ export function MemberEnrollForm() {
                   "environment",
                 )
               }
-              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${upiFileName ? "border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]" : "border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500"} transition-colors`}
+              className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${upiFileName ? "border-primary bg-primary/5 text-primary" : "border-border bg-muted text-muted-foreground hover:border-border/80"} transition-colors`}
             >
               <span className="text-xs font-bold uppercase tracking-wider">
                 {upiFileName ? "UPI Selected" : "Add UPI"}
@@ -513,11 +513,11 @@ export function MemberEnrollForm() {
             name="whatsappEnabled"
             type="checkbox"
             defaultChecked
-            className="size-4 rounded border-zinc-700 bg-[#27272a] accent-[#d4ff00]"
+            className="size-4 rounded border-border bg-muted accent-primary"
           />
           <Label
             htmlFor="whatsappEnabled"
-            className="text-xs font-medium text-zinc-400"
+            className="text-xs font-medium text-muted-foreground"
           >
             Send WhatsApp reminders
           </Label>
@@ -527,7 +527,7 @@ export function MemberEnrollForm() {
           <button
             type="submit"
             disabled={pending || !selectedPlanId || !hintPrice}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#d4ff00] text-[13px] font-extrabold uppercase tracking-widest text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-[13px] font-extrabold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
           >
             {pending ? "Saving…" : "Enroll Member"}
             {!pending && <ArrowRight className="h-4 w-4 stroke-[3]" />}

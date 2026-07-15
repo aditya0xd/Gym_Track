@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { MemberCard } from "@/components/gym-owner/MemberCard";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
@@ -86,7 +86,7 @@ export default async function OwnerDashboardPage() {
         <div className="shrink-0 space-y-4 pb-4">
           <div className="flex items-start justify-between gap-3 pt-2">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-lime-400">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-primary">
                 Gym Owner
               </p>
               <div className="mt-1 flex items-center gap-2">
@@ -119,7 +119,7 @@ export default async function OwnerDashboardPage() {
               href="/owner/members?status=all"
               className="rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted/40 flex flex-col justify-between min-h-[110px]"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-lime-400/10 text-lime-400">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Users className="h-4 w-4 stroke-[2.5]" />
               </div>
               <div className="mt-3">
@@ -266,79 +266,31 @@ export default async function OwnerDashboardPage() {
           <p className="text-[11px] font-extrabold uppercase tracking-wider text-foreground">
             Recent Members
           </p>
-          <div className="rounded-2xl border border-border bg-card p-4 divide-y divide-border/60">
-            {recentMembers.map((m) => {
-              const status =
-                m.membershipStatus === "PAUSED"
-                  ? "Paused"
-                  : m.endDate < today
-                    ? "Expired"
-                    : m.endDate <= in7Days
-                      ? "Expiring soon"
-                      : "Active";
-              return (
-                <Link
-                  key={m.id}
-                  href={`/owner/members/${m.id}`}
-                  className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-                      {m.memberPhoto ? (
-                        <Image
-                          src={m.memberPhoto}
-                          alt={m.fullName}
-                          fill
-                          sizes="40px"
-                          unoptimized
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-zinc-800 text-sm font-bold text-foreground">
-                          {m.fullName[0]?.toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-foreground">
-                        {m.fullName}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {m.membershipPlanName ? `${m.membershipPlanName} · ` : ""}{durationLabel(m.billingDuration)} ·{" "}
-                        {formatInrFromDecimalString(m.planPrice.toString())}
-                        {Number(m.discountInr) > 0 ? (
-                          <span className="text-muted-foreground/90">
-                            {" "}
-                            (−
-                            {formatInrFromDecimalString(
-                              m.discountInr.toString(),
-                            )}{" "}
-                            off list)
-                          </span>
-                        ) : null}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${
-                      status === "Active"
-                        ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
-                        : status === "Paused"
-                          ? "border-blue-500/20 bg-blue-500/10 text-blue-400"
-                          : status === "Expiring soon"
-                            ? "border-amber-500/20 bg-amber-500/10 text-amber-500"
-                            : "border-red-500/20 bg-red-500/10 text-red-500"
-                    }`}
-                  >
-                    {status}
-                  </span>
-                </Link>
-              );
-            })}
+          <div className="space-y-3 pb-24">
+            {recentMembers.map((m) => (
+              <MemberCard
+                key={m.id}
+                id={m.id}
+                fullName={m.fullName}
+                phone={m.phone}
+                billingDuration={m.billingDuration}
+                membershipPlanName={m.membershipPlanName}
+                planPrice={m.planPrice.toString()}
+                discountInr={m.discountInr.toString()}
+                endDate={m.endDate.toISOString()}
+                membershipStatus={m.membershipStatus}
+                memberPhoto={m.memberPhoto}
+                joinedDate={m.startDate.toISOString()}
+                paymentStatus={m.paymentStatus}
+                amountPaid={m.amountPaid.toString()}
+              />
+            ))}
             {recentMembers.length === 0 ? (
-              <p className="py-4 text-sm text-muted-foreground">
-                No members yet.
-              </p>
+              <div className="rounded-2xl border border-border bg-card p-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No members yet.
+                </p>
+              </div>
             ) : null}
           </div>
         </div>

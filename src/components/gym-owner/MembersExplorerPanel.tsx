@@ -80,12 +80,12 @@ export function MembersExplorerPanel({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="shrink-0 space-y-4 pb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search members..."
-            className="w-full rounded-xl bg-gray-800/50 py-3 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 backdrop-blur-sm"
+            className="w-full rounded-xl bg-muted/50 border border-border py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
 
@@ -103,7 +103,7 @@ export function MembersExplorerPanel({
         <button
           type="button"
           onClick={() => setShowPlanFilters(!showPlanFilters)}
-          className="mt-3 flex items-center gap-2 text-xs text-gray-400 transition-colors hover:text-white"
+          className="mt-3 flex items-center gap-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           <span>Filter by plan</span>
           {showPlanFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -128,7 +128,7 @@ export function MembersExplorerPanel({
           <MemberCard key={m.id} {...m} />
         ))}
         {filtered.length === 0 ? (
-          <p className="py-12 text-center text-sm text-gray-500">No members found</p>
+          <p className="py-12 text-center text-sm text-muted-foreground">No members found</p>
         ) : null}
       </div>
     </div>

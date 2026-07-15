@@ -243,10 +243,10 @@ export function ManagePlanPanel() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Current Plan Card */}
-      <div className="rounded-2xl border border-[#d4ff00]/20 bg-gradient-to-br from-[#d4ff00]/5 to-transparent p-4 sm:p-6 shadow-sm">
+      <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4 sm:p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#d4ff00]/20">
-            <Crown className="h-4 w-4 text-[#d4ff00]" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
+            <Crown className="h-4 w-4 text-primary" />
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-semibold text-foreground">Current Plan</h2>
@@ -292,7 +292,7 @@ export function ManagePlanPanel() {
               onChange={(e) =>
                 setSelectedPlan(e.target.value as OwnerSubscriptionPlan)
               }
-              className="min-h-11 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground focus:border-[#d4ff00]/50 focus:ring-2 focus:ring-[#d4ff00]/20 transition-all"
+              className="min-h-11 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
             >
               {OWNER_SUBSCRIPTION_PLAN_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -305,7 +305,7 @@ export function ManagePlanPanel() {
             type="button"
             disabled={savingPlan || activeSelectedPlan === data.currentPlan}
             onClick={handleChangePlan}
-            className="w-full sm:w-auto bg-[#d4ff00] text-black hover:bg-[#c2e600] font-semibold"
+            className="w-full sm:w-auto bg-primary text-primary-foreground hover:opacity-90 font-semibold"
           >
             {savingPlan ? "Updating…" : "Update Plan"}
           </Button>
@@ -326,7 +326,7 @@ export function ManagePlanPanel() {
               onChange={(e) =>
                 setInvoiceFilter(e.target.value as "ALL" | BillingStatus)
               }
-              className="min-h-9 w-full sm:w-auto rounded-lg border border-input bg-background px-3 py-2 text-xs font-medium text-foreground focus:border-[#d4ff00]/50 focus:ring-2 focus:ring-[#d4ff00]/20 transition-all"
+              className="min-h-9 w-full sm:w-auto rounded-lg border border-input bg-background px-3 py-2 text-xs font-medium text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
             >
               <option value="ALL">All Invoices</option>
               <option value="PENDING">Pending</option>
@@ -342,24 +342,24 @@ export function ManagePlanPanel() {
               PENDING: {
                 icon: Clock,
                 label: "Pending",
-                className: "border-amber-500/20 bg-amber-500/10 text-amber-500",
+                className: "border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-500",
               },
               PAID: {
                 icon: CheckCircle,
                 label: "Paid",
-                className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+                className: "border-green-200 bg-green-50 text-green-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400",
               },
               FAILED: {
                 icon: AlertCircle,
                 label: "Failed",
-                className: "border-red-500/20 bg-red-500/10 text-red-500",
+                className: "border-red-200 bg-red-50 text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-500",
               },
             };
             const config = statusConfig[inv.status];
             const StatusIcon = config.icon;
 
             return (
-              <div key={inv.id} className="relative overflow-hidden rounded-xl border border-[#d4ff00]/10 bg-gradient-to-br from-card/80 to-card/30 backdrop-blur p-4 shadow-sm transition-all hover:border-[#d4ff00]/30 hover:shadow-md">
+              <div key={inv.id} className="relative overflow-hidden rounded-xl border border-primary/10 bg-gradient-to-br from-card/80 to-card/30 backdrop-blur p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Plan</p>
@@ -388,7 +388,7 @@ export function ManagePlanPanel() {
                       <Button
                         type="button"
                         size="sm"
-                        className="flex-1 bg-[#d4ff00]/10 text-[#d4ff00] hover:bg-[#d4ff00]/20 font-semibold text-xs border border-[#d4ff00]/20"
+                        className="flex-1 bg-primary/10 text-primary hover:bg-primary/20 font-semibold text-xs border border-primary/20"
                         disabled={payingId === inv.id}
                         onClick={() => void handlePayNow(inv.id)}
                       >
@@ -450,17 +450,17 @@ export function ManagePlanPanel() {
                   PENDING: {
                     icon: Clock,
                     label: "Pending",
-                    className: "border-amber-500/20 bg-amber-500/10 text-amber-500",
+                    className: "border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-500",
                   },
                   PAID: {
                     icon: CheckCircle,
                     label: "Paid",
-                    className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+                    className: "border-green-200 bg-green-50 text-green-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400",
                   },
                   FAILED: {
                     icon: AlertCircle,
                     label: "Failed",
-                    className: "border-red-500/20 bg-red-500/10 text-red-500",
+                    className: "border-red-200 bg-red-50 text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-500",
                   },
                 };
                 const config = statusConfig[inv.status];

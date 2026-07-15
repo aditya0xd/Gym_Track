@@ -143,10 +143,10 @@ export function EditProfileDialog({
 
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-md overflow-hidden rounded-[1.5rem] bg-[#16161a] p-6 text-white shadow-2xl">
+          <div className="relative w-full max-w-md overflow-hidden rounded-[1.5rem] bg-card border border-border p-6 text-foreground shadow-2xl">
             {imageToCrop ? (
               <div className="flex flex-col h-full">
-                <h2 className="mb-4 text-xl font-bold">Crop Profile Photo</h2>
+                <h2 className="mb-4 text-xl font-bold text-foreground">Crop Profile Photo</h2>
                 <div className="relative h-64 w-full mb-4 bg-black rounded-xl overflow-hidden">
                   <Cropper
                     image={imageToCrop}
@@ -161,13 +161,13 @@ export function EditProfileDialog({
                 <div className="flex gap-3">
                   <button
                     onClick={resetCropState}
-                    className="flex h-11 flex-1 items-center justify-center rounded-xl border border-white/10 bg-zinc-800 text-sm font-bold transition-colors hover:bg-zinc-700"
+                    className="flex h-11 flex-1 items-center justify-center rounded-xl border border-border bg-secondary text-sm font-bold transition-colors hover:bg-muted text-muted-foreground"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleCropConfirm}
-                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#d4ff00] text-sm font-bold text-black transition-colors hover:bg-[#bce600]"
+                    className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/80"
                   >
                     <Check className="h-4 w-4" />
                     Confirm Crop
@@ -178,17 +178,17 @@ export function EditProfileDialog({
               <>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-zinc-400 transition-colors hover:bg-white/20 hover:text-white"
+                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
 
-                <h2 className="mb-6 text-xl font-bold">Edit Profile</h2>
+                <h2 className="mb-6 text-xl font-bold text-foreground">Edit Profile</h2>
 
                 <form onSubmit={handleSave} className="space-y-5">
                   {/* Profile Photo */}
                   <div className="flex flex-col items-center gap-4">
-                    <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-[#d4ff00] bg-zinc-800">
+                    <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-primary bg-secondary">
                       {profilePhoto ? (
                         <Image
                           src={profilePhoto}
@@ -199,7 +199,7 @@ export function EditProfileDialog({
                           className="object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-white">
+                        <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-foreground">
                           {name.substring(0, 2).toUpperCase()}
                         </div>
                       )}
@@ -213,38 +213,38 @@ export function EditProfileDialog({
                         />
                       </label>
                     </div>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-muted-foreground">
                       Click photo to change
                     </p>
                   </div>
 
                   {/* Name */}
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-zinc-300">
+                    <label className="mb-1 block text-sm font-semibold text-muted-foreground">
                       Name
                     </label>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
+                      className="h-11 w-full rounded-xl border border-border bg-muted px-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                       required
                     />
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="mb-1 block text-sm font-semibold text-zinc-300">
+                    <label className="mb-1 block text-sm font-semibold text-muted-foreground">
                       Email Address
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
+                      className="h-11 w-full rounded-xl border border-border bg-muted px-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                       required
                     />
-                    <p className="mt-1 text-[10px] text-zinc-500">
+                    <p className="mt-1 text-[10px] text-muted-foreground">
                       Changing email will require you to log in with the new
                       email next time.
                     </p>
@@ -254,7 +254,7 @@ export function EditProfileDialog({
                   <button
                     type="submit"
                     disabled={mutation.isPending}
-                    className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-[#d4ff00] text-sm font-bold text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                    className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                   >
                     {mutation.isPending ? (
                       <>

@@ -31,7 +31,7 @@ export default async function OwnerPricingPage() {
         <Suspense
           fallback={
             <div className="flex flex-col items-center justify-center gap-2 py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-[#d4ff00]" />
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
               <p className="text-sm text-muted-foreground">Loading your prices…</p>
             </div>
           }

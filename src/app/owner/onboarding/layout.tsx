@@ -19,7 +19,7 @@ export default async function OnboardingLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#1F1F1F] text-foreground flex flex-col justify-center items-center">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-center items-center">
       {children}
     </div>
   );

@@ -23,10 +23,10 @@ export function FilterChips({ options, selectedValue, onSelect }: FilterChipsPro
             key={item.id}
             type="button"
             onClick={() => onSelect(item.id)}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors ${
               selectedValue === item.id
-                ? "bg-[#d4ff00] text-black"
-                : "bg-gray-700 text-white"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-muted text-muted-foreground border-border hover:bg-muted/80 hover:text-foreground"
             }`}
           >
             {item.icon && <item.icon className="h-3.5 w-3.5" />}
