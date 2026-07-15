@@ -80,3 +80,23 @@ async function PUTHandler(request: Request, userId: string) {
 }
 
 export const PUT = withGymOwner(PUTHandler);
+
+async function GETHandler(_request: Request, userId: string) {
+  const user = await prisma.adminUser.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      profilePhoto: true,
+    },
+  });
+
+  if (!user) {
+    return NextResponse.json({ message: "User not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(user);
+}
+
+export const GET = withGymOwner(GETHandler);

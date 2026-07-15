@@ -33,7 +33,6 @@ export function EditProfileDialog({
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
   const [profilePhoto, setProfilePhoto] = useState(initialProfilePhoto || "");
-  const [newPassword, setNewPassword] = useState("");
 
   const [imageToCropFile, setImageToCropFile] = useState<File | null>(null);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
@@ -47,7 +46,6 @@ export function EditProfileDialog({
         name,
         email,
         profilePhoto: profilePhoto || null,
-        newPassword: newPassword || undefined,
       };
 
       const res = await fetch("/api/owner/profile", {
@@ -64,7 +62,6 @@ export function EditProfileDialog({
     onSuccess: () => {
       toast.success("Profile updated successfully");
       setIsOpen(false);
-      setNewPassword(""); // clear password input
       router.refresh(); // Refresh page to reflect new data
     },
     onError: (err) => {
@@ -251,20 +248,6 @@ export function EditProfileDialog({
                       Changing email will require you to log in with the new
                       email next time.
                     </p>
-                  </div>
-
-                  {/* Password */}
-                  <div>
-                    <label className="mb-1 block text-sm font-semibold text-zinc-300">
-                      New Password (optional)
-                    </label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Leave blank to keep current password"
-                      className="h-11 w-full rounded-xl border border-white/10 bg-black/50 px-3 text-sm text-white focus:border-[#d4ff00] focus:outline-none focus:ring-1 focus:ring-[#d4ff00]"
-                    />
                   </div>
 
                   {/* Action */}
