@@ -104,7 +104,7 @@ function PlanFormFields({
   disabled?: boolean;
 }) {
   const inputClass =
-    "flex h-11 w-full rounded-xl border-0 bg-muted px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]";
+    "flex h-11 w-full rounded-xl border-0 bg-muted px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary";
   const labelClass =
     "text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1";
 
@@ -179,7 +179,7 @@ function PlanFormFields({
           type="button"
           disabled={disabled || form.benefits.length >= 20}
           onClick={() => setForm({ ...form, benefits: [...form.benefits, ""] })}
-          className="text-xs font-bold uppercase tracking-wider text-[#d4ff00] hover:underline disabled:opacity-40"
+          className="text-xs font-bold uppercase tracking-wider text-primary hover:underline disabled:opacity-40"
         >
           + Add benefit
         </button>
@@ -301,7 +301,7 @@ export function MembershipPlansManager() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-[#d4ff00]" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
         <p className="text-sm text-muted-foreground">Loading your plans…</p>
       </div>
     );
@@ -319,7 +319,7 @@ export function MembershipPlansManager() {
             onClick={startCreate}
             className="group flex items-center gap-2.5 rounded-full bg-foreground py-1.5 pl-1.5 pr-4 text-xs font-bold text-background transition-all hover:bg-foreground/90 hover:shadow-lg active:scale-95"
           >
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d4ff00] text-black transition-transform group-hover:scale-105">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform group-hover:scale-105">
               <Plus className="h-4 w-4 stroke-[3]" />
             </div>
             Create Plan
@@ -328,10 +328,10 @@ export function MembershipPlansManager() {
       </div>
 
       {mode !== null ? (
-        <div className="rounded-2xl border border-[#d4ff00]/30 bg-card p-5">
+        <div className="rounded-2xl border border-primary/30 bg-card p-5">
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
                 {mode === "edit" ? "Edit plan" : "New plan"}
               </p>
               <h2 className="mt-1 text-lg font-black text-foreground">
@@ -358,7 +358,7 @@ export function MembershipPlansManager() {
               type="button"
               disabled={saveMutation.isPending}
               onClick={() => saveMutation.mutate()}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#d4ff00] py-2.5 text-[11px] font-black uppercase tracking-widest text-black disabled:opacity-70"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-[11px] font-black uppercase tracking-widest text-primary-foreground disabled:opacity-70"
             >
               {saveMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -389,7 +389,7 @@ export function MembershipPlansManager() {
         return (
           <div
             key={plan.id}
-            className="relative rounded-2xl border border-border bg-card p-5 transition-colors hover:border-[#d4ff00]/30"
+            className="relative rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
           >
             {/* Header section: Name, Category, Members */}
             <div className="mb-4 flex items-start justify-between gap-4">
@@ -448,7 +448,7 @@ export function MembershipPlansManager() {
                     key={b.id}
                     className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-1 text-xs text-muted-foreground"
                   >
-                    <Check className="h-3 w-3 text-[#d4ff00]" />
+                    <Check className="h-3 w-3 text-primary" />
                     {b.label}
                   </span>
                 ))}
@@ -495,8 +495,8 @@ export function MembershipPlansManager() {
             </div>
 
             {plan.name === "Standard Plan" ? (
-              <div className="absolute -top-2.5 left-5 flex items-center gap-1 rounded-full bg-[#d4ff00] px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-black shadow-sm">
-                <Zap className="h-2.5 w-2.5 fill-black stroke-0" />
+              <div className="absolute -top-2.5 left-5 flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest text-primary-foreground shadow-sm">
+                <Zap className="h-2.5 w-2.5 fill-primary-foreground stroke-0" />
                 Default
               </div>
             ) : null}
@@ -510,7 +510,7 @@ export function MembershipPlansManager() {
           <button
             type="button"
             onClick={startCreate}
-            className="mt-3 text-sm font-bold text-[#d4ff00] hover:underline"
+            className="mt-3 text-sm font-bold text-primary hover:underline"
           >
             Create your first plan
           </button>

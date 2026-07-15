@@ -17,7 +17,7 @@ export function OwnerBottomNav() {
   const itemClass = (active: boolean) =>
     cn(
       "flex min-h-12 flex-1 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-[10px] uppercase min-w-0 transition-colors",
-      active ? "text-[#d4ff00]" : "text-muted-foreground hover:text-foreground/80",
+      active ? "text-primary" : "text-muted-foreground hover:text-foreground/80",
     );
 
   return (
@@ -47,7 +47,7 @@ export function OwnerBottomNav() {
       {(pathname === "/owner/dashboard" || pathname === "/owner/members") && (
         <Link
           href="/owner/members/new"
-          className="absolute -top-16 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#d4ff00] text-black shadow-lg shadow-black/40 transition-all hover:scale-105 active:scale-95 md:hidden"
+          className="absolute -top-16 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-black/20 transition-all hover:scale-105 active:scale-95 md:hidden"
           aria-label="Enroll member"
         >
           <Plus className="h-6 w-6 stroke-[2.5]" />

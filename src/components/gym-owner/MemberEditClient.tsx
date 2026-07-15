@@ -107,7 +107,7 @@ export function MemberEditClient({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#18181b] text-[#d4ff00]">
+      <div className="flex h-screen items-center justify-center bg-background text-primary">
         Loading...
       </div>
     );
@@ -115,31 +115,31 @@ export function MemberEditClient({ id }: { id: string }) {
 
   if (error || !member) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#18181b] text-red-500">
+      <div className="flex h-screen items-center justify-center bg-background text-destructive">
         Error loading member details.
       </div>
     );
   }
 
   const inputClass =
-    "flex h-14 w-full rounded-xl border-0 bg-[#27272a] px-4 text-sm text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#d4ff00]";
+    "flex h-14 w-full rounded-xl border border-border bg-muted px-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary";
   const labelClass =
-    "text-[10px] font-bold uppercase tracking-wider text-zinc-400 ml-1";
+    "text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1";
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-md rounded-t-[32px] md:rounded-[32px] bg-[#18181b] p-6 -mx-4 sm:mx-0 shadow-2xl">
+    <div className="mx-auto w-full min-w-0 max-w-md rounded-t-[32px] md:rounded-[32px] bg-card border border-border p-6 -mx-4 sm:mx-0 shadow-2xl">
       <div className="flex items-start justify-between pb-6">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#d4ff00]">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
             Edit Profile
           </p>
-          <h1 className="mt-1 text-3xl font-extrabold text-white">
+          <h1 className="mt-1 text-3xl font-extrabold text-foreground">
             {member.fullName}
           </h1>
         </div>
         <Link
           href={`/owner/members/${id}`}
-          className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-white"
+          className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="h-4 w-4 stroke-[3]" />
         </Link>
@@ -210,7 +210,7 @@ export function MemberEditClient({ id }: { id: string }) {
                 "environment",
               )
             }
-            className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${memberPhotoFileName ? "border-[#d4ff00] bg-[#d4ff00]/5 text-[#d4ff00]" : "border-zinc-700 bg-[#27272a] text-zinc-400 hover:border-zinc-500"} transition-colors`}
+            className={`flex h-14 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed ${memberPhotoFileName ? "border-primary bg-primary/5 text-primary" : "border-border bg-muted text-muted-foreground hover:border-border/80"} transition-colors`}
           >
             <span className="text-xs font-bold uppercase tracking-wider">
               {memberPhotoFileName ? "New Photo Selected" : "Take New Photo"}
@@ -224,11 +224,11 @@ export function MemberEditClient({ id }: { id: string }) {
             name="whatsappEnabled"
             type="checkbox"
             defaultChecked={member.whatsappEnabled}
-            className="size-4 rounded border-zinc-700 bg-[#27272a] accent-[#d4ff00]"
+            className="size-4 rounded border-border bg-muted accent-primary"
           />
           <Label
             htmlFor="whatsappEnabled"
-            className="text-xs font-medium text-zinc-400"
+            className="text-xs font-medium text-muted-foreground"
           >
             Send WhatsApp reminders
           </Label>
@@ -238,7 +238,7 @@ export function MemberEditClient({ id }: { id: string }) {
           <button
             type="submit"
             disabled={pending}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-[#d4ff00] text-[13px] font-extrabold uppercase tracking-widest text-black transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-[13px] font-extrabold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
           >
             {pending ? "Saving…" : "Save Changes"}
             {!pending && <ArrowRight className="h-4 w-4 stroke-[3]" />}

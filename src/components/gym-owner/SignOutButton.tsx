@@ -30,15 +30,15 @@ export function SignOutButton() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => !isSigningOut && setIsOpen(false)}
           />
-          <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/10 bg-[#16161a] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-500">
               <LogOut className="h-6 w-6" />
             </div>
             
-            <h3 className="mb-2 text-xl font-extrabold text-white">
+            <h3 className="mb-2 text-xl font-extrabold text-foreground">
               Sign out?
             </h3>
-            <p className="mb-8 text-sm text-zinc-400">
+            <p className="mb-8 text-sm text-muted-foreground">
               Are you sure you want to sign out of GymTrack Pro? You will need to log in again to access your dashboard.
             </p>
             
@@ -47,7 +47,7 @@ export function SignOutButton() {
                 type="button"
                 disabled={isSigningOut}
                 onClick={() => setIsOpen(false)}
-                className="flex-1 rounded-xl bg-white/5 py-3.5 text-sm font-bold text-white transition-colors hover:bg-white/10 disabled:opacity-50"
+                className="flex-1 rounded-xl bg-secondary py-3.5 text-sm font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
               >
                 Cancel
               </button>
