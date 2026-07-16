@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,9 @@ export default function LoginForm({ className }: LoginFormProps) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [loginPending, setLoginPending] = useState(false);
   const [signupPending, setSignupPending] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // After login, navigate to callbackUrl (set by proxy for protected routes)
   // or fall back to "/" which lets the root page handle role-based routing.
@@ -169,14 +173,28 @@ export default function LoginForm({ className }: LoginFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                placeholder="********"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showLoginPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  placeholder="********"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showLoginPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -220,26 +238,54 @@ export default function LoginForm({ className }: LoginFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="signup-password">Password</Label>
-              <Input
-                id="signup-password"
-                name="password"
-                type="password"
-                required
-                autoComplete="new-password"
-                placeholder="Min 8 characters"
-              />
+              <div className="relative">
+                <Input
+                  id="signup-password"
+                  name="password"
+                  type={showSignupPassword ? "text" : "password"}
+                  required
+                  autoComplete="new-password"
+                  placeholder="Min 8 characters"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSignupPassword(!showSignupPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showSignupPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm password</Label>
-              <Input
-                id="confirm-password"
-                name="confirmPassword"
-                type="password"
-                required
-                autoComplete="new-password"
-                placeholder="Repeat password"
-              />
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  autoComplete="new-password"
+                  placeholder="Repeat password"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <Button type="submit" className="w-full" disabled={signupPending}>
@@ -262,7 +308,7 @@ export default function LoginForm({ className }: LoginFormProps) {
           </Button> */}
 
           <p className="text-center text-xs text-muted-foreground">
-            demo email: seed-admin@gym.local, pass: GymPass123!
+            For demo purposes: <br /> email: <code>seed-admin@gym.local</code>, password: <code>GymPass123!</code> 
             {/* <Link href="/" className="text-foreground underline-offset-4 hover:underline">
               Home
             </Link> */}
