@@ -122,8 +122,8 @@ function PricingFormLegacy() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-[#d4ff00]" />
-        <p className="text-sm text-zinc-400">Loading your prices…</p>
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading your prices…</p>
       </div>
     );
   }
@@ -141,12 +141,12 @@ function PricingFormLegacy() {
           <div
             key={opt.value}
             className={`relative rounded-2xl border bg-card transition-colors ${
-              isPopular ? "border-[#d4ff00]/30" : "border-border"
+              isPopular ? "border-primary/30" : "border-border"
             }`}
           >
             {isPopular && (
-              <div className="absolute -top-3 right-4 flex items-center gap-1 rounded-full bg-[#d4ff00] px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-black">
-                <Zap className="h-3 w-3 fill-black stroke-0" />
+              <div className="absolute -top-3 right-4 flex items-center gap-1 rounded-full bg-primary px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-primary-foreground">
+                <Zap className="h-3 w-3 fill-primary-foreground stroke-0" />
                 Most Popular
               </div>
             )}
@@ -161,7 +161,7 @@ function PricingFormLegacy() {
                 <div className="shrink-0 text-right">
                   {isEditing ? (
                     <div className="flex items-center gap-1">
-                      <span className="text-xl font-black text-[#d4ff00]">₹</span>
+                      <span className="text-xl font-black text-primary">₹</span>
                       <input
                         autoFocus
                         type="text"
@@ -172,12 +172,12 @@ function PricingFormLegacy() {
                           if (e.key === "Enter") saveEdit(opt.value);
                           if (e.key === "Escape") cancelEdit();
                         }}
-                        className="w-24 rounded-lg bg-muted px-2 py-1 text-right text-xl font-black text-[#d4ff00] outline-none ring-1 ring-[#d4ff00]/50 focus:ring-[#d4ff00]"
+                        className="w-24 rounded-lg bg-muted px-2 py-1 text-right text-xl font-black text-primary outline-none ring-1 ring-primary/50 focus:ring-primary"
                         placeholder="0"
                       />
                     </div>
                   ) : (
-                    <p className={`text-3xl font-black ${isPopular ? "text-[#d4ff00]" : "text-foreground"}`}>
+                    <p className={`text-3xl font-black ${isPopular ? "text-primary" : "text-foreground"}`}>
                       {price && Number(price) > 0
                         ? formatInrFromDecimalString(price)
                         : <span className="text-muted-foreground text-lg font-medium">Not set</span>}
@@ -190,7 +190,7 @@ function PricingFormLegacy() {
               <ul className="mt-4 space-y-2">
                 {features.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="h-3.5 w-3.5 shrink-0 text-[#d4ff00]" />
+                    <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
                     {f}
                   </li>
                 ))}
@@ -204,7 +204,7 @@ function PricingFormLegacy() {
                       type="button"
                       onClick={() => saveEdit(opt.value)}
                       disabled={mutation.isPending}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#d4ff00] py-2.5 text-[11px] font-black uppercase tracking-widest text-black transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-[11px] font-black uppercase tracking-widest text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70"
                     >
                       {mutation.isPending
                         ? <Loader2 className="h-4 w-4 animate-spin" />

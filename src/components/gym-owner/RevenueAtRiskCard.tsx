@@ -23,19 +23,19 @@ export function RevenueAtRiskCard({
   const periodLabel = period === "week" ? "this week" : "this month";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-red-500/10 bg-gradient-to-r from-red-950/45 to-zinc-900/90 p-5">
+    <div className="relative overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-r from-red-100/80 to-card dark:from-red-950/30 dark:to-card p-5">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-red-500">
+        <div className="flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-red-600 dark:text-red-400">
           <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
           REVENUE AT RISK
         </div>
-        <div className="flex items-center gap-1 rounded-full bg-zinc-800 p-1">
+        <div className="flex items-center gap-1 rounded-full bg-secondary p-1">
           <button
             onClick={() => setPeriod("week")}
             className={`flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
               period === "week"
-                ? "bg-[#d4ff00] text-black"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Week
@@ -44,8 +44,8 @@ export function RevenueAtRiskCard({
             onClick={() => setPeriod("month")}
             className={`flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
               period === "month"
-                ? "bg-[#d4ff00] text-black"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Month
@@ -53,7 +53,7 @@ export function RevenueAtRiskCard({
         </div>
       </div>
       <div className="mt-5">
-        <p className="text-4xl font-black tracking-tight text-white">
+        <p className="text-4xl font-black tracking-tight text-foreground">
           {formatInrFromDecimalString(currentRevenue)}
         </p>
         <p className="mt-2.5 text-xs text-muted-foreground">

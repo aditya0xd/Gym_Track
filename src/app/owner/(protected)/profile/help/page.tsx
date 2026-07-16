@@ -28,10 +28,10 @@ export default function OwnerHelpPage() {
   ];
 
   return (
-    <div className="min-h-dvh bg-[#292929] text-white p-6 flex flex-col max-w-2xl mx-auto">
+    <div className="min-h-dvh bg-background text-foreground p-6 flex flex-col max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center mb-8">
-        <Link href="/owner/profile" className="mr-4 text-[#d4ff00] hover:text-[#b0e000] transition-colors">
+        <Link href="/owner/profile" className="mr-4 text-primary hover:text-primary/80 transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-2xl font-semibold flex-1">Help &amp; Support</h1>
@@ -40,93 +40,86 @@ export default function OwnerHelpPage() {
       {/* Sections */}
       <section className="space-y-6">
         {/* Getting Started */}
-        <div className="p-4 bg-[#1e1e1e] rounded-xl border border-[#3a3a3a]">
+        <div className="p-4 bg-card rounded-xl border border-border">
           <div className="flex items-center mb-2">
-            <Info className="h-5 w-5 text-[#d4ff00] mr-2" />
+            <Info className="h-5 w-5 text-primary mr-2" />
             <h2 className="text-lg font-medium">Getting Started</h2>
           </div>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             New to GymTrack? Watch our quick onboarding video or read the step&#8209;by&#8209;step guide to set up
             your gym, create membership plans, and start accepting members.
           </p>
-          <div className="inline-flex items-center gap-1 mt-2 text-[#87c038] hover:underline">
+          <div className="inline-flex items-center gap-1 mt-2 text-primary hover:underline cursor-pointer">
             Go to Video Tutorial <ExternalLink className="h-3.5 w-3.5" />
           </div>
         </div>
 
         {/* Quick Links */}
-        <div className="p-4 bg-[#1e1e1e] rounded-xl border border-[#3a3a3a]">
+        <div className="p-4 bg-card rounded-xl border border-border">
           <h2 className="text-lg font-medium mb-3">Quick Links</h2>
           <div className="grid grid-cols-3 gap-3">
             <Link
               href="/owner/members"
-              className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-[#292929] border border-[#3a3a3a] hover:border-[#d4ff00] transition-colors"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-muted border border-border hover:border-primary transition-colors"
             >
-              <Users className="h-5 w-5 text-[#d4ff00]" />
-              <span className="text-xs text-gray-300 text-center">Members</span>
+              <Users className="h-5 w-5 text-primary" />
+              <span className="text-xs text-foreground/80 text-center">Members</span>
             </Link>
             <Link
               href="/owner/plans"
-              className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-[#292929] border border-[#3a3a3a] hover:border-[#d4ff00] transition-colors"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-muted border border-border hover:border-primary transition-colors"
             >
-              <CreditCard className="h-5 w-5 text-[#d4ff00]" />
-              <span className="text-xs text-gray-300 text-center">Plans</span>
+              <CreditCard className="h-5 w-5 text-primary" />
+              <span className="text-xs text-foreground/80 text-center">Plans</span>
             </Link>
-            {/* <Link
-              href="/owner/settings"
-              className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-[#292929] border border-[#3a3a3a] hover:border-[#d4ff00] transition-colors"
-            >
-              <Settings className="h-5 w-5 text-[#d4ff00]" />
-              <span className="text-xs text-gray-300 text-center">Settings</span>
-            </Link> */}
           </div>
         </div>
 
         {/* FAQ */}
-        <div className="p-4 bg-[#1e1e1e] rounded-xl border border-[#3a3a3a]">
+        <div className="p-4 bg-card rounded-xl border border-border">
           <div className="flex items-center mb-3">
-            <HelpCircle className="h-5 w-5 text-[#d4ff00] mr-2" />
+            <HelpCircle className="h-5 w-5 text-primary mr-2" />
             <h2 className="text-lg font-medium">Frequently Asked Questions</h2>
           </div>
           <div className="space-y-3">
             {faqs.map((item, idx) => (
               <details
                 key={idx}
-                className="group rounded-lg bg-[#292929] border border-[#3a3a3a] p-3 open:border-[#d4ff00]/40"
+                className="group rounded-lg bg-muted border border-border p-3 open:border-primary/40"
               >
-                <summary className="text-sm font-medium cursor-pointer list-none flex items-center justify-between">
+                <summary className="text-sm font-medium cursor-pointer list-none flex items-center justify-between text-foreground">
                   {item.q}
-                  <span className="text-[#d4ff00] ml-2 group-open:rotate-45 transition-transform">+</span>
+                  <span className="text-primary ml-2 group-open:rotate-45 transition-transform">+</span>
                 </summary>
-                <p className="text-sm text-gray-400 mt-2">{item.a}</p>
+                <p className="text-sm text-muted-foreground mt-2">{item.a}</p>
               </details>
             ))}
           </div>
-          <p className="mt-3 text-sm text-gray-400">
+          <p className="mt-3 text-sm text-muted-foreground">
             If you don&apos;t see your question, feel free to contact us below.
           </p>
         </div>
 
         {/* Contact Support */}
-        <div className="p-4 bg-[#1e1e1e] rounded-xl border border-[#3a3a3a]">
+        <div className="p-4 bg-card rounded-xl border border-border">
           <div className="flex items-center mb-2">
-            <MessageSquare className="h-5 w-5 text-[#d4ff00] mr-2" />
+            <MessageSquare className="h-5 w-5 text-primary mr-2" />
             <h2 className="text-lg font-medium">Contact Support</h2>
           </div>
-          <p className="text-sm text-gray-400 mb-3">
+          <p className="text-sm text-muted-foreground mb-3">
             Need personalized assistance? Our team aims to reply within 24 hours.
           </p>
           <div className="space-y-2">
             <Link
               href="mailto:adityayadav168@gmail.com"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#d4ff00] text-[#1e1e1e] text-sm font-medium hover:bg-[#b0e000] transition-colors w-full justify-center"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/80 transition-colors w-full justify-center"
             >
               <Mail className="h-4 w-4" />
               Email Support
             </Link>
             <Link
               href="tel:8953317722"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#292929] border border-[#3a3a3a] text-white text-sm font-medium hover:border-[#d4ff00] transition-colors w-full justify-center"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-muted border border-border text-foreground text-sm font-medium hover:border-primary transition-colors w-full justify-center"
             >
               <MessageSquare className="h-4 w-4" />
               Call: 8953317722
@@ -136,7 +129,7 @@ export default function OwnerHelpPage() {
       </section>
 
       {/* Footer note */}
-      <p className="text-xs text-gray-500 text-center mt-8 mb-2">
+      <p className="text-xs text-muted-foreground text-center mt-8 mb-2">
         GymTrack v1.0 &middot; Made for gym owners, by gym owners
       </p>
     </div>

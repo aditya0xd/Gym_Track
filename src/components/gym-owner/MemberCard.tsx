@@ -63,16 +63,16 @@ function paymentStatusInfo(paymentStatus?: PaymentStatus, amountPaid?: string, p
   if (paymentStatus === undefined || paymentStatus === null) return null;
   
   if (paymentStatus === "DONE") {
-    return { label: "Paid", color: "text-green-400", bgColor: "bg-green-500/20" };
+    return { label: "Paid", color: "text-green-600 dark:text-green-400", bgColor: "bg-green-100 dark:bg-green-500/20" };
   }
   
   const due = planPrice && amountPaid !== undefined ? Math.max(0, Number(planPrice) - Number(amountPaid)) : null;
   
   if (paymentStatus === "PARTIAL") {
-    return { label: due ? `Due ₹${due.toFixed(0)}` : "Partial", color: "text-yellow-400", bgColor: "bg-yellow-500/20" };
+    return { label: due ? `Due ₹${due.toFixed(0)}` : "Partial", color: "text-yellow-600 dark:text-yellow-400", bgColor: "bg-yellow-100 dark:bg-yellow-500/20" };
   }
   
-  return { label: due ? `Due ₹${due.toFixed(0)}` : "Due", color: "text-red-400", bgColor: "bg-red-500/20" };
+  return { label: due ? `Due ₹${due.toFixed(0)}` : "Due", color: "text-red-600 dark:text-red-400", bgColor: "bg-red-100 dark:bg-red-500/20" };
 }
 
 export function MemberCard({
@@ -91,21 +91,21 @@ export function MemberCard({
   const status = statusOf(endDate, membershipStatus);
   const statusColor =
     status === "EXPIRED"
-      ? "bg-red-500/20 text-red-400"
+      ? "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400"
       : status === "EXPIRING_SOON"
-        ? "bg-yellow-500/20 text-yellow-400"
+        ? "bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
         : status === "PAUSED"
-          ? "bg-blue-500/20 text-blue-400"
-          : "bg-green-500/20 text-green-400";
+          ? "bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400"
+          : "bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400";
 
   const paymentInfo = paymentStatusInfo(paymentStatus, amountPaid, planPrice);
 
   return (
     <Link
       href={`/owner/members/${id}`}
-      className="flex items-center gap-3 rounded-xl bg-gray-800/50 p-4 backdrop-blur-sm hover:bg-gray-800/70 transition-colors"
+      className="flex items-center gap-3 rounded-xl bg-card border border-border p-4 hover:bg-muted/50 transition-colors"
     >
-      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-700">
+      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary">
         {memberPhoto ? (
           <Image
             src={memberPhoto}
@@ -116,13 +116,13 @@ export function MemberCard({
             className="object-cover"
           />
         ) : (
-          <User className="h-7 w-7 text-gray-400" />
+          <User className="h-7 w-7 text-muted-foreground" />
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white">{fullName}</p>
+        <p className="text-sm font-semibold text-foreground">{fullName}</p>
         
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
             <span>
@@ -132,7 +132,7 @@ export function MemberCard({
           </div>
           <div className="flex items-center gap-1">
             <CreditCard className="h-3 w-3" />
-            <span className="font-medium text-gray-300">{formatInrFromDecimalString(planPrice)}</span>
+            <span className="font-medium text-foreground/80">{formatInrFromDecimalString(planPrice)}</span>
           </div>
           {joinedDate && (
             <div className="flex items-center gap-1">

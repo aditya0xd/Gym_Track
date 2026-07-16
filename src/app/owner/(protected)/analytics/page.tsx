@@ -57,7 +57,7 @@ export default async function OwnerAnalyticsPage() {
         ) : (
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="flex items-start gap-3">
-              <div className="rounded-full bg-[#d4ff00]/15 p-2 text-[#d4ff00]">
+              <div className="rounded-full bg-primary/15 p-2 text-primary">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div className="space-y-3">
