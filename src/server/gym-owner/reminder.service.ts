@@ -7,6 +7,7 @@ import { HttpError } from "@/lib/http/errors";
 import { prisma } from "@/lib/prisma";
 import { getMergedPlanFeatures } from "@/server/platform-plan-features.service";
 import { memberScope } from "@/lib/tenant/scope";
+import { sendWhatsAppMessage } from "@/server/integrations/whatsapp";
 import { sendAiSensyReminder } from "@/server/integrations/aisensy";
 
 export type ReminderType = "MEMBERSHIP_EXPIRY" | "PAYMENT_DUE";
@@ -47,44 +48,78 @@ async function deliverMemberReminder(params: {
   const toPhone = normalizePhone(params.member.phone);
   let channel: Channel = "WHATSAPP";
   let status: ReminderStatus = "SENT";
+  let providerMessageId: string | undefined;
 
-  const send = (ch: Channel) =>
-    sendAiSensyReminder({
-      toPhone,
-      message: params.message,
-      userName: params.member.fullName,
-      channel: ch,
-      templateParams:
-        ch === "WHATSAPP"
-          ? [
-              params.member.fullName,
-              params.member.endDate.toISOString().slice(0, 10),
-              params.message,
-            ]
-          : [params.member.fullName, params.message],
-      tags: ["membership", params.reminderTypeTag.toLowerCase(), ch.toLowerCase()],
-      attributes: {
-        memberId: params.member.id,
-        reminderType: params.reminderTypeTag,
-      },
-    });
-
-  try {
-    if (params.member.whatsappEnabled) {
-      await send("WHATSAPP");
-    } else {
-      await send("SMS");
-      channel = "SMS";
-    }
-  } catch {
-    if (params.member.whatsappEnabled) {
+  // Try direct WhatsApp API first if enabled
+  if (params.member.whatsappEnabled) {
+    try {
+      const result = await sendWhatsAppMessage({
+        toPhone,
+        message: params.message,
+      });
+      providerMessageId = result.providerMessageId;
+    } catch (error) {
+      console.error("Direct WhatsApp API failed, falling back to AiSensy:", error);
+      // Fallback to AiSensy
       try {
-        await send("SMS");
-        channel = "SMS";
+        const result = await sendAiSensyReminder({
+          toPhone,
+          message: params.message,
+          userName: params.member.fullName,
+          channel: "WHATSAPP",
+          templateParams: [
+            params.member.fullName,
+            params.member.endDate.toISOString().slice(0, 10),
+            params.message,
+          ],
+          tags: ["membership", params.reminderTypeTag.toLowerCase(), "whatsapp"],
+          attributes: {
+            memberId: params.member.id,
+            reminderType: params.reminderTypeTag,
+          },
+        });
+        // AiSensy doesn't return message ID in current implementation
+        providerMessageId = undefined;
       } catch {
-        status = "FAILED";
+        // WhatsApp failed, try SMS
+        try {
+          const result = await sendAiSensyReminder({
+            toPhone,
+            message: params.message,
+            userName: params.member.fullName,
+            channel: "SMS",
+            templateParams: [params.member.fullName, params.message],
+            tags: ["membership", params.reminderTypeTag.toLowerCase(), "sms"],
+            attributes: {
+              memberId: params.member.id,
+              reminderType: params.reminderTypeTag,
+            },
+          });
+          channel = "SMS";
+          providerMessageId = undefined;
+        } catch {
+          status = "FAILED";
+        }
       }
-    } else {
+    }
+  } else {
+    // WhatsApp not enabled, use SMS via AiSensy
+    try {
+      const result = await sendAiSensyReminder({
+        toPhone,
+        message: params.message,
+        userName: params.member.fullName,
+        channel: "SMS",
+        templateParams: [params.member.fullName, params.message],
+        tags: ["membership", params.reminderTypeTag.toLowerCase(), "sms"],
+        attributes: {
+          memberId: params.member.id,
+          reminderType: params.reminderTypeTag,
+        },
+      });
+      channel = "SMS";
+      providerMessageId = undefined;
+    } catch {
       status = "FAILED";
     }
   }
@@ -97,6 +132,7 @@ async function deliverMemberReminder(params: {
       message: params.message,
       category: params.category,
       relatedEndDate: params.relatedEndDate,
+      providerMessageId,
     },
     select: {
       id: true,
