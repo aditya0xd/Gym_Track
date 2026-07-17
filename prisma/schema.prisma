@@ -79,8 +79,11 @@ model ReminderLog {
   category       ReminderCategory @default(MANUAL)
   /// When set, used to dedupe scheduled reminders for a specific membership end date.
   relatedEndDate DateTime?        @db.Date
+  /// WhatsApp message ID from Meta API for delivery status correlation
+  providerMessageId String?      @db.Text
 
   @@index([memberId, category, relatedEndDate])
+  @@index([providerMessageId])
 }
 
 /// Gym owner (tenant)

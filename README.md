@@ -340,13 +340,19 @@ Open [http://localhost:3000](http://localhost:3000).
 | `TWILIO_AUTH_TOKEN` | Twilio auth token |
 | `TWILIO_SMS_FROM` | SMS sender number |
 | `TWILIO_WHATSAPP_FROM` | WhatsApp sender number |
+| `WHATSAPP_ACCESS_TOKEN` | Meta WhatsApp API access token |
+| `WHATSAPP_PHONE_NUMBER_ID` | Meta WhatsApp phone number ID |
+| `WHATSAPP_API_VERSION` | Meta Graph API version (default: v18.0) |
+| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | Verify token for WhatsApp webhook verification |
 | `RAZORPAY_KEY_ID` | Razorpay key ID |
 | `RAZORPAY_KEY_SECRET` | Razorpay key secret |
 | `NEXT_PUBLIC_APP_NAME` | App display name |
 
 > **Redis:** Use `redis://localhost:6379` for local Docker. For production, use an Upstash Redis URL from [console.upstash.com](https://console.upstash.com).
 
-> If Twilio or Razorpay values are missing, those features will fail at runtime when invoked.
+> **WhatsApp API:** Get credentials from Meta for Developers. Create verify token with `openssl rand -hex 16`.
+
+> If Twilio, WhatsApp, or Razorpay values are missing, those features will fail at runtime when invoked.
 
 ---
 
