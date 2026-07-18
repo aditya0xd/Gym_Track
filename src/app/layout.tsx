@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AppToaster } from "@/components/providers/AppToaster";
 import { PwaInstallPrompt } from "@/components/providers/PwaInstallPrompt";
 import { PwaRegister } from "@/components/providers/PwaRegister";
+import { OfflineBanner } from "@/components/providers/OfflineBanner";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { QueryProvider } from "@/components/providers/Query-provider";
 import { SplashHider } from "@/components/providers/SplashHider";
@@ -73,6 +74,7 @@ export default function RootLayout({
         <QueryProvider>
           <SessionProvider>
             <PwaRegister />
+            <OfflineBanner />
             {children}
             <AppToaster />
             <PwaInstallPrompt />
