@@ -6,6 +6,8 @@ import { PwaInstallPrompt } from "@/components/providers/PwaInstallPrompt";
 import { PwaRegister } from "@/components/providers/PwaRegister";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { QueryProvider } from "@/components/providers/Query-provider";
+import { SplashHider } from "@/components/providers/SplashHider";
+import { CapacitorBackButton } from "@/components/providers/CapacitorBackButton";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -76,6 +78,8 @@ export default function RootLayout({
             <PwaInstallPrompt />
           </SessionProvider>
         </QueryProvider>
+        <SplashHider />
+        <CapacitorBackButton />
       </body>
     </html>
   );
