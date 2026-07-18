@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { ManagePlanPanel } from "@/components/gym-owner/ManagePlanPanel";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { PageShell } from "@/components/shared/PageShell";
+import { ManagePlanPanel } from "@/components/owner/billing/ManagePlanPanel";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PageShell } from "@/components/layout/PageShell";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {

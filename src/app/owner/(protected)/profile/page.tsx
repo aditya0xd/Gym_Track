@@ -17,7 +17,7 @@ import {
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { SignOutButton } from "@/components/gym-owner/SignOutButton";
+import { SignOutButton } from "@/components/owner/shared/SignOutButton";
 
 export const metadata = {
   title: "Profile | GymTrack Pro",

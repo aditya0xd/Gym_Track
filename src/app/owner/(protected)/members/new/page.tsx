@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { MemberEnrollForm } from "@/components/gym-owner/MemberEnrollForm";
+import { MemberEnrollForm } from "@/components/owner/members/MemberEnrollForm";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {

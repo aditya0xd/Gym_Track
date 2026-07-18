@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import { Calendar, ChevronDown, ChevronUp, Search } from "lucide-react";
 
-import { FilterChips } from "@/components/gym-owner/FilterChips";
-import { MemberCard } from "@/components/gym-owner/MemberCard";
+import { FilterChips } from "@/components/owner/members/FilterChips";
+import { MemberCard } from "@/components/owner/members/MemberCard";
 import type { MemberBillingDuration, MembershipStatus, PaymentStatus } from "@/generated/prisma/client";
 
 type MemberItem = {

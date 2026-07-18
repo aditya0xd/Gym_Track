@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { PageHeader } from "@/components/shared/PageHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { MembersExplorerPanel } from "./MembersExplorerPanel";
 
 type StatusFilter = "ALL" | "EXPIRING_SOON" | "EXPIRED" | "PAUSED";

@@ -8,21 +8,9 @@ import { X, ArrowRight } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { useQuery } from "@tanstack/react-query";
 import { IMAGE_ACCEPT, IMAGE_PROCESSING_PRESETS } from "@/lib/image-processing/config";
-import { imageErrorMessage as sharedImageErrorMessage, processImage } from "@/lib/image-processing/client";
+import { imageErrorMessage as sharedImageErrorMessage, processImage, openImagePicker } from "@/lib/image-processing/client";
 
-function openImagePicker(
-  input: HTMLInputElement | null,
-  mode: "camera" | "files",
-  capture: "user" | "environment",
-) {
-  if (!input) return;
-  if (mode === "camera") {
-    input.setAttribute("capture", capture);
-  } else {
-    input.removeAttribute("capture");
-  }
-  input.click();
-}
+
 
 type UpdateMemberPayload = {
   fullName: string;

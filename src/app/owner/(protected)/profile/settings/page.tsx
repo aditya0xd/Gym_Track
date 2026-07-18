@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Bell, Globe, Moon, Sun, Shield, ChevronRight, Pencil } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { EditProfileDialog } from "@/components/gym-owner/EditProfileDialog";
-import { PasswordResetDialog } from "@/components/gym-owner/PasswordResetDialog";
+import { EditProfileDialog } from "@/components/owner/shared/EditProfileDialog";
+import { PasswordResetDialog } from "@/components/owner/shared/PasswordResetDialog";
 import Image from "next/image";
 
 export default function OwnerSettingsPage() {

@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { MemberCard } from "@/components/gym-owner/MemberCard";
+import { MemberCard } from "@/components/owner/members/MemberCard";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-
-import { PageShell } from "@/components/shared/PageShell";
-import { RevenueAtRiskCard } from "@/components/gym-owner/RevenueAtRiskCard";
+import { RevenueAtRiskCard } from "@/components/owner/analytics/RevenueAtRiskCard";
 import { authOptions } from "@/lib/auth";
 import { MEMBER_BILLING_DURATION_OPTIONS } from "@/lib/constants/billing";
 import { formatInrFromDecimalString } from "@/lib/format/inr";

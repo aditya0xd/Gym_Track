@@ -778,88 +778,22 @@ export function MemberDetailsClient({ id }: { id: string }) {
               </div>
             </div>
 
-            {!member.paymentStatus && member.renewals.length === 0 ? (
+            {member.renewals.length === 0 ? (
               <p className="text-sm text-muted-foreground">No payments recorded yet.</p>
             ) : (
               <div className="space-y-3">
-                {/* Initial payment */}
-                {member.paymentStatus && (
-                  <div className="rounded-xl border border-border bg-muted/40 p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-foreground">
-                          Initial Membership
-                        </p>
-                        <p className="mt-1 text-[11px] text-muted-foreground">
-                          {formatDate(member.startDate)} to{" "}
-                          {formatDate(member.endDate)}
-                        </p>
-                      </div>
-                      <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${paymentStatusTone(
-                          member.paymentStatus,
-                        )}`}
-                      >
-                        {paymentStatusLabel(member.paymentStatus)}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
-                      <p>
-                        Charged:{" "}
-                        <span className="font-semibold text-foreground">
-                          {formatInrFromDecimalString(member.planPrice)}
-                        </span>
-                      </p>
-                      <p>
-                        Paid:{" "}
-                        <span className="font-semibold text-foreground">
-                          {formatInrFromDecimalString(member.amountPaid)}
-                        </span>
-                      </p>
-                      <p>
-                        Due:{" "}
-                        <span className="font-semibold text-foreground">
-                          {formatInrFromDecimalString(
-                            Math.max(
-                              0,
-                              Number(member.planPrice) -
-                                Number(member.amountPaid),
-                            ).toFixed(2),
-                          )}
-                        </span>
-                      </p>
-                      <p>
-                        Provider:{" "}
-                        <span className="font-semibold text-foreground">
-                          {member.upiScreenshot ? "UPI" : "Manual"}
-                        </span>
-                      </p>
-                    </div>
-
-                    <p className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Recorded {formatDate(member.createdAt)}
-                    </p>
-
-                    {member.paymentStatus !== "DONE" && (
-                      <button
-                        onClick={() =>
-                          handleClearDues("initial", member.planPrice)
-                        }
-                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted"
-                      >
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        Clear Dues
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {member.renewals.map((payment) => {
+                {member.renewals.map((payment, index) => {
                   const due = Math.max(
                     0,
                     Number(payment.planPrice) - Number(payment.amountPaid),
                   ).toFixed(2);
+                  // The oldest entry (last in desc-ordered array) is the initial enrollment
+                  const isInitial = index === member.renewals.length - 1;
+                  const label = isInitial
+                    ? `Initial Membership${payment.membershipPlanName ? ` · ${durationLabel(payment.billingDuration)}` : ""}`
+                    : payment.membershipPlanName
+                      ? `${payment.membershipPlanName} · ${durationLabel(payment.billingDuration)}`
+                      : durationLabel(payment.billingDuration);
 
                   return (
                     <div
@@ -869,9 +803,7 @@ export function MemberDetailsClient({ id }: { id: string }) {
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="text-sm font-bold text-foreground">
-                            {payment.membershipPlanName
-                              ? `${payment.membershipPlanName} · ${durationLabel(payment.billingDuration)}`
-                              : durationLabel(payment.billingDuration)}
+                            {label}
                           </p>
                           <p className="mt-1 text-[11px] text-muted-foreground">
                             {formatDate(payment.periodStart)} to{" "}
