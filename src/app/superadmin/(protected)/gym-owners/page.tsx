@@ -5,8 +5,8 @@ import { GymOwnersAdminPanel } from "@/components/superadmin/GymOwnersAdminPanel
 import { BillingInvoicesAdminPanel } from "@/components/superadmin/BillingInvoicesAdminPanel";
 import { PlanFeaturesAdminPanel } from "@/components/superadmin/PlanFeaturesAdminPanel";
 import { PlatformPricingAdminPanel } from "@/components/superadmin/PlatformPricingAdminPanel";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { PageShell } from "@/components/shared/PageShell";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PageShell } from "@/components/layout/PageShell";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {

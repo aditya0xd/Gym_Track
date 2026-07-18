@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { MemberEditClient } from "@/components/gym-owner/MemberEditClient";
+import { MemberEditClient } from "@/components/owner/members/MemberEditClient";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {

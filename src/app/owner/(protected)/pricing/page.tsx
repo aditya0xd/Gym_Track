@@ -3,9 +3,9 @@ import { getServerSession } from "next-auth";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-import { MembershipPlansManager } from "@/components/gym-owner/MembershipPlansManager";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { PageShell } from "@/components/shared/PageShell";
+import { MembershipPlansManager } from "@/components/owner/billing/MembershipPlansManager";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PageShell } from "@/components/layout/PageShell";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {

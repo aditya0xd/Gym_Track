@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { OwnerBottomNav } from "@/components/gym-owner/OwnerBottomNav";
-import { OwnerMainNav } from "@/components/gym-owner/OwnerMainNav";
+import { OwnerBottomNav } from "@/components/owner/shared/OwnerBottomNav";
+import { OwnerMainNav } from "@/components/owner/shared/OwnerMainNav";
 import { authOptions } from "@/lib/auth";
 
 export default async function OwnerProtectedLayout({

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { MemberBulkPanel } from "@/components/gym-owner/MemberBulkPanel";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { PageShell } from "@/components/shared/PageShell";
+import { MemberBulkPanel } from "@/components/owner/members/MemberBulkPanel";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PageShell } from "@/components/layout/PageShell";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
 

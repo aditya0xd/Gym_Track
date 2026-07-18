@@ -20,25 +20,14 @@ import {
 import {
   imageErrorMessage as sharedImageErrorMessage,
   processImage,
+  openImagePicker,
 } from "@/lib/image-processing/client";
 import type {
   MemberBillingDuration,
   PaymentStatus,
 } from "@/generated/prisma/client";
 
-function openImagePicker(
-  input: HTMLInputElement | null,
-  mode: "camera" | "files",
-  capture: "user" | "environment",
-) {
-  if (!input) return;
-  if (mode === "camera") {
-    input.setAttribute("capture", capture);
-  } else {
-    input.removeAttribute("capture");
-  }
-  input.click();
-}
+
 
 export function MemberEnrollForm() {
   const router = useRouter();

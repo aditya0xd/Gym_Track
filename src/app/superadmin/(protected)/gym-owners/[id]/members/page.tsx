@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PageShell } from "@/components/shared/PageShell";
+import { PageShell } from "@/components/layout/PageShell";
 import { SuperAdminMembersTable } from "@/components/superadmin/SuperAdminMembersTable";
 import { SuperAdminAddMemberDialog } from "@/components/superadmin/SuperAdminAddMemberDialog";
 import { SuperAdminCsvUploadDialog } from "@/components/superadmin/SuperAdminCsvUploadDialog";

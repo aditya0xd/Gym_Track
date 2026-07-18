@@ -1,5 +1,7 @@
 "use client";
 
+import { Capacitor } from '@capacitor/core';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import {
   ALLOWED_IMAGE_TYPE_SET,
   RAW_FILE_MAX_BYTES,
@@ -236,4 +238,46 @@ export function imageErrorMessage(err: unknown, label: string): string {
     return `Could not process ${label.toLowerCase()} before the timeout.`;
   }
   return `Could not process ${label.toLowerCase()} on this device.`;
+}
+
+export async function openImagePicker(
+  input: HTMLInputElement | null,
+  mode: "camera" | "files",
+  capture: "user" | "environment",
+) {
+  if (!input) return;
+
+  if (Capacitor.isNativePlatform() && mode === "camera") {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera,
+      });
+
+      if (image.webPath) {
+         const response = await fetch(image.webPath);
+         const blob = await response.blob();
+         const file = new File([blob], `photo_${Date.now()}.${image.format}`, { type: `image/${image.format}` });
+         
+         const dataTransfer = new DataTransfer();
+         dataTransfer.items.add(file);
+         input.files = dataTransfer.files;
+         
+         const event = new Event('change', { bubbles: true });
+         input.dispatchEvent(event);
+      }
+    } catch (e) {
+      console.error("Camera error:", e);
+    }
+    return;
+  }
+
+  if (mode === "camera") {
+    input.setAttribute("capture", capture);
+  } else {
+    input.removeAttribute("capture");
+  }
+  input.click();
 }

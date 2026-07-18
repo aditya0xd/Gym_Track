@@ -1,4 +1,4 @@
-import { PageShell } from "@/components/shared/PageShell";
+import { PageShell } from "@/components/layout/PageShell";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SuperAdminLoading() {

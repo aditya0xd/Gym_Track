@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-import { PageShell } from "@/components/shared/PageShell";
-import { MemberDetailsClient } from "@/components/gym-owner/MemberDetailsClient";
+import { PageShell } from "@/components/layout/PageShell";
+import { MemberDetailsClient } from "@/components/owner/members/MemberDetailsClient";
 import { authOptions } from "@/lib/auth";
 
 export const metadata = {

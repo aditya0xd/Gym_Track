@@ -7,9 +7,8 @@ import { BarChart3, ArrowLeft, Sparkles } from "lucide-react";
 import {
   OwnerAnalyticsClient,
   OwnerAnalyticsRefreshButton,
-} from "@/components/gym-owner/OwnerAnalyticsClient";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { PageShell } from "@/components/shared/PageShell";
+} from "@/components/owner/analytics/OwnerAnalyticsClient";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { authOptions } from "@/lib/auth";
 import { hasGymOwnerPlanFeature } from "@/lib/plan-features/guard";
