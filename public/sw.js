@@ -1,6 +1,6 @@
 const CACHE_NAME = "gymtrack-cache-v1";
 const OFFLINE_URL = "/offline";
-const PRECACHE_URLS = ["/", "/login", "/offline", OFFLINE_URL, "/manifest.webmanifest", "/icons/pwa-icon.svg"];
+const PRECACHE_URLS = ["/", "/login", OFFLINE_URL, "/manifest.webmanifest", "/icons/pwa-icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
