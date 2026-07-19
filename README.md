@@ -53,6 +53,7 @@ A full-stack multi-tenant SaaS platform for gym owners to manage members, renewa
   - [Available Scripts](#available-scripts)
   - [Project Structure](#project-structure)
   - [Deployment](#deployment)
+  - [Mobile App](#mobile-app)
   - [Status](#status)
 
 ---
@@ -424,6 +425,19 @@ The app is ready for production deployment with:
 - GitHub Actions pipelines for automated deployment
 
 Set `NEXTAUTH_URL` to the final deployed base URL before going live.
+
+---
+
+---
+
+## Mobile App
+
+An Android app implementation is maintained in a separate repository: [Gym_Track-mobile_app](https://github.com/aditya0xd/Gym_Track-mobile_app)
+
+- Built with Capacitor, wrapping the deployed web app in a native Android shell
+- Uses native device APIs via Capacitor plugins: camera, splash screen, status bar
+- Configured with an offline fallback page for connectivity loss
+- Signed Android release build (APK) via a local keystore
 
 ---
 
