@@ -249,12 +249,18 @@ export async function createMemberForOwner(
     );
   }
   const planPrice = listPrice.minus(discountInr);
-  const requestedAmountPaid =
-    input.amountPaid === undefined
-      ? input.paymentStatus === "DONE"
-        ? planPrice
-        : new Prisma.Decimal(0)
-      : parseMoney(input.amountPaid, "Amount paid");
+
+  let requestedAmountPaid;
+
+  if (input.amountPaid === undefined) {
+    if (input.paymentStatus === "DONE") {
+      requestedAmountPaid = planPrice;
+    } else {
+      requestedAmountPaid = new Prisma.Decimal(0);
+    }
+  } else {
+    requestedAmountPaid = parseMoney(input.amountPaid, "Amount paid");
+  }
 
   if (requestedAmountPaid.gt(planPrice)) {
     throw new HttpError(400, "Amount paid cannot be greater than the final membership amount.");

@@ -126,7 +126,7 @@ I designed and implemented the full product from scratch: multi-tenant authentic
 
 ## Why This Project Stands Out
 
-- Built as a SaaS-style product not a simple CRUD app
+- Built as a SaaS-style product
 - Supports fully separate owner and platform-admin workflows
 - Includes real payment, reminder, invoice, and analytics flows
 - Uses production-style architecture: service layer, integrations, Prisma models, protected route groups
@@ -143,10 +143,13 @@ I designed and implemented the full product from scratch: multi-tenant authentic
 | Members | Enrollment, member details, status filters (active, expiring, expired) |
 | Membership Plans | Owners can create named plans (e.g. Strength, Couple) with dynamic benefits and custom duration pricing |
 | Billing | Duration pricing (1/3/6/12 months), invoices, Razorpay checkout, PDF receipts |
+| Receipts | Server-generated PDF payment receipts per invoice, downloadable by owners |
+| Data Import/Export | Bulk member CSV import/export for owners, CSV export for superadmin |
+| Automation | Secured daily cron job (Vercel Cron or Bearer secret) triggering expiry reminders one day before renewal, rate-limited to prevent duplicate runs |
 | Reminders | SMS and WhatsApp renewal reminders via Twilio, delivery logging |
 | Analytics | Retention, churn, payment tracking, revenue-at-risk, revenue-lost visibility |
 | Superadmin | Owner management, platform pricing, trial and subscription controls |
-| PWA | Web manifest, service worker, offline fallback page |
+| PWA | Installable app with Next.js-native manifest, versioned service worker cache, offline fallback page, and RSC-aware caching (avoids caching Next.js server-component/prefetch payloads) |
 | API Docs | OpenAPI/Swagger documentation across all route groups |
 
 ---
@@ -154,7 +157,8 @@ I designed and implemented the full product from scratch: multi-tenant authentic
 ## Tech Stack
 
 **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS 4, shadcn/ui  
-**Backend:** Next.js App Router API routes, Prisma ORM, PostgreSQL, Redis  
+**Backend:** Next.js App Router API routes, Prisma ORM, PostgreSQL  
+**Caching & Rate Limiting:** Redis — cache-aside pattern for members list, request rate limiting, auth session caching
 **Auth:** NextAuth.js, JWT strategy, bcrypt password hashing  
 **Payments & Messaging:** Razorpay (checkout + verification), Twilio (SMS + WhatsApp)  
 **DevOps:** Docker, Docker Compose, GitHub Actions (dev + prod pipelines)  
@@ -163,6 +167,9 @@ I designed and implemented the full product from scratch: multi-tenant authentic
 
 <details>
 <summary>Full dependency versions</summary>
+
+### Caching & Rate Limiting
+- **Redis** `6.0.0` — Cache-aside for member lists, sliding-window rate limiting, auth session caching
 
 ### Core Framework & Language
 - **Next.js** `16.2.1` — React framework with App Router
@@ -188,7 +195,6 @@ I designed and implemented the full product from scratch: multi-tenant authentic
 
 ### State Management & Data Fetching
 - **React Query (TanStack Query)** `5.100.14` — Server state management
-- **Redis** `6.0.0` — Caching layer
 
 ### Payment & Billing
 - **Razorpay** `2.9.6` — Payment gateway integration
@@ -244,9 +250,12 @@ User (Browser / PWA)
 - Passwords hashed with bcrypt before storage
 - JWT-based session strategy via NextAuth
 - Separate database models for gym owners and superadmins
+- Rate limiting applied to sensitive endpoints to mitigate abuse
 - Protected route groups enforce role-based access at the routing layer
-- Razorpay payment signature verified server-side before marking invoices as paid
+- Razorpay signature verification uses HMAC-SHA256 (not yet constant-time comparison)
 - Secrets and credentials managed via environment variables, never hardcoded
+- Cron endpoints protected by Vercel Cron header verification or a bearer secret, with rate limiting to prevent duplicate/accidental runs
+- Logging is console-based (not yet using structured logging library like pino/winston)
 
 ---
 
@@ -421,5 +430,7 @@ Set `NEXTAUTH_URL` to the final deployed base URL before going live.
 ## Status
 
 Actively maintained portfolio project. Owner portal, superadmin portal, payment integration, reminder integration, analytics, CI/CD pipelines, Docker setup, and seeded demo data are all complete.
+
+Known gaps: test coverage is minimal (single example spec), and logging is console-based rather than using a structured logging library like pino/winston.
 
 > Built for the Indian market with INR formatting and Razorpay as the payment gateway.
