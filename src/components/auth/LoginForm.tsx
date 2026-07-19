@@ -296,8 +296,8 @@ export default function LoginForm({ className }: LoginFormProps) {
           </form>
         )}
 
-        <div className="flex flex-col gap-2 border-t border-border pt-4">
           {/* <Button
+        <div className="flex flex-col gap-2 border-t border-border pt-4">
             type="button"
             variant="secondary"
             className="w-full"
@@ -312,8 +312,9 @@ export default function LoginForm({ className }: LoginFormProps) {
             For demo purposes: <br /> email: <code>seed-admin@gym.local</code>, password: <code>GymPass123!</code> 
               Home
           </p>
-          </Link> */}
+          </Link>
         </div>
+           */}
       </CardContent>
     </Card>
   );
