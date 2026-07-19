@@ -33,7 +33,7 @@ export function OfflineBanner() {
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold leading-none">You are offline</p>
           <p className="mt-1 text-[11px] font-medium leading-none opacity-90">
-            Showing cached data. Content may be stale.
+            Showing cached data!
           </p>
         </div>
       </div>

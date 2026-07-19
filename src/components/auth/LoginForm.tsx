@@ -307,12 +307,12 @@ export default function LoginForm({ className }: LoginFormProps) {
             {logoutPending ? "Logging out..." : "Logout"}
           </Button> */}
 
+            {/* <Link href="/" className="text-foreground underline-offset-4 hover:underline">
           <p className="text-center text-xs text-muted-foreground">
             For demo purposes: <br /> email: <code>seed-admin@gym.local</code>, password: <code>GymPass123!</code> 
-            {/* <Link href="/" className="text-foreground underline-offset-4 hover:underline">
               Home
-            </Link> */}
           </p>
+          </Link> */}
         </div>
       </CardContent>
     </Card>
