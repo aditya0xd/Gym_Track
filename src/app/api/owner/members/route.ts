@@ -78,8 +78,7 @@ async function POSTHandler(request: Request, userId: string) {
     ),
   );
 
-  try {
-    const member = await createMemberForOwner(userId, {
+  const dataOfMembers = {
       fullName: data.fullName,
       email: data.email,
       phone: data.phone,
@@ -92,7 +91,10 @@ async function POSTHandler(request: Request, userId: string) {
       upiScreenshot: data.upiScreenshot,
       discountInr: data.discountInr,
       amountPaid: data.amountPaid,
-    });
+    }
+
+  try {
+    const member = await createMemberForOwner(userId, dataOfMembers);
 
     return NextResponse.json(
       {
