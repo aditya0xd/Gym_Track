@@ -1,4 +1,4 @@
-const CACHE_NAME = "gymtrack-cache-v2";
+const CACHE_NAME = "gymtrack-cache-v3";
 const OFFLINE_URL = "/offline";
 const PRECACHE_URLS = ["/", "/login", OFFLINE_URL, "/manifest.webmanifest", "/icons/pwa-icon.svg"];
 
@@ -66,7 +66,8 @@ self.addEventListener("fetch", (event) => {
   }
 
   // 2. Next.js RSC / Dynamic Page Data Fetching (Client-side navigations)
-  // Strategy: Network-First. Fetch fresh page data, cache it, fallback to cached data if offline.
+  // Strategy: Network-First. Fetch fresh page data, cache it.
+  // If offline & not in cache, fallback to pre-cached OFFLINE_URL to prevent Vercel's generic reload error screen.
   if (isRscRequest(event.request, url)) {
     event.respondWith(
       fetch(event.request)
@@ -78,7 +79,11 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return networkResponse;
         })
-        .catch(() => caches.match(event.request)),
+        .catch(async () => {
+          const cached = await caches.match(event.request);
+          if (cached) return cached;
+          return caches.match(OFFLINE_URL);
+        }),
     );
     return;
   }
