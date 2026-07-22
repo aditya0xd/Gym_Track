@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import { Button } from "@/components/ui/button";
 
 export function OfflineCard() {
@@ -15,9 +13,6 @@ export function OfflineCard() {
         <div className="mt-5 flex flex-wrap gap-2">
           <Button type="button" onClick={() => window.location.reload()}>
             Retry
-          </Button>
-          <Button type="button" variant="outline" asChild>
-            <Link href="/login">Go to login</Link>
           </Button>
         </div>
       </div>
